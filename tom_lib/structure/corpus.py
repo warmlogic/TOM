@@ -30,13 +30,27 @@ class Corpus:
         self._vectorization = vectorization
         self._max_relative_frequency = max_relative_frequency
         self._min_absolute_frequency = min_absolute_frequency
+        self._sample = sample
 
         self.max_features = max_features
         self.data_frame = pandas.read_csv(source_file_path, sep='\t', encoding='utf-8')
         if sample:
-            self.data_frame = self.data_frame.sample(frac=0.8)
-        self.data_frame.fillna(' ')
-        self.size = self.data_frame.count(0)[0]
+            if isinstance(sample, bool):
+                sample = 0.8
+            if isinstance(sample, float):
+                self.data_frame = self.data_frame.sample(frac=sample)
+            else:
+                raise ValueError('Unknown sample: {}'.format(sample))
+        # reset index because row numbers are used to access rows
+        self.data_frame = self.data_frame.reset_index()
+        for col in ['index', 'id']:
+            # remove these columns because they are not needed
+            if col in self.data_frame.columns:
+                self.data_frame = self.data_frame.drop(col, axis=1)
+        # fill in null values
+        self.data_frame = self.data_frame.fillna(' ')
+        # get shape of df (previous code used count, which won't work if there are columns other than index 0 that have nans)
+        self.size = self.data_frame.shape[0]
 
         stop_words = []
         if language is not None:
@@ -147,7 +161,7 @@ class Corpus:
                 for j in range(i+1, len(authors)):
                     nx_graph.add_edge(authors[i], authors[j])
         bb = nx.betweenness_centrality(nx_graph)
-        nx.set_node_attributes(nx_graph, 'betweenness', bb)
+        nx.set_node_attributes(nx_graph, bb, 'betweenness')
         if nx_format:
             return nx_graph
         else:

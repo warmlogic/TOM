@@ -22,6 +22,7 @@ class TopicModel(object):
         self.document_topic_matrix = None  # document x topic matrix
         self.topic_word_matrix = None  # topic x word matrix
         self.nb_topics = None  # a scalar value > 1
+        self._sample = corpus._sample
 
     @abstractmethod
     def infer_topics(self, num_topics=10, **kwargs):
@@ -38,9 +39,15 @@ class TopicModel(object):
         :param tao: Number of sampled models to build
         :return: A list of len (max_num_topics - min_num_topics) with the stability of each tested k
         """
+        if self._sample:
+            sample = self._sample
+        else:
+            sample = True
+
         stability = []
         # Build reference topic model
         # Generate tao topic models with tao samples of the corpus
+
         for k in range(min_num_topics, max_num_topics + 1, step):
             self.infer_topics(k)
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
@@ -52,7 +59,7 @@ class TopicModel(object):
                                     vectorization=self.corpus._vectorization,
                                     max_relative_frequency=self.corpus._max_relative_frequency,
                                     min_absolute_frequency=self.corpus._min_absolute_frequency,
-                                    sample=True)
+                                    sample=sample)
                 tao_model = type(self)(tao_corpus)
                 tao_model.infer_topics(k)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
@@ -60,7 +67,7 @@ class TopicModel(object):
             stability.append(np.mean(agreement_score_list))
         return stability
 
-    def arun_metric(self, min_num_topics=10, max_num_topics=50, iterations=10):
+    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10):
         """
         Implements Arun metric to estimate the optimal number of topics:
         Arun, R., V. Suresh, C. V. Madhavan, and M. N. Murthy
@@ -76,7 +83,7 @@ class TopicModel(object):
             kl_list = []
             l = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(l)
-            for i in range(min_num_topics, max_num_topics + 1):
+            for i in range(min_num_topics, max_num_topics + 1, step):
                 self.infer_topics(i)
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = l.dot(self.document_topic_matrix.todense())
@@ -87,7 +94,7 @@ class TopicModel(object):
         ouput = np.array(kl_matrix)
         return ouput.mean(axis=0)
 
-    def brunet_metric(self, min_num_topics=10, max_num_topics=50, iterations=10):
+    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10):
         """
         Implements a consensus-based metric to estimate the optimal number of topics:
         Brunet, J.P., Tamayo, P., Golub, T.R., Mesirov, J.P.
@@ -99,7 +106,7 @@ class TopicModel(object):
         :return:
         """
         cophenetic_correlation = []
-        for i in range(min_num_topics, max_num_topics+1):
+        for i in range(min_num_topics, max_num_topics + 1, step):
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
                 self.infer_topics(i)

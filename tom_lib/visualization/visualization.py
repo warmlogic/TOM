@@ -54,30 +54,33 @@ class Visualization:
         plt.xlabel('number of topics')
         plt.ylabel('stability')
         plt.savefig('output/greene.png')
-        save_topic_number_metrics_data('output/greene.tsv', range_=(min_num_topics, max_num_topics),
-                                       data=greene_stability, metric_type='greene')
+        save_topic_number_metrics_data('output/greene.tsv',
+            range_=(min_num_topics, max_num_topics),
+            data=greene_stability, step=step, metric_type='greene')
 
-    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, iterations=10):
-        symmetric_kl_divergence = self.topic_model.arun_metric(min_num_topics, max_num_topics, iterations)
+    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10):
+        symmetric_kl_divergence = self.topic_model.arun_metric(min_num_topics=min_num_topics, max_num_topics=max_num_topics, step=step, iterations=iterations)
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1), symmetric_kl_divergence)
+        plt.plot(range(min_num_topics, max_num_topics+1, step), symmetric_kl_divergence)
         plt.title('Arun et al. metric')
         plt.xlabel('number of topics')
         plt.ylabel('symmetric KL divergence')
         plt.savefig('output/arun.png')
-        save_topic_number_metrics_data('output/arun.tsv', range_=(min_num_topics, max_num_topics),
-                                       data=symmetric_kl_divergence, metric_type='arun')
+        save_topic_number_metrics_data('output/arun.tsv',
+            range_=(min_num_topics, max_num_topics),
+            data=symmetric_kl_divergence, step=step, metric_type='arun')
 
-    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, iterations=10):
-        cophenetic_correlation = self.topic_model.brunet_metric(min_num_topics, max_num_topics, iterations)
+    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10):
+        cophenetic_correlation = self.topic_model.brunet_metric(min_num_topics=min_num_topics, max_num_topics=max_num_topics, step=step, iterations=iterations)
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1), cophenetic_correlation)
+        plt.plot(range(min_num_topics, max_num_topics+1, step), cophenetic_correlation)
         plt.title('Brunet et al. metric')
         plt.xlabel('number of topics')
         plt.ylabel('cophenetic correlation coefficient')
         plt.savefig('output/brunet.png')
-        save_topic_number_metrics_data('output/brunet.tsv', range_=(min_num_topics, max_num_topics),
-                                       data=cophenetic_correlation, metric_type='brunet')
+        save_topic_number_metrics_data('output/brunet.tsv',
+            range_=(min_num_topics, max_num_topics),
+            data=cophenetic_correlation, step=step, metric_type='brunet')
 
     def topic_cloud(self, file_path='output/topic_cloud.json'):
         json_graph = {}
