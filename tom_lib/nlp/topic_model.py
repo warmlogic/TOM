@@ -152,6 +152,36 @@ class TopicModel(object):
         weighted_words.sort(key=lambda x: x[1], reverse=True)
         return weighted_words[:num_words]
 
+    def print_top_docs(self, topics, top_n, weights=False, num_words=10):
+        for t in list(self.top_topic_docs(topics=topics, top_n=top_n, weights=weights)):
+            top_terms = list(self.top_words(t[0], num_words))
+            print('='*30)
+            print('Topic {}: {}'.format(t[0], top_terms))
+            for d in t[1]:
+                print('-'*30)
+                print('Document {}'.format(d))
+                print(self.corpus.full_text(d))
+
+    def top_topic_docs(self, topics=-1, top_n=10, weights=False):
+        '''Inspired by Textacy:
+        http://textacy.readthedocs.io/en/latest/_modules/textacy/tm/topic_model.html#TopicModel.top_topic_docs
+        '''
+        if topics == -1:
+            topics = range(self.nb_topics)
+        elif isinstance(topics, int):
+            topics = (topics,)
+
+        for topic_idx in topics:
+            top_doc_idxs = np.argsort(self.document_topic_matrix[:, topic_idx].toarray(), axis=0)[:-top_n - 1:-1]
+            top_doc_idxs = [i[0] for i in top_doc_idxs]
+
+            if weights is False:
+                yield (topic_idx,
+                       tuple(doc_idx for doc_idx in top_doc_idxs))
+            else:
+                yield (topic_idx,
+                       tuple((doc_idx, self.document_topic_matrix[doc_idx, topic_idx]) for doc_idx in top_doc_idxs))
+
     def word_distribution_for_topic(self, topic_id):
         vector = self.topic_word_matrix[topic_id].toarray()
         return vector[0]
