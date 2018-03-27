@@ -6,8 +6,15 @@ from flask import Flask, render_template
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization
 from tom_lib.structure.corpus import Corpus
 
+from pathlib import Path
+
 __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
+
+data_dir_raw = Path('.')
+# filename_all = 'raw_corpus.tsv'
+# filename_all = 'raw_corpus_author.tsv'
+filename_all = 'raw_corpus_author_phrased.tsv'
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
@@ -17,11 +24,13 @@ max_tf = 0.8
 min_tf = 4
 num_topics = 15
 vectorization = 'tfidf'
+n_gram = 1
 
 # Load corpus
-corpus = Corpus(source_file_path='input/egc_lemmatized.csv',
-                language='french',
+corpus = Corpus(source_file_path=data_dir_raw / filename_all,
+                language='english',
                 vectorization=vectorization,
+                n_gram=n_gram,
                 max_relative_frequency=max_tf,
                 min_absolute_frequency=min_tf)
 print('corpus size:', corpus.size)
@@ -46,8 +55,12 @@ for topic_id in range(topic_model.nb_topics):
                                  'browser/static/data/word_distribution' + str(topic_id) + '.tsv')
     utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
                                        'browser/static/data/affiliation_repartition' + str(topic_id) + '.tsv')
+
+    min_year = topic_model.corpus.data_frame['date'].min()
+    max_year = topic_model.corpus.data_frame['date'].max()
+
     evolution = []
-    for i in range(2012, 2016):
+    for i in range(min_year, max_year+1):
         evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
     utils.save_topic_evolution(evolution, 'browser/static/data/frequency' + str(topic_id) + '.tsv')
 
