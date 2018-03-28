@@ -160,6 +160,8 @@ class TopicModel(object):
             for d in t[1]:
                 print('-'*30)
                 print('Document {}'.format(d))
+                print(self.corpus.affiliation(d), self.corpus.date(d))
+                print('Title:', self.corpus.title(d))
                 print(self.corpus.full_text(d))
 
     def top_topic_docs(self, topics=-1, top_n=10, weights=False):
