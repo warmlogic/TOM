@@ -28,7 +28,7 @@ class TopicModel(object):
     def infer_topics(self, num_topics=10, **kwargs):
         pass
 
-    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10):
+    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10, verbose=True):
         """
         Implements Greene metric to compute the optimal number of topics. Taken from How Many Topics?
         Stability Analysis for Topic Models from Greene et al. 2014.
@@ -68,9 +68,12 @@ class TopicModel(object):
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
+            if verbose:
+                print('Topics={}, stability={}'.format(k,
+                    np.mean(agreement_score_list)))
         return stability
 
-    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10):
+    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10, verbose=True):
         """
         Implements Arun metric to estimate the optimal number of topics:
         Arun, R., V. Suresh, C. V. Madhavan, and M. N. Murthy
@@ -94,10 +97,12 @@ class TopicModel(object):
                 c_m2 /= norm
                 kl_list.append(tom_lib.stats.symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
+            if verbose:
+                print('Iteration {}, KL list={}'.format(j, kl_list))
         ouput = np.array(kl_matrix)
         return ouput.mean(axis=0)
 
-    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10):
+    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10, verbose=True):
         """
         Implements a consensus-based metric to estimate the optimal number of topics:
         Brunet, J.P., Tamayo, P., Golub, T.R., Mesirov, J.P.
@@ -129,6 +134,8 @@ class TopicModel(object):
             # ax = sns.heatmap(average_C)
             # plt.savefig('reorderedC.png')
             cophenetic_correlation.append(c)
+            if verbose:
+                print('Topics={}, cophenetic correlation={}'.format(i, c))
         return cophenetic_correlation
 
     def print_topics(self, num_words=10, sort_by_freq=''):
