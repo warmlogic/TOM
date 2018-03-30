@@ -3,10 +3,13 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 import networkx as nx
 import itertools
-import pandas
+import pandas as pd
 from networkx.readwrite import json_graph
 from scipy import spatial
 import re
+from pathlib import Path
+import numpy as np
+from sklearn.preprocessing import normalize
 
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -16,7 +19,8 @@ class Corpus:
 
     def __init__(self,
                  source_file_path,
-                 language=None,
+                 sep='\t',
+                 language='english',
                  n_gram=1,
                  vectorization='tfidf',
                  max_relative_frequency=1.,
@@ -24,7 +28,14 @@ class Corpus:
                  max_features=2000,
                  sample=None):
 
-        self._source_file_path = source_file_path
+        if isinstance(source_file_path, str) or isinstance(source_file_path, Path):
+            self._source_file_path = source_file_path
+            self.data_frame = pd.read_csv(source_file_path, sep=sep, encoding='utf-8')
+        elif isinstance(source_file_path, pd.DataFrame):
+            self._source_file_path = 'pd.DataFrame from memory'
+            self.data_frame = source_file_path.copy()
+
+        self._sep = sep
         self._language = language
         self._n_gram = n_gram
         self._vectorization = vectorization
@@ -33,7 +44,6 @@ class Corpus:
         self._sample = sample
 
         self.max_features = max_features
-        self.data_frame = pandas.read_csv(source_file_path, sep='\t', encoding='utf-8')
         if sample:
             if isinstance(sample, bool):
                 sample = 0.8
@@ -43,7 +53,7 @@ class Corpus:
                 raise ValueError('Unknown sample: {}'.format(sample))
         # reset index because row numbers are used to access rows
         self.data_frame = self.data_frame.reset_index()
-        for col in ['index', 'id']:
+        for col in ['index', 'id', 'docnum']:
             # remove these columns because they are not needed
             if col in self.data_frame.columns:
                 self.data_frame = self.data_frame.drop(col, axis=1)
@@ -75,7 +85,7 @@ class Corpus:
         self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
 
     def export(self, file_path):
-        self.data_frame.to_csv(path_or_buf=file_path, sep='\t', encoding='utf-8')
+        self.data_frame.to_csv(path_or_buf=file_path, sep=self._sep, encoding='utf-8')
 
     def full_text(self, doc_id):
         return self.data_frame.iloc[doc_id]['text']
@@ -150,6 +160,25 @@ class Corpus:
                 similarities.append((a_doc_id, similarity))
         similarities.sort(key=lambda x: x[1], reverse=True)
         return similarities[:num_docs]
+
+    def find_similar_document_pairs(self, threshold):
+        '''find all the similar document pairs above a threshold.
+        for a tf vectorized corpus, try threshold=0.83
+        for a tfidf vectorized corpus, try threshold=0.88
+        '''
+        # compute pairwise similarities
+        result = np.dot(normalize(self.sklearn_vector_space, axis=1),
+                        normalize(self.sklearn_vector_space, axis=1).T)
+        # keep similarities above threshold
+        similar_pairs = np.where(result.toarray() > threshold)
+        # remove self pairs
+        similar_pairs = [frozenset([v0, v1]) for v0, v1 in
+            zip(similar_pairs[0], similar_pairs[1]) if v0 != v1]
+        # remove duplicate pairs
+        similar_pairs = list(set(similar_pairs))
+        # return as a list of tuples
+        similar_pairs = [(list(i)[0], list(i)[1]) for i in similar_pairs]
+        return similar_pairs
 
     def collaboration_network(self, doc_ids=None, nx_format=False):
         nx_graph = nx.Graph(name='')

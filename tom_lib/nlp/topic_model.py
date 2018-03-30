@@ -53,13 +53,16 @@ class TopicModel(object):
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
-                tao_corpus = Corpus(source_file_path=self.corpus._source_file_path,
-                                    language=self.corpus._language,
-                                    n_gram=self.corpus._n_gram,
-                                    vectorization=self.corpus._vectorization,
-                                    max_relative_frequency=self.corpus._max_relative_frequency,
-                                    min_absolute_frequency=self.corpus._min_absolute_frequency,
-                                    sample=sample)
+                tao_corpus = Corpus(
+                    # source_file_path=self.corpus._source_file_path,
+                    source_file_path=self.corpus.data_frame,
+                    language=self.corpus._language,
+                    n_gram=self.corpus._n_gram,
+                    vectorization=self.corpus._vectorization,
+                    max_relative_frequency=self.corpus._max_relative_frequency,
+                    min_absolute_frequency=self.corpus._min_absolute_frequency,
+                    sample=sample,
+                    )
                 tao_model = type(self)(tao_corpus)
                 tao_model.infer_topics(k)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
