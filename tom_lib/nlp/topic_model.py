@@ -269,6 +269,10 @@ class TopicModel(object):
         tuples.sort(key=lambda x: x[1], reverse=True)
         return tuples
 
+    def topic_distribution_for_new_document(self, text):
+        doc_topic_distr = self.model.transform(
+            self.corpus.vectorizer.transform([text]))[0]
+        return doc_topic_distr
 
 class LatentDirichletAllocation(TopicModel):
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
@@ -276,13 +280,15 @@ class LatentDirichletAllocation(TopicModel):
         lda_model = None
         topic_document = None
         if algorithm == 'variational':
-            lda_model = LDA(n_topics=num_topics, learning_method='batch')
+            lda_model = LDA(n_components=num_topics, learning_method='batch')
             topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
         elif algorithm == 'gibbs':
             lda_model = lda.LDA(n_topics=num_topics, n_iter=500)
             topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
         else:
             raise ValueError("algorithm must be either 'variational' or 'gibbs', got '%s'" % algorithm)
+        # store the model for future use
+        self.model = lda_model
         self.topic_word_matrix = []
         self.document_topic_matrix = []
         vocabulary_size = len(self.corpus.vocabulary)
@@ -315,15 +321,17 @@ class LatentDirichletAllocation(TopicModel):
 class NonNegativeMatrixFactorization(TopicModel):
     def infer_topics(self, num_topics=10, **kwargs):
         self.nb_topics = num_topics
-        nmf = NMF(n_components=num_topics)
-        topic_document = nmf.fit_transform(self.corpus.sklearn_vector_space)
+        nmf_model = NMF(n_components=num_topics)
+        topic_document = nmf_model.fit_transform(self.corpus.sklearn_vector_space)
+        # store the model for future use
+        self.model = nmf_model
         self.topic_word_matrix = []
         self.document_topic_matrix = []
         vocabulary_size = len(self.corpus.vocabulary)
         row = []
         col = []
         data = []
-        for topic_idx, topic in enumerate(nmf.components_):
+        for topic_idx, topic in enumerate(nmf_model.components_):
             for i in range(vocabulary_size):
                 row.append(topic_idx)
                 col.append(i)
