@@ -79,6 +79,7 @@ class Corpus:
                                          stop_words=stop_words)
         else:
             raise ValueError('Unknown vectorization type: %s' % vectorization)
+        self.vectorizer = vectorizer
         self.sklearn_vector_space = vectorizer.fit_transform(self.data_frame['text'].tolist())
         self.gensim_vector_space = None
         vocab = vectorizer.get_feature_names()
