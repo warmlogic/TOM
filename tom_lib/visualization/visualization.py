@@ -44,43 +44,84 @@ class Visualization:
         plt.xlabel('word')
         plt.savefig(file_path)
 
-    def plot_greene_metric(self, min_num_topics=10, max_num_topics=20, tao=10, step=5,
-                           top_n_words=10):
-        greene_stability = self.topic_model.greene_metric(min_num_topics=min_num_topics, max_num_topics=max_num_topics,
-                                                          step=step, top_n_words=top_n_words, tao=tao)
+    def plot_greene_metric(self, min_num_topics=10, max_num_topics=20, tao=10, step=5, top_n_words=10, verbose=True):
+        greene_stability = self.topic_model.greene_metric(
+            min_num_topics=min_num_topics,
+            max_num_topics=max_num_topics,
+            step=step,
+            top_n_words=top_n_words,
+            tao=tao,
+            verbose=verbose,
+            )
         plt.clf()
         plt.plot(np.arange(min_num_topics, max_num_topics+1, step), greene_stability)
         plt.title('Greene et al. metric')
-        plt.xlabel('number of topics')
-        plt.ylabel('stability')
+        plt.xlabel('Number of topics')
+        plt.ylabel('Stability')
         plt.savefig('output/greene.png')
         save_topic_number_metrics_data('output/greene.tsv',
             range_=(min_num_topics, max_num_topics),
             data=greene_stability, step=step, metric_type='greene')
 
-    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10):
-        symmetric_kl_divergence = self.topic_model.arun_metric(min_num_topics=min_num_topics, max_num_topics=max_num_topics, step=step, iterations=iterations)
+    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10, verbose=True):
+        symmetric_kl_divergence = self.topic_model.arun_metric(
+            min_num_topics=min_num_topics,
+            max_num_topics=max_num_topics,
+            step=step,
+            iterations=iterations,
+            verbose=verbose,
+            )
         plt.clf()
         plt.plot(range(min_num_topics, max_num_topics+1, step), symmetric_kl_divergence)
         plt.title('Arun et al. metric')
-        plt.xlabel('number of topics')
-        plt.ylabel('symmetric KL divergence')
+        plt.xlabel('Number of topics')
+        plt.ylabel('Symmetric KL Divergence')
         plt.savefig('output/arun.png')
         save_topic_number_metrics_data('output/arun.tsv',
             range_=(min_num_topics, max_num_topics),
             data=symmetric_kl_divergence, step=step, metric_type='arun')
 
-    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10):
-        cophenetic_correlation = self.topic_model.brunet_metric(min_num_topics=min_num_topics, max_num_topics=max_num_topics, step=step, iterations=iterations)
+    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10, verbose=True):
+        cophenetic_correlation = self.topic_model.brunet_metric(
+            min_num_topics=min_num_topics,
+            max_num_topics=max_num_topics,
+            step=step,
+            iterations=iterations,
+            verbose=verbose,
+            )
         plt.clf()
         plt.plot(range(min_num_topics, max_num_topics+1, step), cophenetic_correlation)
         plt.title('Brunet et al. metric')
-        plt.xlabel('number of topics')
-        plt.ylabel('cophenetic correlation coefficient')
+        plt.xlabel('Number of topics')
+        plt.ylabel('Cophenetic correlation coefficient')
         plt.savefig('output/brunet.png')
         save_topic_number_metrics_data('output/brunet.tsv',
             range_=(min_num_topics, max_num_topics),
             data=cophenetic_correlation, step=step, metric_type='brunet')
+
+    def plot_perplexity_metric(self, min_num_topics=10, max_num_topics=20, step=5, train_size=0.7, verbose=True):
+        train_perplexities, test_perplexities = self.topic_model.perplexity_metric(
+            min_num_topics=min_num_topics,
+            max_num_topics=max_num_topics,
+            step=step,
+            train_size=train_size,
+            verbose=verbose,
+            )
+        if (len(train_perplexities) > 0) and (len(test_perplexities) > 0):
+            plt.clf()
+            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), train_perplexities, label='Train')
+            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), test_perplexities, label='Test')
+            plt.title('Perplexity metric')
+            plt.xlabel('Number of topics')
+            plt.ylabel('Perplexity')
+            plt.legend(loc='best')
+            plt.savefig('output/perplexity.png')
+            save_topic_number_metrics_data('output/perplexity_train.tsv',
+                range_=(min_num_topics, max_num_topics),
+                data=train_perplexities, step=step, metric_type='perplexity')
+            save_topic_number_metrics_data('output/perplexity_test.tsv',
+                range_=(min_num_topics, max_num_topics),
+                data=test_perplexities, step=step, metric_type='perplexity')
 
     def topic_cloud(self, file_path='output/topic_cloud.json'):
         json_graph = {}

@@ -6,6 +6,7 @@ import tom_lib.stats
 from scipy import spatial, cluster
 from scipy.sparse import coo_matrix
 from sklearn.decomposition import NMF, LatentDirichletAllocation as LDA
+from sklearn.model_selection import train_test_split
 import lda
 
 from tom_lib.structure.corpus import Corpus
@@ -23,6 +24,7 @@ class TopicModel(object):
         self.topic_word_matrix = None  # topic x word matrix
         self.nb_topics = None  # a scalar value > 1
         self._sample = corpus._sample
+        self.model = None
 
     @abstractmethod
     def infer_topics(self, num_topics=10, **kwargs):
@@ -49,18 +51,21 @@ class TopicModel(object):
         # Generate tao topic models with tao samples of the corpus
 
         for k in range(min_num_topics, max_num_topics + 1, step):
+            if verbose:
+                print('Topics={}'.format(k))
             self.infer_topics(k)
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
                 tao_corpus = Corpus(
-                    # source_file_path=self.corpus._source_file_path,
                     source_file_path=self.corpus.data_frame,
+                    sep=self.corpus._sep,
                     language=self.corpus._language,
                     n_gram=self.corpus._n_gram,
                     vectorization=self.corpus._vectorization,
                     max_relative_frequency=self.corpus._max_relative_frequency,
                     min_absolute_frequency=self.corpus._min_absolute_frequency,
+                    max_features=self.corpus.max_features,
                     sample=sample,
                     )
                 tao_model = type(self)(tao_corpus)
@@ -69,8 +74,7 @@ class TopicModel(object):
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
             if verbose:
-                print('Topics={}, stability={}'.format(k,
-                    np.mean(agreement_score_list)))
+                print('\tStability={:.4f}'.format(k, stability[-1]))
         return stability
 
     def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10, verbose=True):
@@ -86,6 +90,8 @@ class TopicModel(object):
         """
         kl_matrix = []
         for j in range(iterations):
+            if verbose:
+                print('Iteration={}'.format(j))
             kl_list = []
             l = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(l)
@@ -98,7 +104,7 @@ class TopicModel(object):
                 kl_list.append(tom_lib.stats.symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
             if verbose:
-                print('Iteration {}, KL list={}'.format(j, kl_list))
+                print('\tKL list={}'.format(j, kl_list))
         ouput = np.array(kl_matrix)
         return ouput.mean(axis=0)
 
@@ -115,6 +121,8 @@ class TopicModel(object):
         """
         cophenetic_correlation = []
         for i in range(min_num_topics, max_num_topics + 1, step):
+            if verbose:
+                print('Topics={}'.format(i))
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
                 self.infer_topics(i)
@@ -135,8 +143,56 @@ class TopicModel(object):
             # plt.savefig('reorderedC.png')
             cophenetic_correlation.append(c)
             if verbose:
-                print('Topics={}, cophenetic correlation={}'.format(i, c))
+                print('\tcophenetic correlation={}'.format(i, c))
         return cophenetic_correlation
+
+    def perplexity_metric(self, min_num_topics=10, step=5, max_num_topics=50,
+        train_size=0.7, verbose=True):
+        """
+        Measures perplexity for LDA as computed by scikit-learn.
+
+        http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html#sklearn.decomposition.LatentDirichletAllocation.perplexity
+
+        NB: Only supports algorithm='variational' (sklearn LDA)
+
+        :param min_num_topics:
+        :param max_num_topics:
+        :param train_size:
+        :return:
+        """
+
+        train_perplexities = []
+        test_perplexities = []
+        if isinstance(self, LatentDirichletAllocation):
+            algorithm = 'variational'
+            print("Computing perplexity with algorithm='{}'".format(algorithm))
+            df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1-train_size)
+            corpus_train = Corpus(
+                source_file_path=df_train,
+                sep=self.corpus._sep,
+                language=self.corpus._language,
+                n_gram=self.corpus._n_gram,
+                vectorization=self.corpus._vectorization,
+                max_relative_frequency=self.corpus._max_relative_frequency,
+                min_absolute_frequency=self.corpus._min_absolute_frequency,
+                max_features=self.corpus.max_features,
+                sample=None,
+                )
+            tf_test = corpus_train.vectorizer.transform(df_test['text'].tolist())
+            lda_model = type(self)(corpus_train)
+            for i in range(min_num_topics, max_num_topics + 1, step):
+                if verbose:
+                    print('Topics={}'.format(i))
+                lda_model.infer_topics(i, algorithm=algorithm)
+                train_perplexities.append(lda_model.model.perplexity(
+                    corpus_train.sklearn_vector_space))
+                test_perplexities.append(lda_model.model.perplexity(tf_test))
+                if verbose:
+                    print('\tTrain perplexity={:.4f}, Test perplexity={:.4f}'.format(
+                        train_perplexities[-1], test_perplexities[-1]))
+        else:
+            print("Computing perplexity only supported for LDA with algorithm='variational'. Not running.")
+        return train_perplexities, test_perplexities
 
     def print_topics(self, num_words=10, sort_by_freq=''):
         frequency = self.topics_frequency()
@@ -286,7 +342,7 @@ class LatentDirichletAllocation(TopicModel):
             lda_model = lda.LDA(n_topics=num_topics, n_iter=500)
             topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
         else:
-            raise ValueError("algorithm must be either 'variational' or 'gibbs', got '%s'" % algorithm)
+            raise ValueError("algorithm must be either 'variational' or 'gibbs', got {}".format(algorithm))
         # store the model for future use
         self.model = lda_model
         self.topic_word_matrix = []
