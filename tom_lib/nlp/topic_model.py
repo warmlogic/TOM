@@ -143,7 +143,7 @@ class TopicModel(object):
             # plt.savefig('reorderedC.png')
             cophenetic_correlation.append(c)
             if verbose:
-                print('\tcophenetic correlation={}'.format(i, c))
+                print('\tCophenetic correlation={}'.format(i, c))
         return cophenetic_correlation
 
     def perplexity_metric(self, min_num_topics=10, step=5, max_num_topics=50,
@@ -191,7 +191,7 @@ class TopicModel(object):
                     print('\tTrain perplexity={:.4f}, Test perplexity={:.4f}'.format(
                         train_perplexities[-1], test_perplexities[-1]))
         else:
-            print("Computing perplexity only supported for LDA with algorithm='variational'. Not running.")
+            raise TypeError("Computing perplexity only supported for LDA with algorithm='variational'. Not running.")
         return train_perplexities, test_perplexities
 
     def print_topics(self, num_words=10, sort_by_freq=''):
