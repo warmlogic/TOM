@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import codecs
 import numpy as np
 import json
+from pathlib import Path
 
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -15,10 +16,14 @@ __email__ = "adrien.guille@univ-lyon2.fr"
 
 class Visualization:
 
-    def __init__(self, topic_model):
+    def __init__(self, topic_model, output_dir=None):
         self.topic_model = topic_model
+        if output_dir is None:
+            self.output_dir = Path('output')
+        if not self.output_dir.exists():
+            self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def plot_topic_distribution(self, doc_id, file_path='output/topic_distribution.png'):
+    def plot_topic_distribution(self, doc_id, file_path=self.output_dir / 'topic_distribution.png'):
         distribution = self.topic_model.topic_distribution_for_document(doc_id)
         data_x = range(0, len(distribution))
         plt.clf()
@@ -29,7 +34,7 @@ class Visualization:
         plt.xlabel('topic')
         plt.savefig(file_path)
 
-    def plot_word_distribution(self, topic_id, nb_words=10, file_path='output/word_distribution.png'):
+    def plot_word_distribution(self, topic_id, nb_words=10, file_path=self.output_dir / 'word_distribution.png'):
         data_x = []
         data_y = []
         distribution = self.topic_model.top_words(topic_id, nb_words)
@@ -58,8 +63,10 @@ class Visualization:
         plt.title('Greene et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Stability')
-        plt.savefig('output/greene.png')
-        save_topic_number_metrics_data('output/greene.tsv',
+        file_path_fig = self.output_dir / 'greene.png'
+        file_path_data = self.output_dir / 'greene.tsv'
+        plt.savefig(file_path_fig)
+        save_topic_number_metrics_data(file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=greene_stability, step=step, metric_type='greene')
 
@@ -76,8 +83,10 @@ class Visualization:
         plt.title('Arun et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Symmetric KL Divergence')
-        plt.savefig('output/arun.png')
-        save_topic_number_metrics_data('output/arun.tsv',
+        file_path_fig = self.output_dir / 'arun.png'
+        file_path_data = self.output_dir / 'arun.tsv'
+        plt.savefig(file_path_fig)
+        save_topic_number_metrics_data(file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=symmetric_kl_divergence, step=step, metric_type='arun')
 
@@ -94,8 +103,10 @@ class Visualization:
         plt.title('Brunet et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Cophenetic correlation coefficient')
-        plt.savefig('output/brunet.png')
-        save_topic_number_metrics_data('output/brunet.tsv',
+        file_path_fig = self.output_dir / 'brunet.png'
+        file_path_data = self.output_dir / 'brunet.tsv'
+        plt.savefig(file_path_fig)
+        save_topic_number_metrics_data(file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=cophenetic_correlation, step=step, metric_type='brunet')
 
@@ -115,15 +126,18 @@ class Visualization:
             plt.xlabel('Number of topics')
             plt.ylabel('Perplexity')
             plt.legend(loc='best')
-            plt.savefig('output/perplexity.png')
-            save_topic_number_metrics_data('output/perplexity_train.tsv',
+            file_path_fig = self.output_dir / 'perplexity.png'
+            file_path_data_train = self.output_dir / 'perplexity_train.tsv'
+            file_path_data_test = self.output_dir / 'perplexity_test.tsv'
+            plt.savefig(file_path_fig)
+            save_topic_number_metrics_data(file_path_data_train,
                 range_=(min_num_topics, max_num_topics),
                 data=train_perplexities, step=step, metric_type='perplexity')
-            save_topic_number_metrics_data('output/perplexity_test.tsv',
+            save_topic_number_metrics_data(file_path_data_test,
                 range_=(min_num_topics, max_num_topics),
                 data=test_perplexities, step=step, metric_type='perplexity')
 
-    def topic_cloud(self, file_path='output/topic_cloud.json'):
+    def topic_cloud(self, file_path=self.output_dir / 'topic_cloud.json'):
         json_graph = {}
         json_nodes = []
         json_links = []
