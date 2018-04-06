@@ -20,10 +20,18 @@ class Visualization:
         self.topic_model = topic_model
         if output_dir is None:
             self.output_dir = Path('output')
+        else:
+            if isinstance(output_dir, str):
+                self.output_dir = Path(output_dir)
+            elif isinstance(output_dir, Path):
+                self.output_dir = output_dir
+            else:
+                raise TypeError("'output_dir' of type {} not a valid type".format(type(output_dir)))
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def plot_topic_distribution(self, doc_id, file_path=self.output_dir / 'topic_distribution.png'):
+    def plot_topic_distribution(self, doc_id, file_name='topic_distribution.png'):
+        file_path = self.output_dir / file_name
         distribution = self.topic_model.topic_distribution_for_document(doc_id)
         data_x = range(0, len(distribution))
         plt.clf()
@@ -34,7 +42,8 @@ class Visualization:
         plt.xlabel('topic')
         plt.savefig(file_path)
 
-    def plot_word_distribution(self, topic_id, nb_words=10, file_path=self.output_dir / 'word_distribution.png'):
+    def plot_word_distribution(self, topic_id, nb_words=10, file_name='word_distribution.png'):
+        file_path = self.output_dir / file_name
         data_x = []
         data_y = []
         distribution = self.topic_model.top_words(topic_id, nb_words)
@@ -59,7 +68,7 @@ class Visualization:
             verbose=verbose,
             )
         plt.clf()
-        plt.plot(np.arange(min_num_topics, max_num_topics+1, step), greene_stability)
+        plt.plot(np.arange(min_num_topics, max_num_topics+1, step), greene_stability, 'o-')
         plt.title('Greene et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Stability')
@@ -79,7 +88,7 @@ class Visualization:
             verbose=verbose,
             )
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1, step), symmetric_kl_divergence)
+        plt.plot(range(min_num_topics, max_num_topics+1, step), symmetric_kl_divergence, 'o-')
         plt.title('Arun et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Symmetric KL Divergence')
@@ -99,7 +108,7 @@ class Visualization:
             verbose=verbose,
             )
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1, step), cophenetic_correlation)
+        plt.plot(range(min_num_topics, max_num_topics+1, step), cophenetic_correlation, 'o-')
         plt.title('Brunet et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Cophenetic correlation coefficient')
@@ -120,8 +129,8 @@ class Visualization:
             )
         if (len(train_perplexities) > 0) and (len(test_perplexities) > 0):
             plt.clf()
-            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), train_perplexities, label='Train')
-            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), test_perplexities, label='Test')
+            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), train_perplexities, 'o-', label='Train')
+            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), test_perplexities, 'o-', label='Test')
             plt.title('Perplexity metric')
             plt.xlabel('Number of topics')
             plt.ylabel('Perplexity')
@@ -137,7 +146,8 @@ class Visualization:
                 range_=(min_num_topics, max_num_topics),
                 data=test_perplexities, step=step, metric_type='perplexity')
 
-    def topic_cloud(self, file_path=self.output_dir / 'topic_cloud.json'):
+    def topic_cloud(self, file_name='topic_cloud.json'):
+        file_path = self.output_dir / file_name
         json_graph = {}
         json_nodes = []
         json_links = []
