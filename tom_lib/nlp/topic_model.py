@@ -195,19 +195,20 @@ class TopicModel(object):
         return train_perplexities, test_perplexities
 
     def print_topics(self, num_words=10, sort_by_freq=''):
-        frequency = self.topics_frequency()
+        frequency = self.topics_frequency(count=False)
+        frequency_count = self.topics_frequency(count=True)
         topic_list = []
         for topic_id in range(self.nb_topics):
             word_list = []
             for weighted_word in self.top_words(topic_id, num_words):
                 word_list.append(weighted_word[0])
-            topic_list.append((topic_id, frequency[topic_id], word_list))
+            topic_list.append((topic_id, frequency[topic_id], frequency_count[topic_id], word_list))
         if sort_by_freq == 'asc':
             topic_list.sort(key=lambda x: x[1], reverse=False)
         elif sort_by_freq == 'desc':
             topic_list.sort(key=lambda x: x[1], reverse=True)
-        for topic_id, frequency, topic_desc in topic_list:
-            print('topic %d\t%f\t%s' % (topic_id, frequency, ' '.join(topic_desc)))
+        for topic_id, frequency, frequency_count, topic_desc in topic_list:
+            print('topic {}\t{:.4f}\t{:d}\t{}'.format(topic_id, frequency, int(frequency_count), ' '.join(topic_desc)))
 
     def top_words(self, topic_id, num_words):
         vector = self.topic_word_matrix[topic_id]
@@ -273,10 +274,10 @@ class TopicModel(object):
         weights = list(self.topic_distribution_for_document(doc_id))
         return weights.index(max(weights))
 
-    def topic_frequency(self, topic, date=None):
-        return self.topics_frequency(date=date)[topic]
+    def topic_frequency(self, topic, date=None, count=False):
+        return self.topics_frequency(date=date, count=count)[topic]
 
-    def topics_frequency(self, date=None):
+    def topics_frequency(self, date=None, count=False):
         frequency = np.zeros(self.nb_topics)
         if date is None:
             ids = range(self.corpus.size)
@@ -284,7 +285,10 @@ class TopicModel(object):
             ids = self.corpus.doc_ids(date)
         for i in ids:
             topic = self.most_likely_topic_for_document(i)
-            frequency[topic] += 1.0 / len(ids)
+            if count:
+                frequency[topic] += 1
+            else:
+                frequency[topic] += 1.0 / len(ids)
         return frequency
 
     def documents_for_topic(self, topic_id):
