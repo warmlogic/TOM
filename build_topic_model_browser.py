@@ -11,28 +11,33 @@ from pathlib import Path
 __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
 
-data_dir_raw = Path('.')
-# filename_all = 'raw_corpus.tsv'
-# filename_all = 'raw_corpus_author.tsv'
-filename_all = 'raw_corpus_author_phrased.tsv'
+data_dir = Path('.')
+data_dir_processed = data_dir / 'processed'
+filename_all = 'full_set_dedupe_tom_lib_corpus_phrased.tsv'
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
 
 # Parameters
-max_tf = 0.8
-min_tf = 4
+language = 'english'
+max_tf = 0.95
+min_tf = 5
 num_topics = 15
 vectorization = 'tfidf'
 n_gram = 1
+max_features = 5000
+sample = None
 
 # Load corpus
-corpus = Corpus(source_file_path=data_dir_raw / filename_all,
-                language='english',
+corpus = Corpus(source_file_path=data_dir_processed / filename_all,
+                language=language,
                 vectorization=vectorization,
                 n_gram=n_gram,
                 max_relative_frequency=max_tf,
-                min_absolute_frequency=min_tf)
+                min_absolute_frequency=min_tf,
+                max_features=max_features,
+                sample=sample,
+                )
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
 
