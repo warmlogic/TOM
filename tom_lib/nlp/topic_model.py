@@ -208,7 +208,7 @@ class TopicModel(object):
         elif sort_by_freq == 'desc':
             topic_list.sort(key=lambda x: x[1], reverse=True)
         for topic_id, frequency, frequency_count, topic_desc in topic_list:
-            print('topic {}\t{:.4f}\t{:d}\t{}'.format(topic_id, frequency, int(frequency_count), ' '.join(topic_desc)))
+            print('topic {:2d}\t{:.4f}\t{:d}\t{}'.format(topic_id, frequency, int(frequency_count), ' '.join(topic_desc)))
 
     def top_words(self, topic_id, num_words):
         vector = self.topic_word_matrix[topic_id]
