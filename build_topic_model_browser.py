@@ -132,7 +132,7 @@ def vocabulary():
 @app.route('/topic/<tid>.html')
 def topic_details(tid):
     # ids = topic_associations[int(tid)]
-    ids = topic_model.top_topic_docs(topics=int(tid), top_n=100)[1]
+    ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[1]
     documents = []
     for i, document_id in enumerate(ids):
         documents.append((corpus.title(document_id).capitalize(),
