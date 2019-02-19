@@ -24,7 +24,13 @@ class Corpus:
                  max_relative_frequency=1.,
                  min_absolute_frequency=0,
                  max_features=2000,
-                 sample=None):
+                 sample=None,
+                 text_col=None,
+                 title_col=None,
+                 author_col=None,
+                 affiliation_col=None,
+                 date_col=None,
+                 ):
 
         if isinstance(source_file_path, str) or isinstance(source_file_path, Path):
             self._source_file_path = source_file_path
@@ -40,6 +46,12 @@ class Corpus:
         self._max_relative_frequency = max_relative_frequency
         self._min_absolute_frequency = min_absolute_frequency
         self._sample = sample
+
+        self._text_col = text_col or 'text'
+        self._title_col = title_col or 'title'
+        self._author_col = author_col or 'author'
+        self._affiliation_col = affiliation_col or 'affiliation'
+        self._date_col = date_col or 'date'
 
         self.max_features = max_features
         if sample:
@@ -76,9 +88,9 @@ class Corpus:
                                          max_features=self.max_features,
                                          stop_words=stop_words)
         else:
-            raise ValueError('Unknown vectorization type: %s' % vectorization)
+            raise ValueError(f'Unknown vectorization type: {vectorization}')
         self.vectorizer = vectorizer
-        self.sklearn_vector_space = vectorizer.fit_transform(self.data_frame['text'].tolist())
+        self.sklearn_vector_space = vectorizer.fit_transform(self.data_frame[self._text_col].tolist())
         self.gensim_vector_space = None
         vocab = vectorizer.get_feature_names()
         self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
@@ -87,20 +99,20 @@ class Corpus:
         self.data_frame.to_csv(path_or_buf=file_path, sep=self._sep, encoding='utf-8')
 
     def full_text(self, doc_id):
-        return self.data_frame.iloc[doc_id]['text']
+        return self.data_frame.iloc[doc_id][self._text_col]
 
     def title(self, doc_id):
-        return self.data_frame.iloc[doc_id]['title']
+        return self.data_frame.iloc[doc_id][self._title_col]
 
     def date(self, doc_id):
-        return self.data_frame.iloc[doc_id]['date']
+        return self.data_frame.iloc[doc_id][self._date_col]
 
     def author(self, doc_id):
-        aut_str = str(self.data_frame.iloc[doc_id]['author'])
+        aut_str = str(self.data_frame.iloc[doc_id][self._author_col])
         return aut_str.split(', ')
 
     def affiliation(self, doc_id):
-        aff_str = str(self.data_frame.iloc[doc_id]['affiliation'])
+        aff_str = str(self.data_frame.iloc[doc_id][self._affiliation_col])
         return aff_str.split(', ')
 
     def documents_by_author(self, author, date=None):
@@ -131,7 +143,7 @@ class Corpus:
         return ids
 
     def doc_ids(self, date):
-        return self.data_frame[self.data_frame['date'] == date].index.tolist()
+        return self.data_frame[self.data_frame[self._date_col] == date].index.tolist()
 
     def vector_for_document(self, doc_id):
         vector = self.sklearn_vector_space[doc_id]
