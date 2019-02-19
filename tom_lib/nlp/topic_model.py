@@ -179,7 +179,7 @@ class TopicModel(object):
                 max_features=self.corpus.max_features,
                 sample=None,
             )
-            tf_test = corpus_train.vectorizer.transform(df_test['text'].tolist())
+            tf_test = corpus_train.vectorizer.transform(df_test[corpus_train._text_col].tolist())
             lda_model = type(self)(corpus_train)
             for i in range(min_num_topics, max_num_topics + 1, step):
                 if verbose:
