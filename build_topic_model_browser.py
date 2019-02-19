@@ -65,7 +65,7 @@ for topic_id in range(topic_model.nb_topics):
     max_year = topic_model.corpus.data_frame['date'].max()
 
     evolution = []
-    for i in range(min_year, max_year+1):
+    for i in range(min_year, max_year + 1):
         evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
     utils.save_topic_evolution(evolution, 'browser/static/data/frequency' + str(topic_id) + '.tsv')
 
@@ -115,10 +115,10 @@ def vocabulary():
     for i in range(len(corpus.vocabulary)):
         word_list.append((i, corpus.word_for_id(i)))
     splitted_vocabulary = []
-    words_per_column = int(len(corpus.vocabulary)/5)
+    words_per_column = int(len(corpus.vocabulary) / 5)
     for j in range(5):
         sub_vocabulary = []
-        for l in range(j*words_per_column, (j+1)*words_per_column):
+        for l in range(j * words_per_column, (j + 1) * words_per_column):
             sub_vocabulary.append(word_list[l])
         splitted_vocabulary.append(sub_vocabulary)
     return render_template('vocabulary.html',
@@ -138,7 +138,7 @@ def topic_details(tid):
                           corpus.date(document_id), document_id))
     return render_template('topic.html',
                            topic_id=tid,
-                           frequency=round(topic_model.topic_frequency(int(tid))*100, 2),
+                           frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
                            documents=documents,
                            topic_ids=range(topic_model.nb_topics),
                            doc_ids=range(corpus.size))
@@ -181,6 +181,7 @@ def word_details(wid):
                            topic_ids=range(topic_model.nb_topics),
                            doc_ids=range(corpus.size),
                            documents=documents)
+
 
 if __name__ == '__main__':
     # Access the browser at http://localhost:2016/

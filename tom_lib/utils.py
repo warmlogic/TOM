@@ -25,36 +25,36 @@ def save_word_distribution(distribution, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('word\tweight\n')
         for weighted_word in distribution:
-            f.write(weighted_word[0]+'\t'+str(weighted_word[1])+'\n')
+            f.write(weighted_word[0] + '\t' + str(weighted_word[1]) + '\n')
 
 
 def save_topic_distribution(distribution, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('topic\tweight\n')
         for i in range(len(distribution)):
-            f.write('topic '+str(i)+'\t'+str(distribution[i])+'\n')
+            f.write('topic ' + str(i) + '\t' + str(distribution[i]) + '\n')
 
 
 def save_topic_evolution(evolution, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('date\tfrequency\n')
         for date, frequency in evolution:
-            f.write(str(date)+'\t'+str(frequency)+'\n')
+            f.write(str(date) + '\t' + str(frequency) + '\n')
 
 
 def save_affiliation_repartition(affiliation_repartition, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('affiliation\tcount\n')
         for (affiliation, count) in affiliation_repartition:
-            f.write(affiliation+'\t'+str(count)+'\n')
+            f.write(affiliation + '\t' + str(count) + '\n')
 
 
 def save_topic_number_metrics_data(path, range_, data, step=None, metric_type=''):
     import numpy as np
     with open(path, "w") as filo:
-        filo.write("k\t{}_value\n".format(metric_type))
+        filo.write(f"k\t{metric_type}_value\n")
         for idx, range_i in enumerate(np.arange(range_[0], range_[1] + 1, step)):
-            filo.write("{0}\t{1}\n".format(range_i, data[idx]))
+            filo.write(f"{range_i}\t{data[idx]}\n")
 
 
 def save_topic_cloud(topic_model, file_path):

@@ -6,7 +6,6 @@ import itertools
 import pandas as pd
 from networkx.readwrite import json_graph
 from scipy import spatial
-import re
 from pathlib import Path
 import numpy as np
 from sklearn.preprocessing import normalize
@@ -16,7 +15,6 @@ __email__ = "adrien.guille@univ-lyon2.fr"
 
 
 class Corpus:
-
     def __init__(self,
                  source_file_path,
                  sep='\t',
@@ -50,7 +48,7 @@ class Corpus:
             if isinstance(sample, float):
                 self.data_frame = self.data_frame.sample(frac=sample)
             else:
-                raise ValueError('Unknown sample: {}'.format(sample))
+                raise ValueError(f'Unknown sample: {sample}')
         # reset index because row numbers are used to access rows
         self.data_frame = self.data_frame.reset_index()
         for col in ['index', 'id', 'docnum']:
@@ -173,8 +171,7 @@ class Corpus:
         # keep similarities above threshold
         similar_pairs = np.where(result.toarray() > threshold)
         # remove self pairs
-        similar_pairs = [frozenset([v0, v1]) for v0, v1 in
-            zip(similar_pairs[0], similar_pairs[1]) if v0 != v1]
+        similar_pairs = [frozenset([v0, v1]) for v0, v1 in zip(similar_pairs[0], similar_pairs[1]) if v0 != v1]
         # remove duplicate pairs
         similar_pairs = list(set(similar_pairs))
         # return as a list of tuples
@@ -188,7 +185,7 @@ class Corpus:
             for author in authors:
                 nx_graph.add_node(author)
             for i in range(0, len(authors)):
-                for j in range(i+1, len(authors)):
+                for j in range(i + 1, len(authors)):
                     nx_graph.add_edge(authors[i], authors[j])
         bb = nx.betweenness_centrality(nx_graph)
         nx.set_node_attributes(nx_graph, bb, 'betweenness')

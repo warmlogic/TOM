@@ -3,7 +3,7 @@ import matplotlib as mpl
 
 from tom_lib.utils import save_topic_number_metrics_data
 
-mpl.use("Agg") # To be able to create figures on a headless server (no DISPLAY variable)
+mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
 import matplotlib.pyplot as plt
 import codecs
 import numpy as np
@@ -26,7 +26,7 @@ class Visualization:
             elif isinstance(output_dir, Path):
                 self.output_dir = output_dir
             else:
-                raise TypeError("'output_dir' of type {} not a valid type".format(type(output_dir)))
+                raise TypeError(f"'output_dir' of type {type(output_dir)} not a valid type")
         if not self.output_dir.exists():
             self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -66,16 +66,17 @@ class Visualization:
             top_n_words=top_n_words,
             tao=tao,
             verbose=verbose,
-            )
+        )
         plt.clf()
-        plt.plot(np.arange(min_num_topics, max_num_topics+1, step), greene_stability, 'o-')
+        plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), greene_stability, 'o-')
         plt.title('Greene et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Stability')
         file_path_fig = self.output_dir / 'greene.png'
         file_path_data = self.output_dir / 'greene.tsv'
         plt.savefig(file_path_fig)
-        save_topic_number_metrics_data(file_path_data,
+        save_topic_number_metrics_data(
+            file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=greene_stability, step=step, metric_type='greene')
 
@@ -86,16 +87,17 @@ class Visualization:
             step=step,
             iterations=iterations,
             verbose=verbose,
-            )
+        )
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1, step), symmetric_kl_divergence, 'o-')
+        plt.plot(range(min_num_topics, max_num_topics + 1, step), symmetric_kl_divergence, 'o-')
         plt.title('Arun et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Symmetric KL Divergence')
         file_path_fig = self.output_dir / 'arun.png'
         file_path_data = self.output_dir / 'arun.tsv'
         plt.savefig(file_path_fig)
-        save_topic_number_metrics_data(file_path_data,
+        save_topic_number_metrics_data(
+            file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=symmetric_kl_divergence, step=step, metric_type='arun')
 
@@ -106,16 +108,17 @@ class Visualization:
             step=step,
             iterations=iterations,
             verbose=verbose,
-            )
+        )
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics+1, step), cophenetic_correlation, 'o-')
+        plt.plot(range(min_num_topics, max_num_topics + 1, step), cophenetic_correlation, 'o-')
         plt.title('Brunet et al. metric')
         plt.xlabel('Number of topics')
         plt.ylabel('Cophenetic correlation coefficient')
         file_path_fig = self.output_dir / 'brunet.png'
         file_path_data = self.output_dir / 'brunet.tsv'
         plt.savefig(file_path_fig)
-        save_topic_number_metrics_data(file_path_data,
+        save_topic_number_metrics_data(
+            file_path_data,
             range_=(min_num_topics, max_num_topics),
             data=cophenetic_correlation, step=step, metric_type='brunet')
 
@@ -126,11 +129,11 @@ class Visualization:
             step=step,
             train_size=train_size,
             verbose=verbose,
-            )
+        )
         if (len(train_perplexities) > 0) and (len(test_perplexities) > 0):
             plt.clf()
-            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), train_perplexities, 'o-', label='Train')
-            plt.plot(np.arange(min_num_topics, max_num_topics+1, step), test_perplexities, 'o-', label='Test')
+            plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), train_perplexities, 'o-', label='Train')
+            plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), test_perplexities, 'o-', label='Test')
             plt.title('Perplexity metric')
             plt.xlabel('Number of topics')
             plt.ylabel('Perplexity')
@@ -139,10 +142,12 @@ class Visualization:
             file_path_data_train = self.output_dir / 'perplexity_train.tsv'
             file_path_data_test = self.output_dir / 'perplexity_test.tsv'
             plt.savefig(file_path_fig)
-            save_topic_number_metrics_data(file_path_data_train,
+            save_topic_number_metrics_data(
+                file_path_data_train,
                 range_=(min_num_topics, max_num_topics),
                 data=train_perplexities, step=step, metric_type='perplexity')
-            save_topic_number_metrics_data(file_path_data_test,
+            save_topic_number_metrics_data(
+                file_path_data_test,
                 range_=(min_num_topics, max_num_topics),
                 data=test_perplexities, step=step, metric_type='perplexity')
 
@@ -155,7 +160,7 @@ class Visualization:
             description = []
             for weighted_word in self.topic_model.top_words(i, 5):
                 description.append(weighted_word[1])
-            json_nodes.append({'name': 'topic'+str(i),
+            json_nodes.append({'name': f'topic{i}',
                                'frequency': self.topic_model.topic_frequency(i),
                                'description': ', '.join(description),
                                'group': i})
