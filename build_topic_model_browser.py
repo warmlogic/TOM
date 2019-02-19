@@ -61,8 +61,8 @@ for topic_id in range(topic_model.nb_topics):
     utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
                                        'browser/static/data/affiliation_repartition' + str(topic_id) + '.tsv')
 
-    min_year = topic_model.corpus.data_frame['date'].min()
-    max_year = topic_model.corpus.data_frame['date'].max()
+    min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
+    max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
 
     evolution = []
     for i in range(min_year, max_year + 1):
@@ -185,4 +185,6 @@ def word_details(wid):
 
 if __name__ == '__main__':
     # Access the browser at http://localhost:2016/
-    app.run(debug=True, host='localhost', port=2016)
+    # app.run(debug=True, host='localhost', port=2016)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+    # app.run(debug=False, host='0.0.0.0', port=5000)
