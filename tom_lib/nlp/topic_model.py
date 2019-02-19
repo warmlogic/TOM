@@ -334,6 +334,7 @@ class TopicModel(object):
             self.corpus.vectorizer.transform([text]))[0]
         return doc_topic_distr
 
+
 class LatentDirichletAllocation(TopicModel):
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
         self.nb_topics = num_topics
