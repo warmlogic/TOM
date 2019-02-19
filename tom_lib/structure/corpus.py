@@ -26,6 +26,7 @@ class Corpus:
                  max_features=2000,
                  sample=None,
                  text_col=None,
+                 full_text_col=None,
                  title_col=None,
                  author_col=None,
                  affiliation_col=None,
@@ -48,6 +49,7 @@ class Corpus:
         self._sample = sample
 
         self._text_col = text_col or 'text'
+        self._full_text_col = full_text_col or self._text_col
         self._title_col = title_col or 'title'
         self._author_col = author_col or 'author'
         self._affiliation_col = affiliation_col or 'affiliation'
@@ -99,7 +101,7 @@ class Corpus:
         self.data_frame.to_csv(path_or_buf=file_path, sep=self._sep, encoding='utf-8')
 
     def full_text(self, doc_id):
-        return self.data_frame.iloc[doc_id][self._text_col]
+        return self.data_frame.iloc[doc_id][self._full_text_col]
 
     def title(self, doc_id):
         return self.data_frame.iloc[doc_id][self._title_col]
@@ -190,18 +192,18 @@ class Corpus:
         similar_pairs = [(list(i)[0], list(i)[1]) for i in similar_pairs]
         return similar_pairs
 
-    def collaboration_network(self, doc_ids=None, nx_format=False):
-        nx_graph = nx.Graph(name='')
-        for doc_id in doc_ids:
-            authors = self.author(doc_id)
-            for author in authors:
-                nx_graph.add_node(author)
-            for i in range(0, len(authors)):
-                for j in range(i + 1, len(authors)):
-                    nx_graph.add_edge(authors[i], authors[j])
-        bb = nx.betweenness_centrality(nx_graph)
-        nx.set_node_attributes(nx_graph, bb, 'betweenness')
-        if nx_format:
-            return nx_graph
-        else:
-            return json_graph.node_link_data(nx_graph)
+    # def collaboration_network(self, doc_ids=None, nx_format=False):
+    #     nx_graph = nx.Graph(name='')
+    #     for doc_id in doc_ids:
+    #         authors = self.author(doc_id)
+    #         for author in authors:
+    #             nx_graph.add_node(author)
+    #         for i in range(0, len(authors)):
+    #             for j in range(i + 1, len(authors)):
+    #                 nx_graph.add_edge(authors[i], authors[j])
+    #     bb = nx.betweenness_centrality(nx_graph)
+    #     nx.set_node_attributes(nx_graph, bb, 'betweenness')
+    #     if nx_format:
+    #         return nx_graph
+    #     else:
+    #         return json_graph.node_link_data(nx_graph)
