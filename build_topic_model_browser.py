@@ -79,13 +79,13 @@ for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
                                   'browser/static/data/topic_distribution_w' + str(word_id) + '.tsv')
 
-# Associate documents with topics
-topic_associations = topic_model.documents_per_topic()
+# # Associate documents with topics
+# topic_associations = topic_model.documents_per_topic()
 
-# Export per-topic author network
-for topic_id in range(topic_model.nb_topics):
-    utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
-                           'browser/static/data/author_network' + str(topic_id) + '.json')
+# # Export per-topic author network
+# for topic_id in range(topic_model.nb_topics):
+#     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
+#                            'browser/static/data/author_network' + str(topic_id) + '.json')
 
 
 @app.route('/')
@@ -130,11 +130,13 @@ def vocabulary():
 
 @app.route('/topic/<tid>.html')
 def topic_details(tid):
-    ids = topic_associations[int(tid)]
+    # ids = topic_associations[int(tid)]
+    ids = topic_model.top_topic_docs(topics=int(tid), top_n=100)[1]
     documents = []
     for document_id in ids:
         documents.append((corpus.title(document_id).capitalize(),
-                          ', '.join(corpus.author(document_id)),
+                          ', '.join(corpus.affiliation(document_id)).capitalize(),
+                          ', '.join(corpus.author(document_id)).capitalize(),
                           corpus.date(document_id), document_id))
     return render_template('topic.html',
                            topic_id=tid,
@@ -163,9 +165,13 @@ def document_details(did):
                            topic_ids=range(topic_model.nb_topics),
                            doc_ids=range(corpus.size),
                            documents=documents,
+                           title=corpus.title(int(did)),
                            authors=', '.join(corpus.author(int(did))),
                            year=corpus.date(int(did)),
-                           short_content=corpus.title(int(did)))
+                           short_content=corpus.title(int(did)),
+                           affiliation=', '.join(corpus.affiliation(int(did))),
+                           full_text=corpus.full_text(int(did)),
+                           )
 
 
 @app.route('/word/<wid>.html')

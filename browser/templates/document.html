@@ -41,8 +41,10 @@
         </select>
     </div>
     <div id="header">
-        <h1>Details about article {{ doc_id }}</h1>
-        Authors: {{ authors }} - Date: {{ year }}
+        <h1>Details about document {{ doc_id }}</h1>
+        Title: {{ title }}
+        <br><br>
+        Authors: {{ authors }} - Date: {{ year }} - Affiliation: {{ affiliation }}
     </div>
     <div id="wrap">
         <div id="left_column">
@@ -74,6 +76,12 @@
                     </li>
                 {% endfor %}
             </ul>
+        </div>
+    </div>
+    <div id="wrap">
+        <div id="left_column">
+            <h2>Full text</h2>
+            {{ full_text }}
         </div>
     </div>
 </body>

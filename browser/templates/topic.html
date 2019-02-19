@@ -71,8 +71,10 @@
         <thead>
         <tr>
             <th>Title</th>
+            <th>Affiliation</th>
             <th>Author(s)</th>
             <th>Date</th>
+            <th>ID</th>
         </tr>
         </thead>
         <tbody>
@@ -81,15 +83,17 @@
                 <td>{{ doc[0] }}</td>
                 <td>{{ doc[1] }}</td>
                 <td>{{ doc[2] }}</td>
+                <td>{{ doc[3] }}</td>
+                <td><a href="../document/{{ doc[4] }}.html">{{ doc[4] }}</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
     <h2>Topic frequency</h2>
     <line-chart></line-chart>
-    <h2>Author network</h2>
-    <author-network></author-network>
-    <h2>Number of documents per institution</h2>
+    <!-- <h2>Author network</h2>
+    <author-network></author-network> -->
+    <h2>Number of documents per affiliation</h2>
     <bar-chart2></bar-chart2>
 </div>
 </body>
@@ -207,7 +211,7 @@
                 .attr("d", line);
     });
 </script>
-<script>
+<!-- <script>
     var width3 = 600,
             height3 = 400;
     var force = d3.layout.force()
@@ -246,7 +250,7 @@
                     .attr("cy", function(d) { return d.y; });
         });
     });
-</script>
+</script> -->
 <script>
     var margin4 = {top: 10, right: 0, bottom: 100, left: 40},
             width4 = 600 - margin.left - margin.right,
