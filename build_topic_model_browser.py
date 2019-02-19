@@ -19,10 +19,11 @@ filename_all = 'full_set_dedupe_tom_lib_corpus_phrased.tsv'
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
 
 # Parameters
-language = 'english'
+# language = 'english'
+language = None
 max_tf = 0.95
 min_tf = 5
-num_topics = 15
+num_topics = 23
 vectorization = 'tfidf'
 n_gram = 1
 max_features = 5000
