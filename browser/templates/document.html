@@ -43,7 +43,7 @@
     <div id="header">
         <h1>Details about document {{ doc_id }}</h1>
         Title: {{ title }}
-        <br><br>
+        <br>
         Authors: {{ authors }} - Date: {{ year }} - Affiliation: {{ affiliation }}
     </div>
     <div id="wrap">
@@ -80,7 +80,7 @@
     </div>
     <div id="wrap">
         <div id="left_column">
-            <h2>Full text</h2>
+            <h2>Full text: {{ title }}</h2>
             {{ full_text }}
         </div>
     </div>
