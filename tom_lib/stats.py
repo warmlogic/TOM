@@ -1,5 +1,5 @@
 # coding: utf-8
-import numpy
+# import numpy
 import numpy as np
 import scipy.stats as stats
 
@@ -8,7 +8,7 @@ __email__ = "adrien.guille@univ-lyon2.fr"
 
 
 def symmetric_kl(distrib_p, distrib_q):
-    return numpy.sum([stats.entropy(distrib_p, distrib_q), stats.entropy(distrib_p, distrib_q)])
+    return np.sum([stats.entropy(distrib_p, distrib_q), stats.entropy(distrib_p, distrib_q)])
 
 
 def myjaccard(r_i, r_j):
@@ -40,5 +40,5 @@ def agreement_score(s_x, s_y):
         raise Exception("Both ranked term list sets should have the same dimension.")
     k = len(s_x)
     m = jaccard_similarity_matrix(s_x, s_y)
-    agree_sum = [m[i,].max() for i in range(k)]
+    agree_sum = [m[i, :].max() for i in range(k)]
     return sum(agree_sum) / k
