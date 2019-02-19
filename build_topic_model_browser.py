@@ -38,6 +38,7 @@ corpus = Corpus(source_file_path=data_dir_processed / filename_all,
                 min_absolute_frequency=min_tf,
                 max_features=max_features,
                 sample=sample,
+                full_text_col='orig_text',
                 )
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
@@ -132,13 +133,13 @@ def vocabulary():
 @app.route('/topic/<tid>.html')
 def topic_details(tid):
     # ids = topic_associations[int(tid)]
-    ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[1]
+    ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
     documents = []
     for i, document_id in enumerate(ids):
-        documents.append((corpus.title(document_id).capitalize(),
-                          ', '.join(corpus.affiliation(document_id)).capitalize(),
-                          ', '.join(corpus.author(document_id)).capitalize(),
-                          corpus.date(document_id), i, document_id))
+        documents.append((i + 1, corpus.title(document_id).title(),
+                          ', '.join(corpus.affiliation(document_id)).title(),
+                          ', '.join(corpus.author(document_id)).title(),
+                          corpus.date(document_id), document_id))
     return render_template('topic.html',
                            topic_id=tid,
                            frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
@@ -157,8 +158,8 @@ def document_details(did):
     word_list.reverse()
     documents = []
     for another_doc in corpus.similar_documents(int(did), 5):
-        documents.append((corpus.title(another_doc[0]).capitalize(),
-                          ', '.join(corpus.author(another_doc[0])),
+        documents.append((corpus.title(another_doc[0]).title(),
+                          ', '.join(corpus.author(another_doc[0])).title(),
                           corpus.date(another_doc[0]), another_doc[0], round(another_doc[1], 3)))
     return render_template('document.html',
                            doc_id=did,
@@ -166,11 +167,11 @@ def document_details(did):
                            topic_ids=range(topic_model.nb_topics),
                            doc_ids=range(corpus.size),
                            documents=documents,
-                           title=corpus.title(int(did)),
-                           authors=', '.join(corpus.author(int(did))),
+                           title=corpus.title(int(did)).title(),
+                           authors=', '.join(corpus.author(int(did))).title(),
                            year=corpus.date(int(did)),
-                           short_content=corpus.title(int(did)),
-                           affiliation=', '.join(corpus.affiliation(int(did))),
+                           short_content=corpus.title(int(did)).title(),
+                           affiliation=', '.join(corpus.affiliation(int(did))).title(),
                            full_text=corpus.full_text(int(did)),
                            )
 
@@ -179,8 +180,8 @@ def document_details(did):
 def word_details(wid):
     documents = []
     for document_id in corpus.docs_for_word(int(wid)):
-        documents.append((corpus.title(document_id).capitalize(),
-                          ', '.join(corpus.author(document_id)),
+        documents.append((corpus.title(document_id).title(),
+                          ', '.join(corpus.author(document_id)).title(),
                           corpus.date(document_id), document_id))
     return render_template('word.html',
                            word_id=wid,
