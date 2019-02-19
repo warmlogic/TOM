@@ -134,11 +134,11 @@ def topic_details(tid):
     # ids = topic_associations[int(tid)]
     ids = topic_model.top_topic_docs(topics=int(tid), top_n=100)[1]
     documents = []
-    for document_id in ids:
+    for i, document_id in enumerate(ids):
         documents.append((corpus.title(document_id).capitalize(),
                           ', '.join(corpus.affiliation(document_id)).capitalize(),
                           ', '.join(corpus.author(document_id)).capitalize(),
-                          corpus.date(document_id), document_id))
+                          corpus.date(document_id), i, document_id))
     return render_template('topic.html',
                            topic_id=tid,
                            frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
