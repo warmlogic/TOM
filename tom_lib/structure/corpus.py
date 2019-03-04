@@ -1,14 +1,14 @@
 # coding: utf-8
-from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-import networkx as nx
+from pathlib import Path
 import itertools
 import pandas as pd
-from networkx.readwrite import json_graph
-from scipy import spatial
-from pathlib import Path
 import numpy as np
+from scipy import spatial
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.preprocessing import normalize
+# import networkx as nx
+# from networkx.readwrite import json_graph
 
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -18,27 +18,20 @@ class Corpus:
     def __init__(self,
                  source_file_path,
                  sep='\t',
-                 language='english',
-                 n_gram=1,
-                 vectorization='tfidf',
-                 max_relative_frequency=1.,
-                 min_absolute_frequency=0,
-                 max_features=2000,
-                 sample=None,
-                 text_col=None,
-                 full_text_col=None,
-                 title_col=None,
-                 author_col=None,
-                 affiliation_col=None,
-                 date_col=None,
+                 language: str='english',
+                 n_gram: int=1,
+                 vectorization: str='tfidf',
+                 max_relative_frequency: float=1.0,
+                 min_absolute_frequency: int=0,
+                 max_features: int=2000,
+                 sample: float=1.0,
+                 text_col: str=None,
+                 full_text_col: str=None,
+                 title_col: str=None,
+                 author_col: str=None,
+                 affiliation_col: str=None,
+                 date_col: str=None,
                  ):
-
-        if isinstance(source_file_path, str) or isinstance(source_file_path, Path):
-            self._source_file_path = source_file_path
-            self.data_frame = pd.read_csv(source_file_path, sep=sep, encoding='utf-8')
-        elif isinstance(source_file_path, pd.DataFrame):
-            self._source_file_path = 'pd.DataFrame from memory'
-            self.data_frame = source_file_path.copy()
 
         self._sep = sep
         self._language = language
@@ -56,13 +49,17 @@ class Corpus:
         self._date_col = date_col or 'date'
 
         self.max_features = max_features
-        if sample:
-            if isinstance(sample, bool):
-                sample = 0.8
-            if isinstance(sample, float):
-                self.data_frame = self.data_frame.sample(frac=sample)
-            else:
-                raise ValueError(f'Unknown sample: {sample}')
+
+        if isinstance(source_file_path, str) or isinstance(source_file_path, Path):
+            self._source_file_path = source_file_path
+            self.data_frame = pd.read_csv(source_file_path, sep=self._sep, encoding='utf-8')
+        elif isinstance(source_file_path, pd.DataFrame):
+            self._source_file_path = 'pd.DataFrame from memory'
+            self.data_frame = source_file_path.copy()
+
+        if self._sample < 1.0:
+            self.data_frame = self.data_frame.sample(frac=self._sample)
+
         # reset index because row numbers are used to access rows
         self.data_frame = self.data_frame.reset_index()
         self.data_frame.index.name = 'id'
@@ -76,22 +73,22 @@ class Corpus:
         self.size = self.data_frame.shape[0]
 
         stop_words = []
-        if language is not None:
-            stop_words = stopwords.words(language)
-        if vectorization == 'tfidf':
-            vectorizer = TfidfVectorizer(ngram_range=(1, n_gram),
-                                         max_df=max_relative_frequency,
-                                         min_df=min_absolute_frequency,
+        if self._language:
+            stop_words = stopwords.words(self._language)
+        if self._vectorization == 'tfidf':
+            vectorizer = TfidfVectorizer(ngram_range=(1, self._n_gram),
+                                         max_df=self._max_relative_frequency,
+                                         min_df=self._min_absolute_frequency,
                                          max_features=self.max_features,
                                          stop_words=stop_words)
-        elif vectorization == 'tf':
-            vectorizer = CountVectorizer(ngram_range=(1, n_gram),
-                                         max_df=max_relative_frequency,
-                                         min_df=min_absolute_frequency,
+        elif self._vectorization == 'tf':
+            vectorizer = CountVectorizer(ngram_range=(1, self._n_gram),
+                                         max_df=self._max_relative_frequency,
+                                         min_df=self._min_absolute_frequency,
                                          max_features=self.max_features,
                                          stop_words=stop_words)
         else:
-            raise ValueError(f'Unknown vectorization type: {vectorization}')
+            raise ValueError(f'Unknown vectorization type: {self._vectorization}')
         self.vectorizer = vectorizer
         self.sklearn_vector_space = vectorizer.fit_transform(self.data_frame[self._text_col].tolist())
         self.gensim_vector_space = None
