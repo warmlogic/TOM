@@ -54,7 +54,7 @@ if os.path.exists('browser/static/data'):
 os.makedirs('browser/static/data')
 
 # Export topic cloud
-utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json')
+utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=5)
 
 # Export details about topics
 for topic_id in range(topic_model.nb_topics):
