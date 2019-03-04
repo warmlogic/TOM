@@ -30,7 +30,7 @@ class TopicModel(object):
     def infer_topics(self, num_topics=10, **kwargs):
         pass
 
-    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10, verbose=True):
+    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10, sample=0.8, verbose=True):
         """
         Implements Greene metric to compute the optimal number of topics. Taken from How Many Topics?
         Stability Analysis for Topic Models from Greene et al. 2014.
@@ -41,11 +41,6 @@ class TopicModel(object):
         :param tao: Number of sampled models to build
         :return: A list of len (max_num_topics - min_num_topics) with the stability of each tested k
         """
-        if self._sample:
-            sample = self._sample
-        else:
-            sample = True
-
         stability = []
         # Build reference topic model
         # Generate tao topic models with tao samples of the corpus
@@ -161,7 +156,6 @@ class TopicModel(object):
         :param train_size:
         :return:
         """
-
         train_perplexities = []
         test_perplexities = []
         if isinstance(self, LatentDirichletAllocation):
