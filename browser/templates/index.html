@@ -13,7 +13,7 @@
             <option>vocabulary</option>
         </select>
         -
-        <select onChange="window.location.href='../topic/'+this.value+'.html'">
+        <select onChange="window.location.href='../topic/'+this.value.split(' ')[1].slice(0, -1)+'.html'">
             <option selected="selected" disabled="disabled">Details about a topic</option>
             {% for i in topic_ids %}
                 <option>{{ i }}</option>
