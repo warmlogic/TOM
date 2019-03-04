@@ -65,12 +65,13 @@ class Corpus:
                 raise ValueError(f'Unknown sample: {sample}')
         # reset index because row numbers are used to access rows
         self.data_frame = self.data_frame.reset_index()
+        self.data_frame.index.name = 'id'
         for col in ['index', 'id', 'docnum']:
             # remove these columns because they are not needed
             if col in self.data_frame.columns:
                 self.data_frame = self.data_frame.drop(col, axis=1)
         # fill in null values
-        self.data_frame = self.data_frame.fillna(' ')
+        self.data_frame = self.data_frame.fillna('')
         # get shape of df (previous code used count, which won't work if there are columns other than index 0 that have nans)
         self.size = self.data_frame.shape[0]
 
