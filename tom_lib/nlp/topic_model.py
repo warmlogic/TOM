@@ -30,7 +30,8 @@ class TopicModel(object):
     def infer_topics(self, num_topics=10, **kwargs):
         pass
 
-    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10, sample=0.8, verbose=True):
+    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10,
+                      sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
         """
         Implements Greene metric to compute the optimal number of topics. Taken from How Many Topics?
         Stability Analysis for Topic Models from Greene et al. 2014.
@@ -49,9 +50,9 @@ class TopicModel(object):
             if verbose:
                 print(f'Topics={k}')
             if type(self).__name__ == 'NonNegativeMatrixFactorization':
-                self.infer_topics(num_topics=k, beta_loss=self.beta_loss)
+                self.infer_topics(num_topics=k, beta_loss=beta_loss)
             elif type(self).__name__ == 'LatentDirichletAllocation':
-                self.infer_topics(num_topics=k, algorithm=self.algorithm)
+                self.infer_topics(num_topics=k, algorithm=algorithm)
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
@@ -68,9 +69,9 @@ class TopicModel(object):
                 )
                 tao_model = type(self)(tao_corpus)
                 if type(self).__name__ == 'NonNegativeMatrixFactorization':
-                    tao_model.infer_topics(num_topics=k, beta_loss=self.beta_loss)
+                    tao_model.infer_topics(num_topics=k, beta_loss=beta_loss)
                 elif type(self).__name__ == 'LatentDirichletAllocation':
-                    tao_model.infer_topics(num_topics=k, algorithm=self.algorithm)
+                    tao_model.infer_topics(num_topics=k, algorithm=algorithm)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
@@ -78,7 +79,8 @@ class TopicModel(object):
                 print(f'\tStability={stability[-1]:.4f}')
         return stability
 
-    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10, verbose=True):
+    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
+                    beta_loss='frobenius', algorithm='variational', verbose=True):
         """
         Implements Arun metric to estimate the optimal number of topics:
         Arun, R., V. Suresh, C. V. Madhavan, and M. N. Murthy
@@ -98,9 +100,9 @@ class TopicModel(object):
             norm = np.linalg.norm(doc_len)
             for i in range(min_num_topics, max_num_topics + 1, step):
                 if type(self).__name__ == 'NonNegativeMatrixFactorization':
-                    self.infer_topics(num_topics=i, beta_loss=self.beta_loss)
+                    self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif type(self).__name__ == 'LatentDirichletAllocation':
-                    self.infer_topics(num_topics=i, algorithm=self.algorithm)
+                    self.infer_topics(num_topics=i, algorithm=algorithm)
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
@@ -112,7 +114,8 @@ class TopicModel(object):
         ouput = np.array(kl_matrix)
         return ouput.mean(axis=0)
 
-    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10, verbose=True):
+    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
+                      beta_loss='frobenius', algorithm='variational', verbose=True):
         """
         Implements a consensus-based metric to estimate the optimal number of topics:
         Brunet, J.P., Tamayo, P., Golub, T.R., Mesirov, J.P.
@@ -130,9 +133,9 @@ class TopicModel(object):
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
                 if type(self).__name__ == 'NonNegativeMatrixFactorization':
-                    self.infer_topics(num_topics=i, beta_loss=self.beta_loss)
+                    self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif type(self).__name__ == 'LatentDirichletAllocation':
-                    self.infer_topics(num_topics=i, algorithm=self.algorithm)
+                    self.infer_topics(num_topics=i, algorithm=algorithm)
                 for p in range(self.corpus.size):
                     for q in range(self.corpus.size):
                         if self.most_likely_topic_for_document(p) == self.most_likely_topic_for_document(q):
