@@ -77,9 +77,16 @@ body {
 
 #left_column {
   text-align: left;
-  width:600px;
+  width:700px;
   margin:0 auto;
   float:left;
+}
+
+#right_column {
+  text-align: left;
+  width:300px;
+  margin:0 auto;
+  float:right;
 }
 
 #five_columns {
@@ -101,13 +108,6 @@ body {
   width:1000px;
   margin:0 auto;
   float:left;
-}
-
-#right_column {
-  text-align: left;
-  width:400px;
-  margin:0 auto;
-  float:right;
 }
 
 .main-content {

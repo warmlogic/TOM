@@ -7,8 +7,9 @@
 </head>
 <body>
     <div id="navigation">
-        <select onChange="window.location.href=((this.value == 'topics') ? 'topic_cloud.html' : 'vocabulary.html')">
+        <select onChange="window.location.href=((this.value == 'topics') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
             <option selected="selected" disabled="disabled">Overview</option>
+            <option>home</option>
             <option>topics</option>
             <option>vocabulary</option>
         </select>

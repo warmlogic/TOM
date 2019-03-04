@@ -27,8 +27,9 @@
 </style>
 <body>
     <div id="navigation">
-        <select onChange="window.location.href=((this.value == 'topics') ? '../topic_cloud.html' : '../vocabulary.html')">
+        <select onChange="window.location.href=((this.value == 'topics') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
             <option selected="selected" disabled="disabled">Overview</option>
+            <option>home</option>
             <option>topics</option>
             <option>vocabulary</option>
         </select>
@@ -68,9 +69,9 @@
 <script src="{{ url_for('static', filename = 'js/d3.min.js' )}}"></script>
 <script src="{{ url_for('static', filename = 'js/d3-tip.js' )}}"></script>
 <script>
-var margin = {top: 10, right: 0, bottom: 60, left: 40},
-    width = 600 - margin.left - margin.right,
-    height = 350 - margin.top - margin.bottom;
+var margin = {top: 10, right: 0, bottom: 250, left: 250},
+    width = 700 - margin.left - margin.right,
+    height = 550 - margin.top - margin.bottom;
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);
 var y = d3.scale.linear()
@@ -102,18 +103,9 @@ d3.tsv("{{ url_for('static', filename = 'data/topic_distribution_w'+word_id+'.ts
       .call(xAxis)
       .selectAll("text")
             .style("text-anchor", "end")
-            .attr("dx", "-1em")
-            .attr("dy", "-0.7em")
-            .attr("transform", "rotate(-90)" );
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 2)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Weight");
+            .attr("dx", "-0.4em")
+            .attr("dy", "0.4em")
+            .attr("transform", "rotate(-35)" );
   svg.selectAll(".bar")
       .data(data)
     .enter().append("rect")
@@ -122,6 +114,15 @@ d3.tsv("{{ url_for('static', filename = 'data/topic_distribution_w'+word_id+'.ts
       .attr("width", x.rangeBand())
       .attr("y", function(d) { return y(d.weight); })
       .attr("height", function(d) { return height - y(d.weight); })
+      svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 2)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Weight");
 });
 
 function type(d) {

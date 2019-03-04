@@ -7,8 +7,9 @@
 </head>
 <body>
     <div id="navigation">
-        <select onChange="window.location.href=((this.value == 'topics') ? 'topic_cloud.html' : 'vocabulary.html')">
+        <select onChange="window.location.href=((this.value == 'topics') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
             <option selected="selected" disabled="disabled">Overview</option>
+            <option>home</option>
             <option>topics</option>
             <option>vocabulary</option>
         </select>
@@ -23,5 +24,25 @@
     <div id="header">
         <h1>Topic and document browser</h1>
         <a href="https://github.com/warmlogic/TOM">Built using https://github.com/warmlogic/TOM</a>
+    </div>
+    <div id="wrap">
+        <div id="left_column">
+            <h2>Topics (top words)</h2>
+            <ul>
+                {% for topic in topic_ids %}
+                    <li><a href="../topic/{{ loop.index - 1}}.html">{{ topic }}</a></li>
+                {% endfor %}
+            </ul>
+    </div>
+        <div id="right_column">
+            <h2>Dataset and model details</h2>
+            <ul>
+                <li>Document count: {{ corpus_size }}</li>
+                <li>Vocabulary size: {{ vocabulary_size }}</li>
+                <li>Model type: {{ method }}</li>
+                <li>Vectorization: {{ vectorization }}</li>
+                <li>Number of topics: {{ num_topics }}</li>
+            </ul>
+        </div>
     </div>
 </body>

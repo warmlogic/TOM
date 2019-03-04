@@ -46,8 +46,9 @@
 </style>
 <body>
 <div id="navigation">
-    <select onChange="window.location.href=((this.value == 'topics') ? '../topic_cloud.html' : '../vocabulary.html')">
+    <select onChange="window.location.href=((this.value == 'topics') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
         <option selected="selected" disabled="disabled">Overview</option>
+        <option>home</option>
         <option>topics</option>
         <option>vocabulary</option>
     </select>
@@ -134,9 +135,9 @@
                 .call(xAxis)
                 .selectAll("text")
                 .style("text-anchor", "end")
-                .attr("dx", "-1em")
-                .attr("dy", "-0.7em")
-                .attr("transform", "rotate(-90)" );
+                .attr("dx", "-0.4em")
+                .attr("dy", "0.4em")
+                .attr("transform", "rotate(-35)" );
         svg.append("g")
                 .attr("class", "y axis")
                 .call(yAxis)
@@ -198,7 +199,16 @@
         svg2.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + height2 + ")")
-                .call(xAxis2);
+                .call(xAxis2)
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-0.4em")
+                .attr("dy", "0.4em")
+                .attr("transform", "rotate(-35)" );
+        svg2.append("path")
+                .datum(data2)
+                .attr("class", "line")
+                .attr("d", line);
         svg2.append("g")
                 .attr("class", "y axis")
                 .call(yAxis2)
@@ -207,10 +217,6 @@
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text("Frequency");
-        svg2.append("path")
-                .datum(data2)
-                .attr("class", "line")
-                .attr("d", line);
     });
 </script>
 <!-- <script>
@@ -281,9 +287,17 @@
                 .call(xAxis4)
                 .selectAll("text")
                 .style("text-anchor", "end")
-                .attr("dx", "-1em")
-                .attr("dy", "-0.7em")
-                .attr("transform", "rotate(-90)" );
+                .attr("dx", "-0.4em")
+                .attr("dy", "0.4em")
+                .attr("transform", "rotate(-35)" );
+        svg4.selectAll(".bar")
+                .data(data4)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) { return x4(d.affiliation); })
+                .attr("width", x4.rangeBand())
+                .attr("y", function(d) { return y4(d.count); })
+                .attr("height", function(d) { return height4 - y4(d.count); })
         svg4.append("g")
                 .attr("class", "y axis")
                 .call(yAxis4)
@@ -293,14 +307,6 @@
                 .attr("dy", ".71em")
                 .style("text-anchor", "end")
                 .text("Count");
-        svg4.selectAll(".bar")
-                .data(data4)
-                .enter().append("rect")
-                .attr("class", "bar")
-                .attr("x", function(d) { return x4(d.affiliation); })
-                .attr("width", x4.rangeBand())
-                .attr("y", function(d) { return y4(d.count); })
-                .attr("height", function(d) { return height4 - y4(d.count); })
     });
 
     function type(d) {
