@@ -99,12 +99,14 @@ for topic_id in range(topic_model.nb_topics):
 for doc_id in range(topic_model.corpus.size):
     utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
                                   f'browser/static/data/topic_distribution_d{doc_id}.tsv',
+                                  topic_description,
                                   )
 
 # Export details about words
 for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
                                   f'browser/static/data/topic_distribution_w{word_id}.tsv',
+                                  topic_description,
                                   )
 
 # # Associate documents with topics
