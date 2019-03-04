@@ -1,4 +1,6 @@
 # coding: utf-8
+import configparser
+from pathlib import Path
 import os
 import shutil
 import tom_lib.utils as utils
@@ -6,33 +8,49 @@ from flask import Flask, render_template
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization
 from tom_lib.structure.corpus import Corpus
 
-from pathlib import Path
-
 __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
 
-data_dir = Path('.')
-data_dir_processed = data_dir / 'processed'
-filename_all = 'full_set_dedupe_tom_lib_corpus_phrased.tsv'
+config_filepath = 'config.ini'
+config = configparser.ConfigParser()
+try:
+    config.read(config_filepath)
+except OSError as e:
+    print(f'Config file {config_filepath} not found. Did you set it up?')
+
+# Read parameters
+data_dir = config['tom'].get('data_dir', '', vars=os.environ)
+if not data_dir:
+    data_dir = '.'
+data_dir = Path(data_dir)
+docs_filename = config['tom'].get('docs_filename', '')
+if not docs_filename:
+    raise ValueError(f'docs_filename not specified in {config_filepath}')
+
+language = config['tom'].get('language', '')
+if not language:
+    language = None
+max_relative_frequency = config['tom'].getfloat('max_relative_frequency', 0.8)
+min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
+num_topics = config['tom'].getint('', 15)
+vectorization = config['tom'].get('vectorization', 'tfidf')
+n_gram = config['tom'].getint('n_gram', 1)
+max_features = config['tom'].getint('max_features', 5000)
+sample = config['tom'].getint('sample', '')
+if not sample:
+    sample = None
+top_words_description = config['tom'].getint('top_words_description', 5)
+top_words_cloud = config['tom'].getint('top_words_cloud', 5)
+
+source_filepath = data_dir / docs_filename
+if not source_filepath.exists():
+    raise OSError(f'Documents file does not exist: {source_filepath}')
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
 
-# Parameters
-# language = 'english'
-language = None
-# max_relative_frequency = 0.8
-# min_absolute_frequency = 5
-max_relative_frequency = 1.0
-min_absolute_frequency = 1
-num_topics = 23
-vectorization = 'tfidf'
-n_gram = 1
-max_features = 5000
-sample = None
-
 # Load corpus
-corpus = Corpus(source_file_path=data_dir_processed / filename_all,
+corpus = Corpus(source_filepath=source_filepath,
                 language=language,
                 vectorization=vectorization,
                 n_gram=n_gram,
@@ -50,10 +68,9 @@ topic_model = NonNegativeMatrixFactorization(corpus=corpus)
 topic_model.infer_topics(num_topics=num_topics)
 topic_model.print_topics(num_words=10)
 
-top_words = 5
 topic_description = []
 for i in range(topic_model.nb_topics):
-    description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words)]
+    description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
     topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
 # Clean the data directory
@@ -62,7 +79,7 @@ if os.path.exists('browser/static/data'):
 os.makedirs('browser/static/data')
 
 # Export topic cloud
-utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=5)
+utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=top_words_cloud)
 
 # Export details about topics
 for topic_id in range(topic_model.nb_topics):
