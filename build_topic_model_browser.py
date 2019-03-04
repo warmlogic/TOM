@@ -12,7 +12,7 @@ __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
 
 config_filepath = 'config.ini'
-config = configparser.ConfigParser()
+config = configparser.ConfigParser(allow_no_value=True)
 try:
     config.read(config_filepath)
 except OSError as e:
@@ -35,10 +35,8 @@ min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
 num_topics = config['tom'].getint('', 15)
 vectorization = config['tom'].get('vectorization', 'tfidf')
 n_gram = config['tom'].getint('n_gram', 1)
-max_features = config['tom'].getint('max_features', 5000)
-sample = config['tom'].getint('sample', '')
-if not sample:
-    sample = None
+max_features = config['tom'].getint('max_features', 2000)
+sample = config['tom'].getfloat('sample', 1.0)
 top_words_description = config['tom'].getint('top_words_description', 5)
 top_words_cloud = config['tom'].getint('top_words_cloud', 5)
 
