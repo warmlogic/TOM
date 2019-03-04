@@ -5,7 +5,7 @@ import os
 import shutil
 import tom_lib.utils as utils
 from flask import Flask, render_template
-from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization
+from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
 
 __author__ = "Adrien Guille"
@@ -44,9 +44,27 @@ max_features = config['tom'].getint('max_features', 2000)
 sample = config['tom'].getfloat('sample', 1.0)
 top_words_description = config['tom'].getint('top_words_description', 5)
 top_words_cloud = config['tom'].getint('top_words_cloud', 5)
+model_type = config['tom'].get('model_type', 'NMF')
+nmf_beta_loss = config['tom'].get('nmf_beta_loss', 'frobenius')
+lda_algorithm = config['tom'].get('lda_algorithm', 'variational')
+
+if model_type not in ['NMF', 'LDA']:
+    raise ValueError('model_type must be NMF or LDA')
+
+if model_type == 'NMF':
+    if nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
+        raise ValueError(f"beta_loss must be frobenius, kullback-leibler, or itakura-saito, got {nmf_beta_loss}")
+elif model_type == 'LDA':
+    if lda_algorithm not in ['variational', 'gibbs']:
+        raise ValueError(f'lda_algorithm must be variational or gibbs, got {lda_algorithm}')
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
+
+# Clean the data directory
+if os.path.exists('browser/static/data'):
+    shutil.rmtree('browser/static/data')
+os.makedirs('browser/static/data')
 
 # Load corpus
 corpus = Corpus(source_filepath=source_filepath,
@@ -62,8 +80,13 @@ corpus = Corpus(source_filepath=source_filepath,
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
 
+# Initialize topic model
+if model_type == 'NMF':
+    topic_model = NonNegativeMatrixFactorization(corpus=corpus, beta_loss=nmf_beta_loss)
+elif model_type == 'LDA':
+    topic_model = LatentDirichletAllocation(corpus=corpus, algorithm=lda_algorithm)
+
 # Infer topics
-topic_model = NonNegativeMatrixFactorization(corpus=corpus)
 topic_model.infer_topics(num_topics=num_topics)
 topic_model.print_topics(num_words=10)
 
@@ -71,11 +94,6 @@ topic_description = []
 for i in range(topic_model.nb_topics):
     description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
     topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
-
-# Clean the data directory
-if os.path.exists('browser/static/data'):
-    shutil.rmtree('browser/static/data')
-os.makedirs('browser/static/data')
 
 # Export topic cloud
 utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=top_words_cloud)
