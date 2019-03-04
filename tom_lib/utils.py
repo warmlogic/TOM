@@ -72,7 +72,7 @@ def save_topic_cloud(topic_model, file_path, top_words=5):
         description = []
         for weighted_word in topic_model.top_words(i, top_words):
             description.append(weighted_word[0])
-        json_nodes.append({'name': f'topic{i}',
+        json_nodes.append({'name': i,
                            'frequency': topic_model.topic_frequency(i),
                            'description': f"Topic {i}: {', '.join(description)}",
                            'group': i})
