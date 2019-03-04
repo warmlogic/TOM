@@ -162,7 +162,7 @@ class Visualization:
                 description.append(weighted_word[1])
             json_nodes.append({'name': f'topic{i}',
                                'frequency': self.topic_model.topic_frequency(i),
-                               'description': ', '.join(description),
+                               'description': f"Topic {i}: {', '.join(description)}",
                                'group': i})
         json_graph['nodes'] = json_nodes
         json_graph['links'] = json_links

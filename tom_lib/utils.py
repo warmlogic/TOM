@@ -57,18 +57,17 @@ def save_topic_number_metrics_data(path, range_, data, step=None, metric_type=''
             filo.write(f"{range_i}\t{data[idx]}\n")
 
 
-def save_topic_cloud(topic_model, file_path):
+def save_topic_cloud(topic_model, file_path, top_words=5):
     json_graph = {}
     json_nodes = []
     json_links = []
     for i in range(topic_model.nb_topics):
-            # include topic number in description
-        description = [f'{i}: ']
-        for weighted_word in topic_model.top_words(i, 5):
+        description = []
+        for weighted_word in topic_model.top_words(i, top_words):
             description.append(weighted_word[0])
-        json_nodes.append({'name': i,
+        json_nodes.append({'name': f'topic{i}',
                            'frequency': topic_model.topic_frequency(i),
-                           'description': ', '.join(description),
+                           'description': f"Topic {i}: {', '.join(description)}",
                            'group': i})
     json_graph['nodes'] = json_nodes
     json_graph['links'] = json_links
