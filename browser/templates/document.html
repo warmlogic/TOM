@@ -43,8 +43,9 @@
     <div id="header">
         <h1>Details about document {{ doc_id }}</h1>
         Title: {{ title }}
-        <br>
-        Author: {{ authors }} - Date: {{ year }} - Affiliation: {{ affiliation }}
+        Author: {{ authors }}
+        Date: {{ year }}
+        Affiliation: {{ affiliation }}
     </div>
     <div id="wrap">
         <div id="left_column">
@@ -80,9 +81,11 @@
     </div>
     <div id="wrap">
         <div id="left_column">
-            <h2>Full text for Document: {{ doc_id }}</h2>
+            <h2>Full text for document {{ doc_id }}</h2>
             <h3>Title: {{ title }}</h3>
-            <h4>Author: {{ authors }} - Date: {{ year }} - Affiliation: {{ affiliation }}</h4>
+            <h4>Author: {{ authors }}</h4>
+            <h4>Date: {{ year }}</h4>
+            <h4>Affiliation: {{ affiliation }}</h4>
             {{ full_text }}
         </div>
     </div>
