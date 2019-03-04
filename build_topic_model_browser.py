@@ -21,8 +21,10 @@ app = Flask(__name__, static_folder='browser/static', template_folder='browser/t
 # Parameters
 # language = 'english'
 language = None
-max_tf = 0.95
-min_tf = 5
+# max_relative_frequency = 0.8
+# min_absolute_frequency = 5
+max_relative_frequency = 1.0
+min_absolute_frequency = 1
 num_topics = 23
 vectorization = 'tfidf'
 n_gram = 1
@@ -34,8 +36,8 @@ corpus = Corpus(source_file_path=data_dir_processed / filename_all,
                 language=language,
                 vectorization=vectorization,
                 n_gram=n_gram,
-                max_relative_frequency=max_tf,
-                min_absolute_frequency=min_tf,
+                max_relative_frequency=max_relative_frequency,
+                min_absolute_frequency=min_absolute_frequency,
                 max_features=max_features,
                 sample=sample,
                 full_text_col='orig_text',
@@ -48,6 +50,12 @@ topic_model = NonNegativeMatrixFactorization(corpus=corpus)
 topic_model.infer_topics(num_topics=num_topics)
 topic_model.print_topics(num_words=10)
 
+top_words = 5
+topic_description = []
+for i in range(topic_model.nb_topics):
+    description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words)]
+    topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
+
 # Clean the data directory
 if os.path.exists('browser/static/data'):
     shutil.rmtree('browser/static/data')
@@ -59,9 +67,9 @@ utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_
 # Export details about topics
 for topic_id in range(topic_model.nb_topics):
     utils.save_word_distribution(topic_model.top_words(topic_id, 20),
-                                 'browser/static/data/word_distribution' + str(topic_id) + '.tsv')
+                                 f'browser/static/data/word_distribution{topic_id}.tsv')
     utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
-                                       'browser/static/data/affiliation_repartition' + str(topic_id) + '.tsv')
+                                       f'browser/static/data/affiliation_repartition{topic_id}.tsv')
 
     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
     max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
@@ -69,17 +77,19 @@ for topic_id in range(topic_model.nb_topics):
     evolution = []
     for i in range(min_year, max_year + 1):
         evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
-    utils.save_topic_evolution(evolution, 'browser/static/data/frequency' + str(topic_id) + '.tsv')
+    utils.save_topic_evolution(evolution, f'browser/static/data/frequency{topic_id}.tsv')
 
 # Export details about documents
 for doc_id in range(topic_model.corpus.size):
     utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
-                                  'browser/static/data/topic_distribution_d' + str(doc_id) + '.tsv')
+                                  f'browser/static/data/topic_distribution_d{doc_id}.tsv',
+                                  )
 
 # Export details about words
 for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
-                                  'browser/static/data/topic_distribution_w' + str(word_id) + '.tsv')
+                                  f'browser/static/data/topic_distribution_w{word_id}.tsv',
+                                  )
 
 # # Associate documents with topics
 # topic_associations = topic_model.documents_per_topic()
@@ -87,19 +97,19 @@ for word_id in range(len(topic_model.corpus.vocabulary)):
 # # Export per-topic author network
 # for topic_id in range(topic_model.nb_topics):
 #     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
-#                            'browser/static/data/author_network' + str(topic_id) + '.json')
+#                            f'browser/static/data/author_network{topic_id}.json')
 
 
 @app.route('/')
 def index():
     return render_template('index.html',
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size),
                            method=type(topic_model).__name__,
                            corpus_size=corpus.size,
                            vocabulary_size=len(corpus.vocabulary),
-                           max_tf=max_tf,
-                           min_tf=min_tf,
+                           max_relative_frequency=max_relative_frequency,
+                           min_absolute_frequency=min_absolute_frequency,
                            vectorization=vectorization,
                            num_topics=num_topics)
 
@@ -107,7 +117,7 @@ def index():
 @app.route('/topic_cloud.html')
 def topic_cloud():
     return render_template('topic_cloud.html',
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size))
 
 
@@ -124,7 +134,7 @@ def vocabulary():
             sub_vocabulary.append(word_list[l])
         splitted_vocabulary.append(sub_vocabulary)
     return render_template('vocabulary.html',
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size),
                            splitted_vocabulary=splitted_vocabulary,
                            vocabulary_size=len(word_list))
@@ -144,7 +154,7 @@ def topic_details(tid):
                            topic_id=tid,
                            frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
                            documents=documents,
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size))
 
 
@@ -164,7 +174,7 @@ def document_details(did):
     return render_template('document.html',
                            doc_id=did,
                            words=word_list[:21],
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size),
                            documents=documents,
                            title=corpus.title(int(did)).title(),
@@ -186,7 +196,7 @@ def word_details(wid):
     return render_template('word.html',
                            word_id=wid,
                            word=topic_model.corpus.word_for_id(int(wid)),
-                           topic_ids=range(topic_model.nb_topics),
+                           topic_ids=topic_description,
                            doc_ids=range(corpus.size),
                            documents=documents)
 
