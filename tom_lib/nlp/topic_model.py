@@ -332,16 +332,17 @@ class TopicModel(object):
 class LatentDirichletAllocation(TopicModel):
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
         self.nb_topics = num_topics
+        self.algorithm = algorithm
         lda_model = None
         topic_document = None
-        if algorithm == 'variational':
+        if self.algorithm == 'variational':
             lda_model = LDA(n_components=num_topics, learning_method='batch')
             topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
-        elif algorithm == 'gibbs':
+        elif self.algorithm == 'gibbs':
             lda_model = lda.LDA(n_topics=num_topics, n_iter=500)
             topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
         else:
-            raise ValueError(f"algorithm must be either 'variational' or 'gibbs', got {algorithm}")
+            raise ValueError(f"algorithm must be either 'variational' or 'gibbs', got {self.algorithm}")
         # store the model for future use
         self.model = lda_model
         self.topic_word_matrix = []
@@ -375,10 +376,11 @@ class LatentDirichletAllocation(TopicModel):
 
 class NonNegativeMatrixFactorization(TopicModel):
     def infer_topics(self, num_topics=10, beta_loss='frobenius', **kwargs):
-        if beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
-            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {beta_loss}")
         self.nb_topics = num_topics
-        nmf_model = NMF(n_components=num_topics, beta_loss=beta_loss)
+        self.beta_loss = beta_loss
+        if self.beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
+            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {self.beta_loss}")
+        nmf_model = NMF(n_components=num_topics, beta_loss=self.beta_loss)
         topic_document = nmf_model.fit_transform(self.corpus.sklearn_vector_space)
         # store the model for future use
         self.model = nmf_model

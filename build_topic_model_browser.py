@@ -82,12 +82,16 @@ print('vocabulary size:', len(corpus.vocabulary))
 
 # Initialize topic model
 if model_type == 'NMF':
-    topic_model = NonNegativeMatrixFactorization(corpus=corpus, beta_loss=nmf_beta_loss)
+    topic_model = NonNegativeMatrixFactorization(corpus=corpus)
 elif model_type == 'LDA':
-    topic_model = LatentDirichletAllocation(corpus=corpus, algorithm=lda_algorithm)
+    topic_model = LatentDirichletAllocation(corpus=corpus)
 
 # Infer topics
-topic_model.infer_topics(num_topics=num_topics)
+if model_type == 'NMF':
+    topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
+elif model_type == 'LDA':
+    topic_model.infer_topics(num_topics=num_topics, algorithm=lda_algorithm)
+
 topic_model.print_topics(num_words=10)
 
 topic_description = []
