@@ -27,6 +27,11 @@ docs_filename = config['tom'].get('docs_filename', '')
 if not docs_filename:
     raise ValueError(f'docs_filename not specified in {config_filepath}')
 
+source_filepath = data_dir / docs_filename
+# Ensure data exists
+if not source_filepath.exists():
+    raise OSError(f'Documents file does not exist: {source_filepath}')
+
 language = config['tom'].get('language', '')
 if not language:
     language = None
@@ -39,10 +44,6 @@ max_features = config['tom'].getint('max_features', 2000)
 sample = config['tom'].getfloat('sample', 1.0)
 top_words_description = config['tom'].getint('top_words_description', 5)
 top_words_cloud = config['tom'].getint('top_words_cloud', 5)
-
-source_filepath = data_dir / docs_filename
-if not source_filepath.exists():
-    raise OSError(f'Documents file does not exist: {source_filepath}')
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')

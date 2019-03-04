@@ -16,7 +16,7 @@ __email__ = "adrien.guille@univ-lyon2.fr"
 
 class Corpus:
     def __init__(self,
-                 source_file_path,
+                 source_filepath,
                  sep='\t',
                  language: str='english',
                  n_gram: int=1,
@@ -50,12 +50,12 @@ class Corpus:
 
         self.max_features = max_features
 
-        if isinstance(source_file_path, str) or isinstance(source_file_path, Path):
-            self._source_file_path = source_file_path
-            self.data_frame = pd.read_csv(source_file_path, sep=self._sep, encoding='utf-8')
-        elif isinstance(source_file_path, pd.DataFrame):
-            self._source_file_path = 'pd.DataFrame from memory'
-            self.data_frame = source_file_path.copy()
+        if isinstance(source_filepath, str) or isinstance(source_filepath, Path):
+            self._source_filepath = source_filepath
+            self.data_frame = pd.read_csv(source_filepath, sep=self._sep, encoding='utf-8')
+        elif isinstance(source_filepath, pd.DataFrame):
+            self._source_filepath = 'pd.DataFrame from memory'
+            self.data_frame = source_filepath.copy()
 
         if self._sample < 1.0:
             self.data_frame = self.data_frame.sample(frac=self._sample)
