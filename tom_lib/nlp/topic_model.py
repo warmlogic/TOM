@@ -68,9 +68,9 @@ class TopicModel(object):
                 )
                 tao_model = type(self)(tao_corpus)
                 if type(self).__name__ == 'NonNegativeMatrixFactorization':
-                    tao_model.infer_topics(num_topics=k, beta_loss=tao_model.beta_loss)
+                    tao_model.infer_topics(num_topics=k, beta_loss=self.beta_loss)
                 elif type(self).__name__ == 'LatentDirichletAllocation':
-                    tao_model.infer_topics(num_topics=k, algorithm=tao_model.algorithm)
+                    tao_model.infer_topics(num_topics=k, algorithm=self.algorithm)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
