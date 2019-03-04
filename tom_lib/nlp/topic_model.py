@@ -380,9 +380,11 @@ class LatentDirichletAllocation(TopicModel):
 
 
 class NonNegativeMatrixFactorization(TopicModel):
-    def infer_topics(self, num_topics=10, **kwargs):
+    def infer_topics(self, num_topics=10, beta_loss='frobenius', **kwargs):
+        if beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
+            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {beta_loss}")
         self.nb_topics = num_topics
-        nmf_model = NMF(n_components=num_topics)
+        nmf_model = NMF(n_components=num_topics, beta_loss=beta_loss)
         topic_document = nmf_model.fit_transform(self.corpus.sklearn_vector_space)
         # store the model for future use
         self.model = nmf_model
