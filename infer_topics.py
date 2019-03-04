@@ -5,7 +5,6 @@ from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
 import nltk
 
-
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
 
@@ -14,34 +13,73 @@ nltk.download('stopwords')
 
 # Load and prepare a corpus
 print('Load documents from CSV')
-corpus = Corpus(source_file_path='input/egc_lemmatized.csv',
-                language='french',  # language for stop words
-                vectorization='tfidf',  # 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
-                max_relative_frequency=0.8,  # ignore words which relative frequency is > than max_relative_frequency
-                min_absolute_frequency=4)  # ignore words which absolute frequency is < than min_absolute_frequency
+# ignore words which relative frequency is > than max_relative_frequency
+max_relative_frequency = 0.8
+# ignore words which absolute frequency is < than min_absolute_frequency
+min_absolute_frequency = 5
+# 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
+vectorization = 'tfidf'
+source_file_path = 'input/egc_lemmatized.csv'
+# language for stop words
+language = 'french'
+
+corpus = Corpus(source_file_path=source_file_path,
+                language=language,
+                vectorization=vectorization,
+                max_relative_frequency=max_relative_frequency,
+                min_absolute_frequency=min_absolute_frequency,
+                )
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
 
 # Instantiate a topic model
 topic_model = NonNegativeMatrixFactorization(corpus)
 
-# Estimate the optimal number of topics
+# # Estimate the optimal number of topics
 # print('Estimating the number of topics...')
 # viz = Visualization(topic_model)
-# viz.plot_greene_metric(min_num_topics=10,
-#                        max_num_topics=11,
-#                        tao=10, step=1,
-#                        top_n_words=10)
-# viz.plot_arun_metric(min_num_topics=5,
-#                      max_num_topics=30,
-#                      iterations=10)
-# viz.plot_brunet_metric(min_num_topics=5,
-#                        max_num_topics=30,
-#                        iterations=10)
+# min_num_topics = 11
+# max_num_topics = 21
+# step = 2
+# tao = 10
+# top_n_words = 10
+# iterations = 10
+# # train_size = 0.7
+# verbose = True
+# viz.plot_greene_metric(
+#     min_num_topics=min_num_topics,
+#     max_num_topics=max_num_topics,
+#     step=step,
+#     tao=tao,
+#     top_n_words=top_n_words,
+#     verbose=verbose,
+# )
+# viz.plot_arun_metric(
+#     min_num_topics=min_num_topics,
+#     max_num_topics=max_num_topics,
+#     step=step,
+#     iterations=iterations,
+#     verbose=verbose,
+# )
+# viz.plot_brunet_metric(
+#     min_num_topics=min_num_topics,
+#     max_num_topics=max_num_topics,
+#     step=step,
+#     iterations=iterations,
+#     verbose=verbose,
+# )
+# # viz.plot_perplexity_metric(
+# #     min_num_topics=min_num_topics,
+# #     max_num_topics=max_num_topics,
+# #     step=step,
+# #     train_size=train_size,
+# #     verbose=verbose,
+# # )
 
 # Infer topics
 print('Inferring topics...')
-topic_model.infer_topics(num_topics=15)
+num_topics = 15
+topic_model.infer_topics(num_topics=num_topics)
 # Save model on disk
 ut.save_topic_model(topic_model, 'NMF_EGC_15topics.pickle')
 # Load model from disk: topic_model = ut.load_topic_model('NMF_EGC_15topics.pickle')
