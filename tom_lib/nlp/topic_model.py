@@ -48,7 +48,10 @@ class TopicModel(object):
         for k in range(min_num_topics, max_num_topics + 1, step):
             if verbose:
                 print(f'Topics={k}')
-            self.infer_topics(k)
+            if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                self.infer_topics(num_topics=k, beta_loss=self.beta_loss)
+            elif type(self).__name__ == 'LatentDirichletAllocation':
+                self.infer_topics(num_topics=k, algorithm=self.algorithm)
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
@@ -64,7 +67,10 @@ class TopicModel(object):
                     sample=sample,
                 )
                 tao_model = type(self)(tao_corpus)
-                tao_model.infer_topics(k)
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                    tao_model.infer_topics(num_topics=k, beta_loss=tao_model.beta_loss)
+                elif type(self).__name__ == 'LatentDirichletAllocation':
+                    tao_model.infer_topics(num_topics=k, algorithm=tao_model.algorithm)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
@@ -91,7 +97,10 @@ class TopicModel(object):
             doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(doc_len)
             for i in range(min_num_topics, max_num_topics + 1, step):
-                self.infer_topics(i)
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                    self.infer_topics(num_topics=i, beta_loss=self.beta_loss)
+                elif type(self).__name__ == 'LatentDirichletAllocation':
+                    self.infer_topics(num_topics=i, algorithm=self.algorithm)
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
@@ -120,7 +129,10 @@ class TopicModel(object):
                 print(f'Topics={i}')
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
-                self.infer_topics(i)
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                    self.infer_topics(num_topics=i, beta_loss=self.beta_loss)
+                elif type(self).__name__ == 'LatentDirichletAllocation':
+                    self.infer_topics(num_topics=i, algorithm=self.algorithm)
                 for p in range(self.corpus.size):
                     for q in range(self.corpus.size):
                         if self.most_likely_topic_for_document(p) == self.most_likely_topic_for_document(q):
