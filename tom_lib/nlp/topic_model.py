@@ -56,7 +56,7 @@ class TopicModel(object):
             agreement_score_list = []
             for t in range(tao):
                 tao_corpus = Corpus(
-                    source_file_path=self.corpus.data_frame,
+                    source_filepath=self.corpus.data_frame,
                     sep=self.corpus._sep,
                     language=self.corpus._language,
                     n_gram=self.corpus._n_gram,
@@ -175,7 +175,7 @@ class TopicModel(object):
             print(f"Computing perplexity with algorithm='{algorithm}'")
             df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1 - train_size)
             corpus_train = Corpus(
-                source_file_path=df_train,
+                source_filepath=df_train,
                 sep=self.corpus._sep,
                 language=self.corpus._language,
                 n_gram=self.corpus._n_gram,

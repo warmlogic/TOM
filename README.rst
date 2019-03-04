@@ -89,11 +89,11 @@ documents and vectorize them using tf-idf with unigrams.
 
 ::
 
-    corpus = Corpus(source_file_path='input/raw_corpus.csv',
-                    language='french', 
-                    vectorization='tfidf', 
+    corpus = Corpus(source_filepath='input/raw_corpus.csv',
+                    language='french',
+                    vectorization='tfidf',
                     n_gram=1,
-                    max_relative_frequency=0.8, 
+                    max_relative_frequency=0.8,
                     min_absolute_frequency=4)
     print('corpus size:', corpus.size)
     print('vocabulary size:', len(corpus.vocabulary))
@@ -134,14 +134,14 @@ metrics for estimating the optimal number of topics.
 
     topic_model = NonNegativeMatrixFactorization(corpus)
     viz = Visualization(topic_model)
-    viz.plot_greene_metric(min_num_topics=5, 
-                           max_num_topics=50, 
-                           tao=10, step=1, 
+    viz.plot_greene_metric(min_num_topics=5,
+                           max_num_topics=50,
+                           tao=10, step=1,
                            top_n_words=10)
-    viz.plot_arun_metric(min_num_topics=5, 
-                         max_num_topics=50, 
+    viz.plot_arun_metric(min_num_topics=5,
+                         max_num_topics=50,
                          iterations=10)
-    viz.plot_brunet_metric(min_num_topics=5, 
+    viz.plot_brunet_metric(min_num_topics=5,
                            max_num_topics=50,
                            iterations=10)
 

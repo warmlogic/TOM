@@ -19,11 +19,11 @@ max_relative_frequency = 0.8
 min_absolute_frequency = 5
 # 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
 vectorization = 'tfidf'
-source_file_path = 'input/egc_lemmatized.csv'
+source_filepath = 'input/egc_lemmatized.csv'
 # language for stop words
 language = 'french'
 
-corpus = Corpus(source_file_path=source_file_path,
+corpus = Corpus(source_filepath=source_filepath,
                 language=language,
                 vectorization=vectorization,
                 max_relative_frequency=max_relative_frequency,

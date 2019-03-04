@@ -11,7 +11,7 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
     - tf-idf
 
 ### Topic modeling
-- Latent Dirichlet Allocation 
+- Latent Dirichlet Allocation
     - Standard variational Bayesian inference (Latent Dirichlet Allocation. Blei et al, 2003)
     - Online variational Bayesian inference (Online learning for Latent Dirichlet Allocation. Hoffman et al, 2010)
     - Collapsed Gibbs sampling (Finding scientific topics. Griffiths & Steyvers, 2004)
@@ -62,11 +62,11 @@ etc.
 The following code snippet shows how to load a corpus of French documents and vectorize them using tf-idf with unigrams.
 
 ```
-corpus = Corpus(source_file_path='input/raw_corpus.csv',
-                language='french', 
-                vectorization='tfidf', 
+corpus = Corpus(source_filepath='input/raw_corpus.csv',
+                language='french',
+                vectorization='tfidf',
                 n_gram=1,
-                max_relative_frequency=0.8, 
+                max_relative_frequency=0.8,
                 min_absolute_frequency=4)
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
@@ -75,7 +75,7 @@ print('Vector representation of document 0:\n', corpus.vector_for_document(0))
 
 ### Instantiate a topic model and infer topics
 
-It is possible to instantiate a NMF or LDA object then infer topics. 
+It is possible to instantiate a NMF or LDA object then infer topics.
 
 NMF:
 
@@ -102,14 +102,14 @@ Here we instantiate a NMF object, then generate plots with the three metrics for
 ```
 topic_model = NonNegativeMatrixFactorization(corpus)
 viz = Visualization(topic_model)
-viz.plot_greene_metric(min_num_topics=5, 
-                       max_num_topics=50, 
-                       tao=10, step=1, 
+viz.plot_greene_metric(min_num_topics=5,
+                       max_num_topics=50,
+                       tao=10, step=1,
                        top_n_words=10)
-viz.plot_arun_metric(min_num_topics=5, 
-                     max_num_topics=50, 
+viz.plot_arun_metric(min_num_topics=5,
+                     max_num_topics=50,
                      iterations=10)
-viz.plot_brunet_metric(min_num_topics=5, 
+viz.plot_brunet_metric(min_num_topics=5,
                        max_num_topics=50,
                        iterations=10)
 ```
