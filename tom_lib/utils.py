@@ -2,6 +2,8 @@
 import codecs
 import json
 import pickle
+import numpy as np
+from typing import List
 
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -25,36 +27,41 @@ def save_word_distribution(distribution, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('word\tweight\n')
         for weighted_word in distribution:
-            f.write(weighted_word[0] + '\t' + str(weighted_word[1]) + '\n')
+            f.write(f'{weighted_word[0]}\t{weighted_word[1]}\n')
 
 
-def save_topic_distribution(distribution, file_path):
+def save_topic_distribution(distribution, file_path, topic_description: List=None):
+    if topic_description:
+        if len(topic_description) != len(distribution):
+            topic_description = None
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('topic\tweight\n')
         for i in range(len(distribution)):
-            f.write('topic ' + str(i) + '\t' + str(distribution[i]) + '\n')
+            if topic_description:
+                f.write(f'{topic_description[i]}\t{distribution[i]}\n')
+            else:
+                f.write(f'Topic {i}\t{distribution[i]}\n')
 
 
 def save_topic_evolution(evolution, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('date\tfrequency\n')
         for date, frequency in evolution:
-            f.write(str(date) + '\t' + str(frequency) + '\n')
+            f.write(f'{date}\t{frequency}\n')
 
 
 def save_affiliation_repartition(affiliation_repartition, file_path):
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('affiliation\tcount\n')
         for (affiliation, count) in affiliation_repartition:
-            f.write(affiliation + '\t' + str(count) + '\n')
+            f.write(f'{affiliation}\t{count}\n')
 
 
 def save_topic_number_metrics_data(path, range_, data, step=None, metric_type=''):
-    import numpy as np
     with open(path, "w") as filo:
         filo.write(f"k\t{metric_type}_value\n")
         for idx, range_i in enumerate(np.arange(range_[0], range_[1] + 1, step)):
-            filo.write(f"{range_i}\t{data[idx]}\n")
+            filo.write(f'{range_i}\t{data[idx]}\n')
 
 
 def save_topic_cloud(topic_model, file_path, top_words=5):
