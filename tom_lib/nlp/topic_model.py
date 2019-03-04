@@ -49,9 +49,9 @@ class TopicModel(object):
         for k in range(min_num_topics, max_num_topics + 1, step):
             if verbose:
                 print(f'Topics={k}')
-            if type(self).__name__ == 'NonNegativeMatrixFactorization':
+            if isinstance(self, NonNegativeMatrixFactorization):
                 self.infer_topics(num_topics=k, beta_loss=beta_loss)
-            elif type(self).__name__ == 'LatentDirichletAllocation':
+            elif isinstance(self, LatentDirichletAllocation):
                 self.infer_topics(num_topics=k, algorithm=algorithm)
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
@@ -68,9 +68,9 @@ class TopicModel(object):
                     sample=sample,
                 )
                 tao_model = type(self)(tao_corpus)
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if isinstance(self, NonNegativeMatrixFactorization):
                     tao_model.infer_topics(num_topics=k, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif isinstance(self, LatentDirichletAllocation):
                     tao_model.infer_topics(num_topics=k, algorithm=algorithm)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
@@ -99,9 +99,9 @@ class TopicModel(object):
             doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(doc_len)
             for i in range(min_num_topics, max_num_topics + 1, step):
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if isinstance(self, NonNegativeMatrixFactorization):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif isinstance(self, LatentDirichletAllocation):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
@@ -132,9 +132,9 @@ class TopicModel(object):
                 print(f'Topics={i}')
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if isinstance(self, NonNegativeMatrixFactorization):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif isinstance(self, LatentDirichletAllocation):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 for p in range(self.corpus.size):
                     for q in range(self.corpus.size):
@@ -158,7 +158,7 @@ class TopicModel(object):
 
     def perplexity_metric(
         self, min_num_topics=10, step=5, max_num_topics=50,
-            train_size=0.7, verbose=True):
+            train_size=0.7, algorithm='variational', verbose=True):
         """
         Measures perplexity for LDA as computed by scikit-learn.
 
@@ -174,7 +174,6 @@ class TopicModel(object):
         train_perplexities = []
         test_perplexities = []
         if isinstance(self, LatentDirichletAllocation):
-            algorithm = 'variational'
             print(f"Computing perplexity with algorithm='{algorithm}'")
             df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1 - train_size)
             corpus_train = Corpus(
