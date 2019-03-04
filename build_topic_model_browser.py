@@ -37,7 +37,7 @@ if not language:
     language = None
 max_relative_frequency = config['tom'].getfloat('max_relative_frequency', 0.8)
 min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
-num_topics = config['tom'].getint('', 15)
+num_topics = config['tom'].getint('num_topics', 15)
 vectorization = config['tom'].get('vectorization', 'tfidf')
 n_gram = config['tom'].getint('n_gram', 1)
 max_features = config['tom'].getint('max_features', 2000)
