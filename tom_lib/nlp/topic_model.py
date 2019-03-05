@@ -271,6 +271,15 @@ class TopicModel(object):
                 yield (topic_idx,
                        tuple((doc_idx, self.document_topic_matrix[doc_idx, topic_idx]) for doc_idx in top_doc_idxs))
 
+    def top_documents(self, topic_id, num_docs):
+        vector = self.document_topic_matrix[:, topic_id]
+        cx = vector.tocoo()
+        weighted_docs = [()] * self.corpus.size
+        for doc_id, topic_id, weight in itertools.zip_longest(cx.row, cx.col, cx.data):
+            weighted_docs[doc_id] = (doc_id, weight)
+        weighted_docs.sort(key=lambda x: x[1], reverse=True)
+        return weighted_docs[:num_docs]
+
     def word_distribution_for_topic(self, topic_id):
         vector = self.topic_word_matrix[topic_id].toarray()
         return vector[0]
