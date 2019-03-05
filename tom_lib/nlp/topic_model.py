@@ -35,8 +35,10 @@ class TopicModel(object):
         """
         Higher is better.
 
-        Implements Greene metric to compute the optimal number of topics. Taken from How Many Topics?
+        Implements Greene metric to compute the optimal number of topics. Taken from: How Many Topics?
         Stability Analysis for Topic Models from Greene et al. 2014.
+        https://arxiv.org/abs/1404.4606
+
         :param step:
         :param min_num_topics: Minimum number of topics to test
         :param max_num_topics: Maximum number of topics to test
@@ -94,6 +96,8 @@ class TopicModel(object):
         Arun, R., V. Suresh, C. V. Madhavan, and M. N. Murthy
         On finding the natural number of topics with latent dirichlet allocation: Some observations.
         In PAKDD (2010), pp. 391–402.
+        https://doi.org/10.1007/978-3-642-13657-3_43
+
         :param min_num_topics: Minimum number of topics to test
         :param max_num_topics: Maximum number of topics to test
         :param iterations: Number of iterations per value of k
@@ -129,10 +133,14 @@ class TopicModel(object):
     def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
                       beta_loss='frobenius', algorithm='variational', verbose=True):
         """
+        Higher is better.
+
         Implements a consensus-based metric to estimate the optimal number of topics:
         Brunet, J.P., Tamayo, P., Golub, T.R., Mesirov, J.P.
         Metagenes and molecular pattern discovery using matrix factorization.
         Proc. National Academy of Sciences 101(12) (2004), pp. 4164–4169
+        https://dx.doi.org/10.1073%2Fpnas.0308531101
+
         :param min_num_topics:
         :param max_num_topics:
         :param iterations:
@@ -154,10 +162,6 @@ class TopicModel(object):
                     raise TypeError(f'Unsupported model type: {type(self).__name__}')
                 mlt = np.array([self.most_likely_topic_for_document(idx_d) for idx_d in range(self.corpus.size)])
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
-                # for p in range(self.corpus.size):
-                #     for q in range(self.corpus.size):
-                #         if mlt[p] == mlt[q]:
-                #             average_C[p, q] += float(1. / iterations)
 
             if verbose:
                 print('    Clustering...')
