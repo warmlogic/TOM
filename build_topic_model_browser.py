@@ -40,7 +40,12 @@ min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
 num_topics = config['tom'].getint('num_topics', 15)
 vectorization = config['tom'].get('vectorization', 'tfidf')
 n_gram = config['tom'].getint('n_gram', 1)
-max_features = config['tom'].getint('max_features', 2000)
+try:
+    max_features = config['tom'].getint('max_features', None)
+except ValueError:
+    max_features = config['tom'].get('max_features', None)
+if max_features == 'None':
+    max_features = None
 sample = config['tom'].getfloat('sample', 1.0)
 top_words_description = config['tom'].getint('top_words_description', 5)
 top_words_cloud = config['tom'].getint('top_words_cloud', 5)
