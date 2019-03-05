@@ -46,9 +46,9 @@ class TopicModel(object):
         # Build reference topic model
         # Generate tao topic models with tao samples of the corpus
 
-        for k in range(min_num_topics, max_num_topics + 1, step):
+        for idx, k in enumerate(range(min_num_topics, max_num_topics + 1, step)):
             if verbose:
-                print(f'Topics={k}')
+                print(f'Topics={k} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
             if isinstance(self, NonNegativeMatrixFactorization):
                 self.infer_topics(num_topics=k, beta_loss=beta_loss)
             elif isinstance(self, LatentDirichletAllocation):
@@ -76,7 +76,7 @@ class TopicModel(object):
                 agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
             if verbose:
-                print(f'\tStability={stability[-1]:.4f}')
+                print(f'    Stability={stability[-1]:.4f}')
         return stability
 
     def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
@@ -94,11 +94,13 @@ class TopicModel(object):
         kl_matrix = []
         for j in range(iterations):
             if verbose:
-                print(f'Iteration={j}')
+                print(f'Iteration: {j+1} of {iterations}')
             kl_list = []
             doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(doc_len)
-            for i in range(min_num_topics, max_num_topics + 1, step):
+            for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
+                if verbose:
+                    print(f'    Topics={i + 1} ({idx} of {len(range(min_num_topics, max_num_topics + 1, step))})')
                 if isinstance(self, NonNegativeMatrixFactorization):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif isinstance(self, LatentDirichletAllocation):
@@ -110,7 +112,7 @@ class TopicModel(object):
                 kl_list.append(tom_lib.stats.symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
             if verbose:
-                print(f'\tKL list={kl_list}')
+                print(f'    KL list={kl_list}')
         ouput = np.array(kl_matrix)
         return ouput.mean(axis=0)
 
@@ -127,11 +129,13 @@ class TopicModel(object):
         :return:
         """
         cophenetic_correlation = []
-        for i in range(min_num_topics, max_num_topics + 1, step):
+        for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
             if verbose:
-                print(f'Topics={i}')
+                print(f'Topics={i} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
+                if verbose:
+                    print(f'    Iteration: {j+1} of {iterations}')
                 if isinstance(self, NonNegativeMatrixFactorization):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif isinstance(self, LatentDirichletAllocation):
@@ -143,6 +147,8 @@ class TopicModel(object):
                 #         if mlt[p] == mlt[q]:
                 #             average_C[p, q] += float(1. / iterations)
 
+            if verbose:
+                print('    Clustering...')
             clustering = cluster.hierarchy.linkage(average_C, method='average')
             Z = cluster.hierarchy.dendrogram(clustering, orientation='right')
             index = Z['leaves']
@@ -191,9 +197,9 @@ class TopicModel(object):
             )
             tf_test = corpus_train.vectorizer.transform(df_test[corpus_train._text_col].tolist())
             lda_model = type(self)(corpus_train)
-            for i in range(min_num_topics, max_num_topics + 1, step):
+            for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
                 if verbose:
-                    print(f'Topics={i}')
+                    print(f'Topics={i} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
                 lda_model.infer_topics(i, algorithm=algorithm)
                 train_perplexities.append(lda_model.model.perplexity(
                     corpus_train.sklearn_vector_space))
