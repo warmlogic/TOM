@@ -32,20 +32,20 @@ source_filepath = data_dir / docs_filename
 if not source_filepath.exists():
     raise OSError(f'Documents file does not exist: {source_filepath}')
 
-language = config['tom'].get('language', '')
-if not language:
-    language = None
+language = config['tom'].get('language', None)
+assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
 max_relative_frequency = config['tom'].getfloat('max_relative_frequency', 0.8)
 min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
 num_topics = config['tom'].getint('num_topics', 15)
 vectorization = config['tom'].get('vectorization', 'tfidf')
 n_gram = config['tom'].getint('n_gram', 1)
-try:
-    max_features = config['tom'].getint('max_features', None)
-except ValueError:
-    max_features = config['tom'].get('max_features', None)
-if max_features == 'None':
-    max_features = None
+max_features = config['tom'].get('max_features', None)
+if isinstance(max_features, str):
+    if max_features.isnumeric():
+        max_features = int(max_features)
+    elif max_features == 'None':
+        max_features = None
+assert isinstance(max_features, int) or (max_features is None)
 sample = config['tom'].getfloat('sample', 1.0)
 top_words_description = config['tom'].getint('top_words_description', 5)
 top_words_cloud = config['tom'].getint('top_words_cloud', 5)
