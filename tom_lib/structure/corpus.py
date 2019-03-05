@@ -72,9 +72,9 @@ class Corpus:
         # get shape of df (previous code used count, which won't work if there are columns other than index 0 that have nans)
         self.size = self.data_frame.shape[0]
 
-        print(f'Number of unique words: {len(set(np.hstack(self.data_frame[self._text_col].str.split().values))):,}')
-        if self.max_features:
-            print(f'Reducing vocabulary to: {self.max_features:,}')
+        # print(f'Number of unique words: {len(set(np.hstack(self.data_frame[self._text_col].str.split().values))):,}')
+        # if self.max_features:
+        #     print(f'Reducing vocabulary to: {self.max_features:,}')
 
         stop_words = []
         if self._language:
