@@ -82,8 +82,8 @@ corpus = Corpus(source_filepath=source_filepath,
                 sample=sample,
                 full_text_col='orig_text',
                 )
-print('corpus size:', corpus.size)
-print('vocabulary size:', len(corpus.vocabulary))
+print(f'Corpus size: {corpus.size:,}')
+print(f'Vocabulary size: {len(corpus.vocabulary):,}')
 
 # Initialize topic model
 if model_type == 'NMF':
