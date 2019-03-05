@@ -51,10 +51,12 @@ class TopicModel(object):
         for idx, k in enumerate(range(min_num_topics, max_num_topics + 1, step)):
             if verbose:
                 print(f'Topics={k} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
-            if isinstance(self, NonNegativeMatrixFactorization):
+            if type(self).__name__ == 'NonNegativeMatrixFactorization':
                 self.infer_topics(num_topics=k, beta_loss=beta_loss)
-            elif isinstance(self, LatentDirichletAllocation):
+            elif type(self).__name__ == 'LatentDirichletAllocation':
                 self.infer_topics(num_topics=k, algorithm=algorithm)
+            else:
+                raise TypeError(f'Unsupported model type: {type(self).__name__}')
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
@@ -70,10 +72,12 @@ class TopicModel(object):
                     sample=sample,
                 )
                 tao_model = type(self)(tao_corpus)
-                if isinstance(self, NonNegativeMatrixFactorization):
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
                     tao_model.infer_topics(num_topics=k, beta_loss=beta_loss)
-                elif isinstance(self, LatentDirichletAllocation):
+                elif type(self).__name__ == 'LatentDirichletAllocation':
                     tao_model.infer_topics(num_topics=k, algorithm=algorithm)
+                else:
+                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
@@ -105,10 +109,12 @@ class TopicModel(object):
             for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
                 if verbose:
                     print(f'    Topics={i + 1} ({idx} of {len(range(min_num_topics, max_num_topics + 1, step))})')
-                if isinstance(self, NonNegativeMatrixFactorization):
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif isinstance(self, LatentDirichletAllocation):
+                elif type(self).__name__ == 'LatentDirichletAllocation':
                     self.infer_topics(num_topics=i, algorithm=algorithm)
+                else:
+                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
@@ -140,10 +146,12 @@ class TopicModel(object):
             for j in range(iterations):
                 if verbose:
                     print(f'    Iteration: {j+1} of {iterations}')
-                if isinstance(self, NonNegativeMatrixFactorization):
+                if type(self).__name__ == 'NonNegativeMatrixFactorization':
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif isinstance(self, LatentDirichletAllocation):
+                elif type(self).__name__ == 'LatentDirichletAllocation':
                     self.infer_topics(num_topics=i, algorithm=algorithm)
+                else:
+                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
                 mlt = np.array([self.most_likely_topic_for_document(idx_d) for idx_d in range(self.corpus.size)])
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
                 # for p in range(self.corpus.size):
@@ -185,7 +193,7 @@ class TopicModel(object):
         """
         train_perplexities = []
         test_perplexities = []
-        if isinstance(self, LatentDirichletAllocation):
+        if type(self).__name__ == 'LatentDirichletAllocation':
             print(f"Computing perplexity with algorithm='{algorithm}'")
             df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1 - train_size)
             corpus_train = Corpus(
