@@ -136,10 +136,12 @@ class TopicModel(object):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif isinstance(self, LatentDirichletAllocation):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
-                for p in range(self.corpus.size):
-                    for q in range(self.corpus.size):
-                        if self.most_likely_topic_for_document(p) == self.most_likely_topic_for_document(q):
-                            average_C[p, q] += float(1. / iterations)
+                mlt = np.array([self.most_likely_topic_for_document(i) for i in range(self.corpus.size)])
+                average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
+                # for p in range(self.corpus.size):
+                #     for q in range(self.corpus.size):
+                #         if mlt[p] == mlt[q]:
+                #             average_C[p, q] += float(1. / iterations)
 
             clustering = cluster.hierarchy.linkage(average_C, method='average')
             Z = cluster.hierarchy.dendrogram(clustering, orientation='right')
