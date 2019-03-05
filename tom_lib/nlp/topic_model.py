@@ -2,7 +2,7 @@
 import itertools
 from abc import ABCMeta, abstractmethod
 import numpy as np
-import tom_lib.stats
+from tom_lib.stats import symmetric_kl, agreement_score
 from scipy import spatial, cluster
 from scipy.sparse import coo_matrix
 from sklearn.decomposition import NMF, LatentDirichletAllocation as LDA
@@ -33,6 +33,8 @@ class TopicModel(object):
     def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10,
                       sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
         """
+        Higher is better.
+
         Implements Greene metric to compute the optimal number of topics. Taken from How Many Topics?
         Stability Analysis for Topic Models from Greene et al. 2014.
         :param step:
@@ -73,7 +75,7 @@ class TopicModel(object):
                 elif isinstance(self, LatentDirichletAllocation):
                     tao_model.infer_topics(num_topics=k, algorithm=algorithm)
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
-                agreement_score_list.append(tom_lib.stats.agreement_score(reference_rank, tao_rank))
+                agreement_score_list.append(agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
             if verbose:
                 print(f'    Stability={stability[-1]:.4f}')
@@ -82,6 +84,8 @@ class TopicModel(object):
     def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
                     beta_loss='frobenius', algorithm='variational', verbose=True):
         """
+        Lower is better.
+
         Implements Arun metric to estimate the optimal number of topics:
         Arun, R., V. Suresh, C. V. Madhavan, and M. N. Murthy
         On finding the natural number of topics with latent dirichlet allocation: Some observations.
@@ -109,7 +113,7 @@ class TopicModel(object):
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
                 c_m2 /= norm
-                kl_list.append(tom_lib.stats.symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
+                kl_list.append(symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
             if verbose:
                 print(f'    KL list={kl_list}')
@@ -140,7 +144,7 @@ class TopicModel(object):
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif isinstance(self, LatentDirichletAllocation):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
-                mlt = np.array([self.most_likely_topic_for_document(i) for i in range(self.corpus.size)])
+                mlt = np.array([self.most_likely_topic_for_document(idx_d) for idx_d in range(self.corpus.size)])
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
                 # for p in range(self.corpus.size):
                 #     for q in range(self.corpus.size):
