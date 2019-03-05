@@ -1,14 +1,14 @@
 # coding: utf-8
 # import numpy
 import numpy as np
-import scipy.stats as stats
+from scipy.stats import entropy
 
 __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
 
 
 def symmetric_kl(distrib_p, distrib_q):
-    return np.sum([stats.entropy(distrib_p, distrib_q), stats.entropy(distrib_p, distrib_q)])
+    return np.sum([entropy(distrib_p, distrib_q), entropy(distrib_p, distrib_q)])
 
 
 def myjaccard(r_i, r_j):
@@ -16,7 +16,7 @@ def myjaccard(r_i, r_j):
 
 
 def average_jaccard(r_i, r_j):
-    if not r_j or not r_j:
+    if not r_i or not r_j:
         raise Exception("Ranked lists should have at least one element.")
     if len(r_i) != len(r_j):
         raise Exception("Both ranked term list should have the same dimension.")
