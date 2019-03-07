@@ -58,13 +58,17 @@ class Visualization:
         plt.xlabel('word')
         plt.savefig(file_path)
 
-    def plot_greene_metric(self, min_num_topics=10, max_num_topics=20, tao=10, step=5, top_n_words=10, verbose=True):
+    def plot_greene_metric(self, min_num_topics=10, max_num_topics=20, tao=10, step=5, top_n_words=10,
+                           sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
         greene_stability = self.topic_model.greene_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
             step=step,
             top_n_words=top_n_words,
             tao=tao,
+            sample=sample,
+            beta_loss=beta_loss,
+            algorithm=algorithm,
             verbose=verbose,
         )
         plt.clf()
@@ -80,12 +84,15 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=greene_stability, step=step, metric_type='greene')
 
-    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10, verbose=True):
+    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10,
+                         beta_loss='frobenius', algorithm='variational', verbose=True):
         symmetric_kl_divergence = self.topic_model.arun_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
             step=step,
             iterations=iterations,
+            beta_loss=beta_loss,
+            algorithm=algorithm,
             verbose=verbose,
         )
         plt.clf()
@@ -101,12 +108,15 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=symmetric_kl_divergence, step=step, metric_type='arun')
 
-    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10, verbose=True):
+    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10,
+                           beta_loss='frobenius', algorithm='variational', verbose=True):
         cophenetic_correlation = self.topic_model.brunet_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
             step=step,
             iterations=iterations,
+            beta_loss=beta_loss,
+            algorithm=algorithm,
             verbose=verbose,
         )
         plt.clf()
@@ -122,12 +132,14 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=cophenetic_correlation, step=step, metric_type='brunet')
 
-    def plot_perplexity_metric(self, min_num_topics=10, max_num_topics=20, step=5, train_size=0.7, verbose=True):
+    def plot_perplexity_metric(self, min_num_topics=10, max_num_topics=20, step=5, train_size=0.7,
+                               algorithm='variational', verbose=True):
         train_perplexities, test_perplexities = self.topic_model.perplexity_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
             step=step,
             train_size=train_size,
+            algorithm=algorithm,
             verbose=verbose,
         )
         if (len(train_perplexities) > 0) and (len(test_perplexities) > 0):
