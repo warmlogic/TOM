@@ -19,11 +19,12 @@ except OSError as e:
     print(f'Config file {config_filepath} not found. Did you set it up?')
 
 # Read parameters
-data_dir = config['tom'].get('data_dir', '', vars=os.environ)
+webserver_section = 'webserver'
+data_dir = config[webserver_section].get('data_dir', '', vars=os.environ)
 if not data_dir:
     data_dir = '.'
 data_dir = Path(data_dir)
-docs_filename = config['tom'].get('docs_filename', '')
+docs_filename = config[webserver_section].get('docs_filename', '')
 if not docs_filename:
     raise ValueError(f'docs_filename not specified in {config_filepath}')
 
@@ -32,26 +33,26 @@ source_filepath = data_dir / docs_filename
 if not source_filepath.exists():
     raise OSError(f'Documents file does not exist: {source_filepath}')
 
-language = config['tom'].get('language', None)
+language = config[webserver_section].get('language', None)
 assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
-max_relative_frequency = config['tom'].getfloat('max_relative_frequency', 0.8)
-min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
-num_topics = config['tom'].getint('num_topics', 15)
-vectorization = config['tom'].get('vectorization', 'tfidf')
-n_gram = config['tom'].getint('n_gram', 1)
-max_features = config['tom'].get('max_features', None)
+max_relative_frequency = config[webserver_section].getfloat('max_relative_frequency', 0.8)
+min_absolute_frequency = config[webserver_section].getint('min_absolute_frequency', 5)
+num_topics = config[webserver_section].getint('num_topics', 15)
+vectorization = config[webserver_section].get('vectorization', 'tfidf')
+n_gram = config[webserver_section].getint('n_gram', 1)
+max_features = config[webserver_section].get('max_features', None)
 if isinstance(max_features, str):
     if max_features.isnumeric():
         max_features = int(max_features)
     elif max_features == 'None':
         max_features = None
 assert isinstance(max_features, int) or (max_features is None)
-sample = config['tom'].getfloat('sample', 1.0)
-top_words_description = config['tom'].getint('top_words_description', 5)
-top_words_cloud = config['tom'].getint('top_words_cloud', 5)
-model_type = config['tom'].get('model_type', 'NMF')
-nmf_beta_loss = config['tom'].get('nmf_beta_loss', 'frobenius')
-lda_algorithm = config['tom'].get('lda_algorithm', 'variational')
+sample = config[webserver_section].getfloat('sample', 1.0)
+top_words_description = config[webserver_section].getint('top_words_description', 5)
+top_words_cloud = config[webserver_section].getint('top_words_cloud', 5)
+model_type = config[webserver_section].get('model_type', 'NMF')
+nmf_beta_loss = config[webserver_section].get('nmf_beta_loss', 'frobenius')
+lda_algorithm = config[webserver_section].get('lda_algorithm', 'variational')
 
 if model_type not in ['NMF', 'LDA']:
     raise ValueError('model_type must be NMF or LDA')
