@@ -7,6 +7,9 @@ import tom_lib.utils as utils
 from flask import Flask, render_template, request, send_from_directory
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
+import logging
+logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
+logger = logging.getLogger(__name__)
 
 __author__ = "Adrien Guille"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -16,7 +19,7 @@ config = configparser.ConfigParser(allow_no_value=True)
 try:
     config.read(config_filepath)
 except OSError as e:
-    print(f'Config file {config_filepath} not found. Did you set it up?')
+    logger.error(f'Config file {config_filepath} not found. Did you set it up?')
 
 # Read parameters
 webserver_section = 'webserver'
@@ -59,10 +62,14 @@ if model_type not in ['NMF', 'LDA']:
 
 if model_type == 'NMF':
     if nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
-        raise ValueError(f"beta_loss must be frobenius, kullback-leibler, or itakura-saito, got {nmf_beta_loss}")
+        raise ValueError(f"For NMF, 'beta_loss' must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got '{nmf_beta_loss}'")
+    if vectorization == 'tf':
+        raise ValueError(f"for NMF, 'vectorization' should be 'tfidf', got '{vectorization}'")
 elif model_type == 'LDA':
     if lda_algorithm not in ['variational', 'gibbs']:
-        raise ValueError(f'lda_algorithm must be variational or gibbs, got {lda_algorithm}')
+        raise ValueError(f"For LDA, 'lda_algorithm' must be 'variational' or 'gibbs', got '{lda_algorithm}'")
+    if vectorization == 'tfidf':
+        raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
 
 # Flask Web server
 app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
@@ -72,7 +79,8 @@ if os.path.exists('browser/static/data'):
     shutil.rmtree('browser/static/data')
 os.makedirs('browser/static/data')
 
-# Load corpus
+# Load and prepare a corpus
+logger.info(f'Loading documents: {source_filepath}')
 corpus = Corpus(source_filepath=source_filepath,
                 language=language,
                 vectorization=vectorization,
@@ -83,8 +91,8 @@ corpus = Corpus(source_filepath=source_filepath,
                 sample=sample,
                 full_text_col='orig_text',
                 )
-print(f'Corpus size: {corpus.size:,}')
-print(f'Vocabulary size: {len(corpus.vocabulary):,}')
+logger.info(f'Corpus size: {corpus.size:,}')
+logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')
 
 # Initialize topic model
 if model_type == 'NMF':
@@ -93,6 +101,7 @@ elif model_type == 'LDA':
     topic_model = LatentDirichletAllocation(corpus=corpus)
 
 # Infer topics
+logger.info('Inferring topics')
 if model_type == 'NMF':
     topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
 elif model_type == 'LDA':
@@ -106,9 +115,11 @@ for i in range(topic_model.nb_topics):
     topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
 # Export topic cloud
+logger.info('Saving topic cloud')
 utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=top_words_cloud)
 
 # Export details about topics
+logger.info('Saving topic details')
 for topic_id in range(topic_model.nb_topics):
     utils.save_word_distribution(topic_model.top_words(topic_id, 20),
                                  f'browser/static/data/word_distribution{topic_id}.tsv')
@@ -124,6 +135,7 @@ for topic_id in range(topic_model.nb_topics):
     utils.save_topic_evolution(evolution, f'browser/static/data/frequency{topic_id}.tsv')
 
 # Export details about documents
+logger.info('Saving document details')
 for doc_id in range(topic_model.corpus.size):
     utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
                                   f'browser/static/data/topic_distribution_d{doc_id}.tsv',
@@ -131,6 +143,7 @@ for doc_id in range(topic_model.corpus.size):
                                   )
 
 # Export details about words
+logger.info('Saving word details')
 for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
                                   f'browser/static/data/topic_distribution_w{word_id}.tsv',
@@ -141,6 +154,7 @@ for word_id in range(len(topic_model.corpus.vocabulary)):
 # topic_associations = topic_model.documents_per_topic()
 
 # # Export per-topic author network
+# logger.info('Saving author network details')
 # for topic_id in range(topic_model.nb_topics):
 #     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
 #                            f'browser/static/data/author_network{topic_id}.json')

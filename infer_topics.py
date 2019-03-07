@@ -8,6 +8,9 @@ from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirich
 from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
 # import nltk
+import logging
+logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
+logger = logging.getLogger(__name__)
 
 __author__ = "Adrien Guille, Pavel Soriano"
 __email__ = "adrien.guille@univ-lyon2.fr"
@@ -20,7 +23,7 @@ config = configparser.ConfigParser(allow_no_value=True)
 try:
     config.read(config_filepath)
 except OSError as e:
-    print(f'Config file {config_filepath} not found. Did you set it up?')
+    logger.error(f'Config file {config_filepath} not found. Did you set it up?')
 
 # Read parameters
 webserver_section = 'webserver'
@@ -78,14 +81,17 @@ if model_type not in ['NMF', 'LDA']:
 
 if model_type == 'NMF':
     if nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
-        raise ValueError(f"beta_loss must be frobenius, kullback-leibler, or itakura-saito, got {nmf_beta_loss}")
+        raise ValueError(f"For NMF, 'beta_loss' must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got '{nmf_beta_loss}'")
+    if vectorization == 'tf':
+        raise ValueError(f"for NMF, 'vectorization' should be 'tfidf', got '{vectorization}'")
 elif model_type == 'LDA':
     if lda_algorithm not in ['variational', 'gibbs']:
-        raise ValueError(f'lda_algorithm must be variational or gibbs, got {lda_algorithm}')
+        raise ValueError(f"For LDA, 'lda_algorithm' must be 'variational' or 'gibbs', got '{lda_algorithm}'")
+    if vectorization == 'tfidf':
+        raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
 
 # Load and prepare a corpus
-print(f'Load documents: {source_filepath}')
-
+logger.info(f'Loading documents: {source_filepath}')
 corpus = Corpus(source_filepath=source_filepath,
                 language=language,
                 vectorization=vectorization,
@@ -96,8 +102,8 @@ corpus = Corpus(source_filepath=source_filepath,
                 sample=sample,
                 full_text_col='orig_text',
                 )
-print(f'corpus size: {corpus.size:,}')
-print(f'vocabulary size: {len(corpus.vocabulary):,}')
+logger.info(f'Corpus size: {corpus.size:,}')
+logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')
 
 # Initialize topic model
 if model_type == 'NMF':
@@ -106,10 +112,10 @@ elif model_type == 'LDA':
     topic_model = LatentDirichletAllocation(corpus=corpus)
 
 # Estimate the optimal number of topics
-print('Estimating the number of topics...')
+logger.info('Estimating the number of topics to choose. This could take a while...')
 viz = Visualization(topic_model)
-print(f'Total number of topics to assess: {len(np.arange(min_num_topics, max_num_topics + 1, step))}')
-print(f'Topic numbers: {np.arange(min_num_topics, max_num_topics + 1, step)}')
+logger.info(f'Total number of topics to assess: {len(np.arange(min_num_topics, max_num_topics + 1, step))}')
+logger.info(f'Topic numbers: {np.arange(min_num_topics, max_num_topics + 1, step)}')
 
 viz.plot_greene_metric(
     min_num_topics=min_num_topics,
@@ -146,16 +152,16 @@ viz.plot_brunet_metric(
 # )
 
 # Infer topics
-print('Inferring topics...')
+logger.info('Inferring topics')
 topic_model.infer_topics(num_topics=num_topics)
 
 # Save model on disk
 topic_model_filepath = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}topics.pickle'
-print(f'Saving topic model: {topic_model_filepath}')
+logger.info(f'Saving topic model: {topic_model_filepath}')
 ut.save_topic_model(topic_model, topic_model_filepath)
 
 # # Load model from disk:
-# print(f'Loading topic model: {topic_model_filepath}')
+# logger.info(f'Loading topic model: {topic_model_filepath}')
 # topic_model = ut.load_topic_model(topic_model_filepath)
 
 # Print results
