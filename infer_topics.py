@@ -117,6 +117,7 @@ viz = Visualization(topic_model)
 logger.info(f'Total number of topics to assess: {len(np.arange(min_num_topics, max_num_topics + 1, step))}')
 logger.info(f'Topic numbers: {np.arange(min_num_topics, max_num_topics + 1, step)}')
 
+logger.info('Assessing Greene metric')
 viz.plot_greene_metric(
     min_num_topics=min_num_topics,
     max_num_topics=max_num_topics,
@@ -127,6 +128,7 @@ viz.plot_greene_metric(
     verbose=verbose,
 )
 
+logger.info('Assessing Arun metric')
 viz.plot_arun_metric(
     min_num_topics=min_num_topics,
     max_num_topics=max_num_topics,
@@ -135,6 +137,7 @@ viz.plot_arun_metric(
     verbose=verbose,
 )
 
+logger.info('Assessing Brunet metric')
 viz.plot_brunet_metric(
     min_num_topics=min_num_topics,
     max_num_topics=max_num_topics,
@@ -143,6 +146,7 @@ viz.plot_brunet_metric(
     verbose=verbose,
 )
 
+# logger.info('Assessing perplexity metric')
 # viz.plot_perplexity_metric(
 #     min_num_topics=min_num_topics,
 #     max_num_topics=max_num_topics,
