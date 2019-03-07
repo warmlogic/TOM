@@ -84,7 +84,7 @@ elif model_type == 'LDA':
         raise ValueError(f'lda_algorithm must be variational or gibbs, got {lda_algorithm}')
 
 # Load and prepare a corpus
-print('Load documents from CSV')
+print(f'Load documents: {source_filepath}')
 
 corpus = Corpus(source_filepath=source_filepath,
                 language=language,
@@ -148,10 +148,15 @@ viz.plot_brunet_metric(
 # Infer topics
 print('Inferring topics...')
 topic_model.infer_topics(num_topics=num_topics)
+
 # Save model on disk
 topic_model_filepath = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}topics.pickle'
+print(f'Saving topic model: {topic_model_filepath}')
 ut.save_topic_model(topic_model, topic_model_filepath)
-# Load model from disk: topic_model = ut.load_topic_model(topic_model_filepath)
+
+# # Load model from disk:
+# print(f'Loading topic model: {topic_model_filepath}')
+# topic_model = ut.load_topic_model(topic_model_filepath)
 
 # Print results
 print('\nTopics:')
