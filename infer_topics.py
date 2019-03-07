@@ -23,11 +23,12 @@ except OSError as e:
     print(f'Config file {config_filepath} not found. Did you set it up?')
 
 # Read parameters
-data_dir = config['tom'].get('data_dir', '', vars=os.environ)
+webserver_section = 'webserver'
+data_dir = config[webserver_section].get('data_dir', '', vars=os.environ)
 if not data_dir:
     data_dir = '.'
 data_dir = Path(data_dir)
-docs_filename = config['tom'].get('docs_filename', '')
+docs_filename = config[webserver_section].get('docs_filename', '')
 if not docs_filename:
     raise ValueError(f'docs_filename not specified in {config_filepath}')
 
@@ -36,29 +37,41 @@ source_filepath = data_dir / docs_filename
 if not source_filepath.exists():
     raise OSError(f'Documents file does not exist: {source_filepath}')
 
-language = config['tom'].get('language', None)
+language = config[webserver_section].get('language', None)
 assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
 # ignore words which relative frequency is > than max_relative_frequency
-max_relative_frequency = config['tom'].getfloat('max_relative_frequency', 0.8)
+max_relative_frequency = config[webserver_section].getfloat('max_relative_frequency', 0.8)
 # ignore words which absolute frequency is < than min_absolute_frequency
-min_absolute_frequency = config['tom'].getint('min_absolute_frequency', 5)
-num_topics = config['tom'].getint('num_topics', 15)
+min_absolute_frequency = config[webserver_section].getint('min_absolute_frequency', 5)
+num_topics = config[webserver_section].getint('num_topics', 15)
 # 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
-vectorization = config['tom'].get('vectorization', 'tfidf')
-n_gram = config['tom'].getint('n_gram', 1)
-max_features = config['tom'].get('max_features', None)
+vectorization = config[webserver_section].get('vectorization', 'tfidf')
+n_gram = config[webserver_section].getint('n_gram', 1)
+max_features = config[webserver_section].get('max_features', None)
 if isinstance(max_features, str):
     if max_features.isnumeric():
         max_features = int(max_features)
     elif max_features == 'None':
         max_features = None
 assert isinstance(max_features, int) or (max_features is None)
-sample = config['tom'].getfloat('sample', 1.0)
-top_words_description = config['tom'].getint('top_words_description', 5)
-top_words_cloud = config['tom'].getint('top_words_cloud', 5)
-model_type = config['tom'].get('model_type', 'NMF')
-nmf_beta_loss = config['tom'].get('nmf_beta_loss', 'frobenius')
-lda_algorithm = config['tom'].get('lda_algorithm', 'variational')
+sample = config[webserver_section].getfloat('sample', 1.0)
+top_words_description = config[webserver_section].getint('top_words_description', 5)
+top_words_cloud = config[webserver_section].getint('top_words_cloud', 5)
+model_type = config[webserver_section].get('model_type', 'NMF')
+nmf_beta_loss = config[webserver_section].get('nmf_beta_loss', 'frobenius')
+lda_algorithm = config[webserver_section].get('lda_algorithm', 'variational')
+
+# read assessment config parameters
+assess_section = 'assess'
+min_num_topics = config[assess_section].getint('min_num_topics', 11)
+max_num_topics = config[assess_section].getint('max_num_topics', 49)
+step = config[assess_section].getint('step', 2)
+greene_tao = config[assess_section].getint('greene_tao', 10)
+greene_top_n_words = config[assess_section].getint('greene_top_n_words', 10)
+greene_sample = config[assess_section].getfloat('greene_sample', 0.8)
+iterations = config[assess_section].getint('iterations', 10)
+# perplexity_train_size = config[assess_section].getfloat('perplexity_train_size', 0.7)
+verbose = config[assess_section].getboolean('verbose', )
 
 if model_type not in ['NMF', 'LDA']:
     raise ValueError('model_type must be NMF or LDA')
@@ -95,16 +108,6 @@ elif model_type == 'LDA':
 # Estimate the optimal number of topics
 print('Estimating the number of topics...')
 viz = Visualization(topic_model)
-min_num_topics = 11
-max_num_topics = 49
-step = 2
-greene_tao = 10
-greene_top_n_words = 10
-greene_sample = 0.8
-iterations = 10
-# perplexity_train_size = 0.7
-verbose = True
-
 print(f'Total number of topics to assess: {len(np.arange(min_num_topics, max_num_topics + 1, step))}')
 print(f'Topic numbers: {np.arange(min_num_topics, max_num_topics + 1, step)}')
 
