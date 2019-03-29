@@ -11,9 +11,6 @@ import logging
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
 
-__author__ = "Adrien Guille"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 config_filepath = 'config.ini'
 config = configparser.ConfigParser(allow_no_value=True)
 try:

@@ -2,9 +2,6 @@
 import networkx as nx
 from networkx.readwrite import json_graph
 
-__author__ = "Adrien Guille"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 class AuthorTopicGraph:
 

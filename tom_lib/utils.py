@@ -5,9 +5,6 @@ import pickle
 import numpy as np
 from typing import List
 
-__author__ = "Adrien Guille, Pavel Soriano"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 def print_matrix(matrix):
     n_r = len(matrix[:, 0])

@@ -10,9 +10,6 @@ import numpy as np
 import json
 from pathlib import Path
 
-__author__ = "Adrien Guille, Pavel Soriano"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 class Visualization:
 

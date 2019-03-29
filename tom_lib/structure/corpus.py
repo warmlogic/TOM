@@ -10,9 +10,6 @@ from sklearn.preprocessing import normalize
 # import networkx as nx
 # from networkx.readwrite import json_graph
 
-__author__ = "Adrien Guille, Pavel Soriano"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 class Corpus:
     def __init__(self,

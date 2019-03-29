@@ -3,9 +3,6 @@
 import numpy as np
 from scipy.stats import entropy
 
-__author__ = "Adrien Guille"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 def symmetric_kl(distrib_p, distrib_q):
     return np.sum([entropy(distrib_p, distrib_q), entropy(distrib_p, distrib_q)])

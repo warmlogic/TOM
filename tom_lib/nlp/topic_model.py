@@ -11,9 +11,6 @@ import lda
 
 from tom_lib.structure.corpus import Corpus
 
-__author__ = "Adrien Guille, Pavel Soriano"
-__email__ = "adrien.guille@univ-lyon2.fr"
-
 
 class TopicModel(object):
     __metaclass__ = ABCMeta
