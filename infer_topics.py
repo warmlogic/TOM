@@ -2,7 +2,6 @@
 import configparser
 from pathlib import Path
 import os
-import numpy as np
 import tom_lib.utils as ut
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
@@ -11,9 +10,6 @@ from tom_lib.visualization.visualization import Visualization
 import logging
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
-
-__author__ = "Adrien Guille, Pavel Soriano"
-__email__ = "adrien.guille@univ-lyon2.fr"
 
 # # Download stopwords from NLTK
 # nltk.download('stopwords')
@@ -26,12 +22,12 @@ except OSError as e:
     logger.error(f'Config file {config_filepath} not found. Did you set it up?')
 
 # Read parameters
-webserver_section = 'webserver'
-data_dir = config[webserver_section].get('data_dir', '', vars=os.environ)
+infer_section = 'infer'
+data_dir = config[infer_section].get('data_dir', '', vars=os.environ)
 if not data_dir:
     data_dir = '.'
 data_dir = Path(data_dir)
-docs_filename = config[webserver_section].get('docs_filename', '')
+docs_filename = config[infer_section].get('docs_filename', '')
 if not docs_filename:
     raise ValueError(f'docs_filename not specified in {config_filepath}')
 
@@ -40,41 +36,38 @@ source_filepath = data_dir / docs_filename
 if not source_filepath.exists():
     raise OSError(f'Documents file does not exist: {source_filepath}')
 
-language = config[webserver_section].get('language', None)
+# read data config parameters
+language = config[infer_section].get('language', None)
 assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
+model_type = config[infer_section].get('model_type', 'NMF')
+nmf_beta_loss = config[infer_section].get('nmf_beta_loss', 'frobenius')
+lda_algorithm = config[infer_section].get('lda_algorithm', 'variational')
 # ignore words which relative frequency is > than max_relative_frequency
-max_relative_frequency = config[webserver_section].getfloat('max_relative_frequency', 0.8)
+max_relative_frequency = config[infer_section].getfloat('max_relative_frequency', 0.8)
 # ignore words which absolute frequency is < than min_absolute_frequency
-min_absolute_frequency = config[webserver_section].getint('min_absolute_frequency', 5)
-num_topics = config[webserver_section].getint('num_topics', 15)
+min_absolute_frequency = config[infer_section].getint('min_absolute_frequency', 5)
 # 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
-vectorization = config[webserver_section].get('vectorization', 'tfidf')
-n_gram = config[webserver_section].getint('n_gram', 1)
-max_features = config[webserver_section].get('max_features', None)
+vectorization = config[infer_section].get('vectorization', 'tfidf')
+n_gram = config[infer_section].getint('n_gram', 1)
+max_features = config[infer_section].get('max_features', None)
 if isinstance(max_features, str):
     if max_features.isnumeric():
         max_features = int(max_features)
     elif max_features == 'None':
         max_features = None
 assert isinstance(max_features, int) or (max_features is None)
-sample = config[webserver_section].getfloat('sample', 1.0)
-top_words_description = config[webserver_section].getint('top_words_description', 5)
-top_words_cloud = config[webserver_section].getint('top_words_cloud', 5)
-model_type = config[webserver_section].get('model_type', 'NMF')
-nmf_beta_loss = config[webserver_section].get('nmf_beta_loss', 'frobenius')
-lda_algorithm = config[webserver_section].get('lda_algorithm', 'variational')
+sample = config[infer_section].getfloat('sample', 1.0)
 
 # read assessment config parameters
-assess_section = 'assess'
-min_num_topics = config[assess_section].getint('min_num_topics', 11)
-max_num_topics = config[assess_section].getint('max_num_topics', 49)
-step = config[assess_section].getint('step', 2)
-greene_tao = config[assess_section].getint('greene_tao', 10)
-greene_top_n_words = config[assess_section].getint('greene_top_n_words', 10)
-greene_sample = config[assess_section].getfloat('greene_sample', 0.8)
-iterations = config[assess_section].getint('iterations', 10)
-# perplexity_train_size = config[assess_section].getfloat('perplexity_train_size', 0.7)
-verbose = config[assess_section].getboolean('verbose', )
+min_num_topics = config[infer_section].getint('min_num_topics', 11)
+max_num_topics = config[infer_section].getint('max_num_topics', 49)
+step = config[infer_section].getint('step', 2)
+greene_tao = config[infer_section].getint('greene_tao', 10)
+greene_top_n_words = config[infer_section].getint('greene_top_n_words', 10)
+greene_sample = config[infer_section].getfloat('greene_sample', 0.8)
+iterations = config[infer_section].getint('iterations', 10)
+# perplexity_train_size = config[infer_section].getfloat('perplexity_train_size', 0.7)
+verbose = config[infer_section].getboolean('verbose', )
 
 if model_type not in ['NMF', 'LDA']:
     raise ValueError('model_type must be NMF or LDA')
@@ -105,17 +98,42 @@ corpus = Corpus(source_filepath=source_filepath,
 logger.info(f'Corpus size: {corpus.size:,}')
 logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')
 
-# Initialize topic model
-if model_type == 'NMF':
-    topic_model = NonNegativeMatrixFactorization(corpus=corpus)
-elif model_type == 'LDA':
-    topic_model = LatentDirichletAllocation(corpus=corpus)
+num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
+logger.info(f'Total number of topics to infer: {len(num_topics_infer)}')
+logger.info(f'Topic numbers: {list(num_topics_infer)}')
+
+# Infer topics
+for num_topics in num_topics_infer:
+    # Initialize topic model
+    if model_type == 'NMF':
+        topic_model = NonNegativeMatrixFactorization(corpus=corpus)
+    elif model_type == 'LDA':
+        topic_model = LatentDirichletAllocation(corpus=corpus)
+
+    logger.info(f'Inferring topics: {num_topics}')
+    topic_model.infer_topics(num_topics=num_topics)
+
+    # Save model on disk
+    topic_model_filepath = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}_topics.pickle'
+    logger.info(f'Saving topic model: {topic_model_filepath}')
+    ut.save_topic_model(topic_model, topic_model_filepath)
+
+    # # Load model from disk:
+    # logger.info(f'Loading topic model: {topic_model_filepath}')
+    # topic_model = ut.load_topic_model(topic_model_filepath)
+
+    # Print results
+    print(f'\n{num_topics} topics:')
+    topic_model.print_topics(num_words=10)
+    print('\nTopic distribution for document 0:', topic_model.topic_distribution_for_document(0))
+    print('\nMost likely topic for document 0:', topic_model.most_likely_topic_for_document(0))
+    print('\nFrequency of topics:', topic_model.topics_frequency())
+    print('\nTop 10 most relevant words for topic 2:', topic_model.top_words(2, 10))
 
 # Estimate the optimal number of topics
 logger.info('Estimating the number of topics to choose. This could take a while...')
+
 viz = Visualization(topic_model)
-logger.info(f'Total number of topics to assess: {len(np.arange(min_num_topics, max_num_topics + 1, step))}')
-logger.info(f'Topic numbers: {np.arange(min_num_topics, max_num_topics + 1, step)}')
 
 logger.info('Assessing Greene metric')
 viz.plot_greene_metric(
@@ -154,28 +172,3 @@ viz.plot_brunet_metric(
 #     train_size=perplexity_train_size,
 #     verbose=verbose,
 # )
-
-# Infer topics
-logger.info('Inferring topics')
-topic_model.infer_topics(num_topics=num_topics)
-
-# Save model on disk
-topic_model_filepath = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}topics.pickle'
-logger.info(f'Saving topic model: {topic_model_filepath}')
-ut.save_topic_model(topic_model, topic_model_filepath)
-
-# # Load model from disk:
-# logger.info(f'Loading topic model: {topic_model_filepath}')
-# topic_model = ut.load_topic_model(topic_model_filepath)
-
-# Print results
-print('\nTopics:')
-topic_model.print_topics(num_words=10)
-print('\nTopic distribution for document 0:',
-      topic_model.topic_distribution_for_document(0))
-print('\nMost likely topic for document 0:',
-      topic_model.most_likely_topic_for_document(0))
-print('\nFrequency of topics:',
-      topic_model.topics_frequency())
-print('\nTop 10 most relevant words for topic 2:',
-      topic_model.top_words(2, 10))
