@@ -72,12 +72,16 @@ elif model_type == 'LDA':
         raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
 
 # Flask Web server
-app = Flask(__name__, static_folder='browser/static', template_folder='browser/templates')
+static_folder = 'browser/static'
+template_folder = 'browser/templates'
+data_folder = static_folder / f'data/{num_topics}_topics'
+
+app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
 # Clean the data directory
-if os.path.exists('browser/static/data'):
-    shutil.rmtree('browser/static/data')
-os.makedirs('browser/static/data')
+if os.path.exists(data_folder):
+    shutil.rmtree(data_folder)
+os.makedirs(data_folder)
 
 # Load and prepare a corpus
 logger.info(f'Loading documents: {source_filepath}')
@@ -116,15 +120,15 @@ for i in range(topic_model.nb_topics):
 
 # Export topic cloud
 logger.info('Saving topic cloud')
-utils.save_topic_cloud(topic_model, 'browser/static/data/topic_cloud.json', top_words=top_words_cloud)
+utils.save_topic_cloud(topic_model, f'{data_folder}/topic_cloud.json', top_words=top_words_cloud)
 
 # Export details about topics
 logger.info('Saving topic details')
 for topic_id in range(topic_model.nb_topics):
     utils.save_word_distribution(topic_model.top_words(topic_id, 20),
-                                 f'browser/static/data/word_distribution{topic_id}.tsv')
+                                 f'{data_folder}/word_distribution{topic_id}.tsv')
     utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
-                                       f'browser/static/data/affiliation_repartition{topic_id}.tsv')
+                                       f'{data_folder}/affiliation_repartition{topic_id}.tsv')
 
     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
     max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
@@ -132,13 +136,13 @@ for topic_id in range(topic_model.nb_topics):
     evolution = []
     for i in range(min_year, max_year + 1):
         evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
-    utils.save_topic_evolution(evolution, f'browser/static/data/frequency{topic_id}.tsv')
+    utils.save_topic_evolution(evolution, f'{data_folder}/frequency{topic_id}.tsv')
 
 # Export details about documents
 logger.info('Saving document details')
 for doc_id in range(topic_model.corpus.size):
     utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
-                                  f'browser/static/data/topic_distribution_d{doc_id}.tsv',
+                                  f'{data_folder}/topic_distribution_d{doc_id}.tsv',
                                   topic_description,
                                   )
 
@@ -146,7 +150,7 @@ for doc_id in range(topic_model.corpus.size):
 logger.info('Saving word details')
 for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
-                                  f'browser/static/data/topic_distribution_w{word_id}.tsv',
+                                  f'{data_folder}/topic_distribution_w{word_id}.tsv',
                                   topic_description,
                                   )
 
@@ -157,7 +161,7 @@ for word_id in range(len(topic_model.corpus.vocabulary)):
 # logger.info('Saving author network details')
 # for topic_id in range(topic_model.nb_topics):
 #     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
-#                            f'browser/static/data/author_network{topic_id}.json')
+#                            f'{data_folder}/author_network{topic_id}.json')
 
 
 @app.route('/')
