@@ -2,7 +2,7 @@
 import configparser
 from pathlib import Path, PurePath
 import os
-import tom_lib.utils as utils
+import tom_lib.utils as ut
 from flask import Flask, render_template, request, send_from_directory
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
@@ -52,6 +52,7 @@ top_words_cloud = config[webserver_section].getint('top_words_cloud', 5)
 model_type = config[webserver_section].get('model_type', 'NMF')
 nmf_beta_loss = config[webserver_section].get('nmf_beta_loss', 'frobenius')
 lda_algorithm = config[webserver_section].get('lda_algorithm', 'variational')
+load_if_existing_model = config[webserver_section].getboolean('load_if_existing_model', True)
 
 if model_type not in ['NMF', 'LDA']:
     raise ValueError('model_type must be NMF or LDA')
@@ -70,16 +71,14 @@ elif model_type == 'LDA':
 # Flask Web server
 static_folder = Path('browser/static')
 template_folder = Path('browser/templates')
-data_folder = static_folder / f'data/{model_type}_{source_filepath.stem}_{num_topics}_topics/data'
 
-app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
+# Set up directories for serving files
+tm_folder = Path('data') / f'{model_type}_{source_filepath.stem}_{num_topics}_topics'
+data_folder = tm_folder / 'data'
+model_folder = tm_folder / 'model'
+topic_model_filepath = model_folder / 'model.pickle'
 
-# Clean the data directory
-if data_folder.exists():
-    utils.delete_folder(data_folder)
-data_folder.mkdir(parents=True, exist_ok=True)
-
-# Set up data sub-directories
+# Set up sub-directories for serving files
 topic_cloud_folder = data_folder / 'topic_cloud'
 word_distribution_folder = data_folder / 'word_distribution'
 frequency_folder = data_folder / 'frequency'
@@ -88,33 +87,100 @@ affiliation_repartition_folder = data_folder / 'affiliation_repartition'
 topic_distribution_d_folder = data_folder / 'topic_distribution_d'
 topic_distribution_w_folder = data_folder / 'topic_distribution_w'
 
-# Load and prepare a corpus
-logger.info(f'Loading documents: {source_filepath}')
-corpus = Corpus(source_filepath=source_filepath,
-                language=language,
-                vectorization=vectorization,
-                n_gram=n_gram,
-                max_relative_frequency=max_relative_frequency,
-                min_absolute_frequency=min_absolute_frequency,
-                max_features=max_features,
-                sample=sample,
-                full_text_col='orig_text',
-                )
-logger.info(f'Corpus size: {corpus.size:,}')
-logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')
+app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
-# Initialize topic model
-if model_type == 'NMF':
-    topic_model = NonNegativeMatrixFactorization(corpus=corpus)
-elif model_type == 'LDA':
-    topic_model = LatentDirichletAllocation(corpus=corpus)
+if load_if_existing_model and (static_folder / topic_model_filepath).exists():
+    # Load model from disk:
+    logger.info(f'Loading topic model: {static_folder / topic_model_filepath}')
+    topic_model = ut.load_topic_model(static_folder / topic_model_filepath)
+else:
+    # Clean the topic model directory
+    if (static_folder / tm_folder).exists():
+        ut.delete_folder(static_folder / tm_folder)
+    (static_folder / tm_folder).mkdir(parents=True, exist_ok=True)
 
-# Infer topics
-logger.info('Inferring topics')
-if model_type == 'NMF':
-    topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
-elif model_type == 'LDA':
-    topic_model.infer_topics(num_topics=num_topics, algorithm=lda_algorithm)
+    # Load and prepare a corpus
+    logger.info(f'Loading documents: {source_filepath}')
+    corpus = Corpus(source_filepath=source_filepath,
+                    language=language,
+                    vectorization=vectorization,
+                    n_gram=n_gram,
+                    max_relative_frequency=max_relative_frequency,
+                    min_absolute_frequency=min_absolute_frequency,
+                    max_features=max_features,
+                    sample=sample,
+                    full_text_col='orig_text',
+                    )
+    # Initialize topic model
+    if model_type == 'NMF':
+        topic_model = NonNegativeMatrixFactorization(corpus=corpus)
+    elif model_type == 'LDA':
+        topic_model = LatentDirichletAllocation(corpus=corpus)
+
+    logger.info(f'Corpus size: {topic_model.corpus.size:,}')
+    logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
+
+    # Infer topics
+    logger.info('Inferring topics')
+    if model_type == 'NMF':
+        topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
+    elif model_type == 'LDA':
+        topic_model.infer_topics(num_topics=num_topics, algorithm=lda_algorithm)
+
+    topic_description = []
+    for i in range(topic_model.nb_topics):
+        description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
+        topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
+
+    # Save model on disk
+    logger.info(f'Saving topic model: {topic_model_filepath}')
+    ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
+
+    # Export topic cloud
+    logger.info('Saving topic cloud')
+    ut.save_topic_cloud(topic_model, static_folder / topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
+
+    # Export details about topics
+    logger.info('Saving topic details')
+    for topic_id in range(topic_model.nb_topics):
+        ut.save_word_distribution(topic_model.top_words(topic_id, 20),
+                                  static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv')
+
+        ut.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
+                                        static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv')
+
+        min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
+        max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
+
+        evolution = []
+        for i in range(min_year, max_year + 1):
+            evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
+        ut.save_topic_evolution(evolution, static_folder / frequency_folder / f'frequency{topic_id}.tsv')
+
+    # Export details about documents
+    logger.info('Saving document details')
+    for doc_id in range(topic_model.corpus.size):
+        ut.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
+                                   static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
+                                   topic_description,
+                                   )
+
+    # Export details about words
+    logger.info('Saving word details')
+    for word_id in range(len(topic_model.corpus.vocabulary)):
+        ut.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
+                                   static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
+                                   topic_description,
+                                   )
+
+    # # Associate documents with topics
+    # topic_associations = topic_model.documents_per_topic()
+
+    # # Export per-topic author network
+    # logger.info('Saving author network details')
+    # for topic_id in range(topic_model.nb_topics):
+    #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_associations[topic_id]),
+    #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
 
 topic_model.print_topics(num_words=10)
 
@@ -123,60 +189,15 @@ for i in range(topic_model.nb_topics):
     description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
     topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
-# Export topic cloud
-logger.info('Saving topic cloud')
-utils.save_topic_cloud(topic_model, topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
-
-# Export details about topics
-logger.info('Saving topic details')
-for topic_id in range(topic_model.nb_topics):
-    utils.save_word_distribution(topic_model.top_words(topic_id, 20),
-                                 word_distribution_folder / f'word_distribution{topic_id}.tsv')
-    utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
-                                       affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv')
-
-    min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
-    max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
-
-    evolution = []
-    for i in range(min_year, max_year + 1):
-        evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
-    utils.save_topic_evolution(evolution, frequency_folder / f'frequency{topic_id}.tsv')
-
-# Export details about documents
-logger.info('Saving document details')
-for doc_id in range(topic_model.corpus.size):
-    utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
-                                  topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
-                                  topic_description,
-                                  )
-
-# Export details about words
-logger.info('Saving word details')
-for word_id in range(len(topic_model.corpus.vocabulary)):
-    utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
-                                  topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
-                                  topic_description,
-                                  )
-
-# # Associate documents with topics
-# topic_associations = topic_model.documents_per_topic()
-
-# # Export per-topic author network
-# logger.info('Saving author network details')
-# for topic_id in range(topic_model.nb_topics):
-#     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
-#                            author_network_folder / f'author_network{topic_id}.json')
-
 
 @app.route('/')
 def index():
     return render_template('index.html',
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
+                           doc_ids=range(topic_model.corpus.size),
                            method=type(topic_model).__name__,
-                           corpus_size=corpus.size,
-                           vocabulary_size=len(corpus.vocabulary),
+                           corpus_size=topic_model.corpus.size,
+                           vocabulary_size=len(topic_model.corpus.vocabulary),
                            max_relative_frequency=max_relative_frequency,
                            min_absolute_frequency=min_absolute_frequency,
                            vectorization=vectorization,
@@ -187,18 +208,18 @@ def index():
 def topic_cloud():
     return render_template('topic_cloud.html',
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
-                           topic_cloud_folder=topic_cloud_folder,
+                           doc_ids=range(topic_model.corpus.size),
+                           topic_cloud_filename=topic_cloud_folder / f'topic_cloud.json',
                            )
 
 
 @app.route('/vocabulary.html')
 def vocabulary():
     word_list = []
-    for i in range(len(corpus.vocabulary)):
-        word_list.append((i, corpus.word_for_id(i)))
+    for i in range(len(topic_model.corpus.vocabulary)):
+        word_list.append((i, topic_model.corpus.word_for_id(i)))
     splitted_vocabulary = []
-    words_per_column = int(len(corpus.vocabulary) / 5)
+    words_per_column = int(len(topic_model.corpus.vocabulary) / 5)
     for j in range(5):
         sub_vocabulary = []
         for l in range(j * words_per_column, (j + 1) * words_per_column):
@@ -206,7 +227,7 @@ def vocabulary():
         splitted_vocabulary.append(sub_vocabulary)
     return render_template('vocabulary.html',
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
+                           doc_ids=range(topic_model.corpus.size),
                            splitted_vocabulary=splitted_vocabulary,
                            vocabulary_size=len(word_list))
 
@@ -217,20 +238,20 @@ def topic_details(tid):
     ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
     documents = []
     for i, document_id in enumerate(ids):
-        documents.append((i + 1, corpus.title(document_id).title(),
-                          ', '.join(corpus.affiliation(document_id)).title(),
-                          ', '.join(corpus.author(document_id)).title(),
-                          corpus.date(document_id), document_id))
+        documents.append((i + 1, topic_model.corpus.title(document_id).title(),
+                          ', '.join(topic_model.corpus.affiliation(document_id)).title(),
+                          ', '.join(topic_model.corpus.author(document_id)).title(),
+                          topic_model.corpus.date(document_id), document_id))
     return render_template('topic.html',
                            topic_id=tid,
                            frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
                            documents=documents,
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
-                           word_distribution_folder=word_distribution_folder,
-                           frequency_folder=frequency_folder,
-                           affiliation_repartition_folder=affiliation_repartition_folder,
-                           # author_network_folder=author_network_folder,
+                           doc_ids=range(topic_model.corpus.size),
+                           word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
+                           frequency_filename=frequency_folder / f'frequency{tid}.tsv',
+                           affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
+                           # author_network_filename=author_network_folder / f'author_network{tid}.json',
                            )
 
 
@@ -239,44 +260,44 @@ def document_details(did):
     vector = topic_model.corpus.vector_for_document(int(did))
     word_list = []
     for a_word_id in range(len(vector)):
-        word_list.append((corpus.word_for_id(a_word_id), round(vector[a_word_id], 3), a_word_id))
+        word_list.append((topic_model.corpus.word_for_id(a_word_id), round(vector[a_word_id], 3), a_word_id))
     word_list.sort(key=lambda x: x[1])
     word_list.reverse()
     documents = []
-    for another_doc in corpus.similar_documents(int(did), 5):
-        documents.append((corpus.title(another_doc[0]).title(),
-                          ', '.join(corpus.author(another_doc[0])).title(),
-                          corpus.date(another_doc[0]), another_doc[0], round(another_doc[1], 3)))
+    for another_doc in topic_model.corpus.similar_documents(int(did), 5):
+        documents.append((topic_model.corpus.title(another_doc[0]).title(),
+                          ', '.join(topic_model.corpus.author(another_doc[0])).title(),
+                          topic_model.corpus.date(another_doc[0]), another_doc[0], round(another_doc[1], 3)))
     return render_template('document.html',
                            doc_id=did,
                            words=word_list[:21],
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
+                           doc_ids=range(topic_model.corpus.size),
                            documents=documents,
-                           title=corpus.title(int(did)).title(),
-                           authors=', '.join(corpus.author(int(did))).title(),
-                           year=corpus.date(int(did)),
-                           short_content=corpus.title(int(did)).title(),
-                           affiliation=', '.join(corpus.affiliation(int(did))).title(),
-                           full_text=corpus.full_text(int(did)),
-                           topic_distribution_d_folder=topic_distribution_d_folder,
+                           title=topic_model.corpus.title(int(did)).title(),
+                           authors=', '.join(topic_model.corpus.author(int(did))).title(),
+                           year=topic_model.corpus.date(int(did)),
+                           short_content=topic_model.corpus.title(int(did)).title(),
+                           affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
+                           full_text=topic_model.corpus.full_text(int(did)),
+                           topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
                            )
 
 
 @app.route('/word/<wid>.html')
 def word_details(wid):
     documents = []
-    for document_id in corpus.docs_for_word(int(wid)):
-        documents.append((corpus.title(document_id).title(),
-                          ', '.join(corpus.author(document_id)).title(),
-                          corpus.date(document_id), document_id))
+    for document_id in topic_model.corpus.docs_for_word(int(wid)):
+        documents.append((topic_model.corpus.title(document_id).title(),
+                          ', '.join(topic_model.corpus.author(document_id)).title(),
+                          topic_model.corpus.date(document_id), document_id))
     return render_template('word.html',
                            word_id=wid,
                            word=topic_model.corpus.word_for_id(int(wid)),
                            topic_ids=topic_description,
-                           doc_ids=range(corpus.size),
+                           doc_ids=range(topic_model.corpus.size),
                            documents=documents,
-                           topic_distribution_w_folder=topic_distribution_w_folder,
+                           topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
                            )
 
 

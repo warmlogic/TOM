@@ -3,7 +3,7 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html">
     <title>Details about topic {{ topic_id }}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
     <link href="../static/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
     <script src="../static/js/jquery-1.12.0.min.js" charset="utf-8"></script>
     <script src="../static/js/jquery.dataTables.min.js" charset="utf-8"></script>
@@ -105,7 +105,7 @@
         $('#documents').DataTable();
     });
 </script>
-<script src="{{ url_for('static', filename = 'js/d3.min.js' )}}"></script>
+<script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
 <script>
     // (document.body.clientWidth)*0.6
     var margin = {top: 10, right: 0, bottom: 100, left: 40},
@@ -126,7 +126,7 @@
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    d3.tsv("{{ url_for('static', filename=f'{word_distribution_folder}/word_distribution{topic_id}.tsv') }}", type, function(error, data) {
+    d3.tsv("{{ url_for('static', filename=word_distribution_filename) }}", type, function(error, data) {
         x.domain(data.map(function(d) { return d.word; }));
         y.domain([0, d3.max(data, function(d) { return d.weight; })]);
         svg.append("g")
@@ -187,7 +187,7 @@
             .attr("height", height2 + margin2.top + margin2.bottom)
             .append("g")
             .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-    d3.tsv("{{ url_for('static', filename=f'{frequency_folder}/frequency{topic_id}.tsv') }}", function(error, data2) {
+    d3.tsv("{{ url_for('static', filename=frequency_filename) }}", function(error, data2) {
         if (error) throw error;
 
         data2.forEach(function(d) {
@@ -229,7 +229,7 @@
     var svg3 = d3.select("author-network").append("svg")
             .attr("width", width3)
             .attr("height", height3);
-    d3.json("{{ url_for('static', filename=f'{author_network}/author_network{topic_id}.json') }}", function(error, graph) {
+    d3.json("{{ url_for('static', filename=author_network_filename) }}", function(error, graph) {
         if (error) throw error;
         force
                 .nodes(graph.nodes)
@@ -278,7 +278,7 @@
             .attr("height", height4 + margin4.top + margin4.bottom)
             .append("g")
             .attr("transform", "translate(" + margin4.left + "," + margin4.top + ")");
-    d3.tsv("{{ url_for('static', filename=f'{affiliation_repartition_folder}/affiliation_repartition{topic_id}.tsv') }}", type, function(error, data4) {
+    d3.tsv("{{ url_for('static', filename=affiliation_repartition_filename) }}", type, function(error, data4) {
         x4.domain(data4.map(function(d) { return d.affiliation; }));
         y4.domain([0, d3.max(data4, function(d) { return d.count; })]);
         svg4.append("g")

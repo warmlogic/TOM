@@ -3,7 +3,7 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html">
   <title>Details about document {{ doc_id }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}"/>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
 </head>
 <style>
 .axis path,
@@ -89,7 +89,7 @@
         </div>
     </div>
 </body>
-<script src="{{ url_for('static', filename = 'js/d3.min.js' )}}"></script>
+<script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
 <script>
 var margin = {top: 10, right: 0, bottom: 250, left: 250},
     width = 700 - margin.left - margin.right,
@@ -109,7 +109,7 @@ var svg = d3.select("bar-chart").append("svg")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-d3.tsv("{{ url_for('static', filename=f'{topic_distribution_d_folder}/topic_distribution_d{doc_id}.tsv') }}", type, function(error, data) {
+d3.tsv("{{ url_for('static', filename=topic_distribution_d_filename) }}", type, function(error, data) {
   x.domain(data.map(function(d) { return d.topic; }));
   y.domain([0, d3.max(data, function(d) { return d.weight; })]);
   svg.append("g")
