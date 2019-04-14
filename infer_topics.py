@@ -104,6 +104,11 @@ logger.info(f'Topic numbers: {list(num_topics_infer)}')
 
 # Infer topics
 for num_topics in num_topics_infer:
+    model_dir = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}_topics/model'
+    if not model_dir.exists():
+        model_dir.mkdir(parents=True, exist_ok=True)
+    topic_model_filepath = model_dir / 'model.pickle'
+
     # Initialize topic model
     if model_type == 'NMF':
         topic_model = NonNegativeMatrixFactorization(corpus=corpus)
@@ -114,7 +119,6 @@ for num_topics in num_topics_infer:
     topic_model.infer_topics(num_topics=num_topics)
 
     # Save model on disk
-    topic_model_filepath = data_dir / f'{model_type}_{source_filepath.stem}_{num_topics}_topics.pickle'
     logger.info(f'Saving topic model: {topic_model_filepath}')
     ut.save_topic_model(topic_model, topic_model_filepath)
 
