@@ -67,7 +67,7 @@ greene_top_n_words = config[infer_section].getint('greene_top_n_words', 10)
 greene_sample = config[infer_section].getfloat('greene_sample', 0.8)
 iterations = config[infer_section].getint('iterations', 10)
 # perplexity_train_size = config[infer_section].getfloat('perplexity_train_size', 0.7)
-verbose = config[infer_section].getboolean('verbose', )
+verbose = config[infer_section].getboolean('verbose', True)
 
 if model_type not in ['NMF', 'LDA']:
     raise ValueError('model_type must be NMF or LDA')
