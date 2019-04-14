@@ -76,7 +76,7 @@ app = Flask(__name__, static_folder=static_folder, template_folder=template_fold
 
 # Clean the data directory
 if data_folder.exists():
-    data_folder.unlink()
+    utils.delete_folder(data_folder)
 data_folder.mkdir(parents=True, exist_ok=True)
 
 # Set up data sub-directories
