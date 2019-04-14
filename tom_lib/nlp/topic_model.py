@@ -43,13 +43,16 @@ class TopicModel(object):
         :param tao: Number of sampled models to build
         :return: A list of len (max_num_topics - min_num_topics) with the stability of each tested k
         """
+        print('=' * 50)
+        print('Computing Greene metric (higher is better)...')
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         stability = []
+
         # Build reference topic model
         # Generate tao topic models with tao samples of the corpus
-
-        for idx, k in enumerate(range(min_num_topics, max_num_topics + 1, step)):
+        for idx, k in enumerate(num_topics_infer):
             if verbose:
-                print(f'Topics={k} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
+                print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
             if type(self).__name__ == 'NonNegativeMatrixFactorization':
                 self.infer_topics(num_topics=k, beta_loss=beta_loss)
             elif type(self).__name__ == 'LatentDirichletAllocation':
@@ -100,6 +103,9 @@ class TopicModel(object):
         :param iterations: Number of iterations per value of k
         :return: A list of len (max_num_topics - min_num_topics) with the average symmetric KL divergence for each k
         """
+        print('=' * 50)
+        print('Computing Arun metric (lower is better)...')
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         kl_matrix = []
         for j in range(iterations):
             if verbose:
@@ -107,9 +113,9 @@ class TopicModel(object):
             kl_list = []
             doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
             norm = np.linalg.norm(doc_len)
-            for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
+            for idx, i in enumerate(num_topics_infer):
                 if verbose:
-                    print(f'    Topics={i + 1} ({idx} of {len(range(min_num_topics, max_num_topics + 1, step))})')
+                    print(f'    Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 if type(self).__name__ == 'NonNegativeMatrixFactorization':
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
                 elif type(self).__name__ == 'LatentDirichletAllocation':
@@ -143,10 +149,13 @@ class TopicModel(object):
         :param iterations:
         :return:
         """
+        print('=' * 50)
+        print('Computing Brunet metric (higher is better)...')
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         cophenetic_correlation = []
-        for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
+        for idx, i in enumerate(num_topics_infer):
             if verbose:
-                print(f'Topics={i} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
+                print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
                 if verbose:
@@ -192,6 +201,9 @@ class TopicModel(object):
         :param train_size:
         :return:
         """
+        print('=' * 50)
+        print('Computing perplexity metric (lower is better)...')
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         train_perplexities = []
         test_perplexities = []
         if type(self).__name__ == 'LatentDirichletAllocation':
@@ -210,9 +222,9 @@ class TopicModel(object):
             )
             tf_test = corpus_train.vectorizer.transform(df_test[corpus_train._text_col].tolist())
             lda_model = type(self)(corpus_train)
-            for idx, i in enumerate(range(min_num_topics, max_num_topics + 1, step)):
+            for idx, i in enumerate(num_topics_infer):
                 if verbose:
-                    print(f'Topics={i} ({idx + 1} of {len(range(min_num_topics, max_num_topics + 1, step))})')
+                    print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 lda_model.infer_topics(i, algorithm=algorithm)
                 train_perplexities.append(lda_model.model.perplexity(
                     corpus_train.sklearn_vector_space))
