@@ -125,15 +125,15 @@ for i in range(topic_model.nb_topics):
 
 # Export topic cloud
 logger.info('Saving topic cloud')
-utils.save_topic_cloud(topic_model, f'{topic_cloud_folder}/topic_cloud.json', top_words=top_words_cloud)
+utils.save_topic_cloud(topic_model, topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
 
 # Export details about topics
 logger.info('Saving topic details')
 for topic_id in range(topic_model.nb_topics):
     utils.save_word_distribution(topic_model.top_words(topic_id, 20),
-                                 f'{word_distribution_folder}/word_distribution{topic_id}.tsv')
+                                 word_distribution_folder / f'word_distribution{topic_id}.tsv')
     utils.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
-                                       f'{affiliation_repartition_folder}/affiliation_repartition{topic_id}.tsv')
+                                       affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv')
 
     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
     max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
@@ -141,13 +141,13 @@ for topic_id in range(topic_model.nb_topics):
     evolution = []
     for i in range(min_year, max_year + 1):
         evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
-    utils.save_topic_evolution(evolution, f'{frequency_folder}/frequency{topic_id}.tsv')
+    utils.save_topic_evolution(evolution, frequency_folder / f'frequency{topic_id}.tsv')
 
 # Export details about documents
 logger.info('Saving document details')
 for doc_id in range(topic_model.corpus.size):
     utils.save_topic_distribution(topic_model.topic_distribution_for_document(doc_id),
-                                  f'{topic_distribution_d_folder}/topic_distribution_d{doc_id}.tsv',
+                                  topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
                                   topic_description,
                                   )
 
@@ -155,7 +155,7 @@ for doc_id in range(topic_model.corpus.size):
 logger.info('Saving word details')
 for word_id in range(len(topic_model.corpus.vocabulary)):
     utils.save_topic_distribution(topic_model.topic_distribution_for_word(word_id),
-                                  f'{topic_distribution_w_folder}/topic_distribution_w{word_id}.tsv',
+                                  topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
                                   topic_description,
                                   )
 
@@ -166,7 +166,7 @@ for word_id in range(len(topic_model.corpus.vocabulary)):
 # logger.info('Saving author network details')
 # for topic_id in range(topic_model.nb_topics):
 #     utils.save_json_object(corpus.collaboration_network(topic_associations[topic_id]),
-#                            f'{author_network_folder}/author_network{topic_id}.json')
+#                            author_network_folder / f'author_network{topic_id}.json')
 
 
 @app.route('/')
