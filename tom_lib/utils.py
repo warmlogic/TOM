@@ -96,3 +96,12 @@ def save_json_object(json_object, file_path):
         file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as fp:
         json.dump(json_object, fp, indent=4, separators=(',', ': '))
+
+
+def delete_folder(pth):
+    for sub in pth.iterdir():
+        if sub.is_dir():
+            delete_folder(sub)
+        else:
+            sub.unlink()
+    pth.rmdir()
