@@ -2,7 +2,6 @@
 import configparser
 from pathlib import Path, PurePath
 import os
-import shutil
 import tom_lib.utils as utils
 from flask import Flask, render_template, request, send_from_directory
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
