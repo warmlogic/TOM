@@ -13,6 +13,8 @@ def print_matrix(matrix):
 
 
 def save_topic_model(topic_model, file_path):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     pickle.dump(topic_model, open(file_path, 'wb'))
 
 
@@ -21,6 +23,8 @@ def load_topic_model(file_path):
 
 
 def save_word_distribution(distribution, file_path):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('word\tweight\n')
         for weighted_word in distribution:
@@ -28,6 +32,8 @@ def save_word_distribution(distribution, file_path):
 
 
 def save_topic_distribution(distribution, file_path, topic_description: List=None):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     if topic_description:
         if len(topic_description) != len(distribution):
             topic_description = None
@@ -41,6 +47,8 @@ def save_topic_distribution(distribution, file_path, topic_description: List=Non
 
 
 def save_topic_evolution(evolution, file_path):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('date\tfrequency\n')
         for date, frequency in evolution:
@@ -48,20 +56,26 @@ def save_topic_evolution(evolution, file_path):
 
 
 def save_affiliation_repartition(affiliation_repartition, file_path):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('affiliation\tcount\n')
         for (affiliation, count) in affiliation_repartition:
             f.write(f'{affiliation}\t{count}\n')
 
 
-def save_topic_number_metrics_data(path, range_, data, step=None, metric_type=''):
-    with open(path, "w") as filo:
+def save_topic_number_metrics_data(file_path, range_, data, step=None, metric_type=''):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(file_path, "w") as filo:
         filo.write(f"k\t{metric_type}_value\n")
         for idx, range_i in enumerate(np.arange(range_[0], range_[1] + 1, step)):
             filo.write(f'{range_i}\t{data[idx]}\n')
 
 
 def save_topic_cloud(topic_model, file_path, top_words=5):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     json_graph = {}
     json_nodes = []
     json_links = []
@@ -78,5 +92,7 @@ def save_topic_cloud(topic_model, file_path, top_words=5):
 
 
 def save_json_object(json_object, file_path):
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as fp:
         json.dump(json_object, fp, indent=4, separators=(',', ': '))
