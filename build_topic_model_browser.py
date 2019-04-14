@@ -68,8 +68,8 @@ elif model_type == 'LDA':
         raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
 
 # Flask Web server
-static_folder = 'browser/static'
-template_folder = 'browser/templates'
+static_folder = Path('browser/static')
+template_folder = Path('browser/templates')
 data_folder = static_folder / f'data/{model_type}_{source_filepath.stem}_{num_topics}_topics/data'
 
 app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
