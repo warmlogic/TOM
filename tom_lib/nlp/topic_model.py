@@ -252,13 +252,8 @@ class TopicModel(object):
             print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(topic_desc)}")
 
     def top_words(self, topic_id, num_words):
-        vector = self.topic_word_matrix[topic_id]
-        cx = vector.tocoo()
-        weighted_words = [()] * len(self.corpus.vocabulary)
-        for row, word_id, weight in itertools.zip_longest(cx.row, cx.col, cx.data):
-            weighted_words[word_id] = (self.corpus.word_for_id(word_id), weight)
-        weighted_words.sort(key=lambda x: x[1], reverse=True)
-        return weighted_words[:num_words]
+        word_idx = np.argsort(self.topic_word_matrix[topic_id, :].toarray()[0])[::-1][:num_words]
+        return [self.corpus.word_for_id(i) for i in word_idx]
 
     def print_top_docs(self, topics, top_n, weights=False, num_words=10):
         for t in list(self.top_topic_docs(topics=topics, top_n=top_n, weights=weights)):
