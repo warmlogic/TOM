@@ -1,5 +1,4 @@
 # coding: utf-8
-import itertools
 from collections import Counter
 from abc import ABCMeta, abstractmethod
 import numpy as np
@@ -241,33 +240,37 @@ class TopicModel(object):
         frequency_count = self.topics_frequency(count=True)
         topic_list = []
         for topic_id in range(self.nb_topics):
-            word_list = []
-            for weighted_word in self.top_words(topic_id, num_words):
-                word_list.append(weighted_word[0])
-            topic_list.append((topic_id, frequency[topic_id], frequency_count[topic_id], word_list))
-        if sort_by_freq == 'asc':
+            top_words = [weighted_word[0] for weighted_word in self.top_words(topic_id, num_words)]
+            topic_list.append((topic_id, frequency[topic_id], frequency_count[topic_id], top_words))
+        if sort_by_freq.lower() == 'asc':
             topic_list.sort(key=lambda x: x[1], reverse=False)
-        elif sort_by_freq == 'desc':
+        elif sort_by_freq.lower() == 'desc':
             topic_list.sort(key=lambda x: x[1], reverse=True)
-        for topic_id, frequency, frequency_count, topic_desc in topic_list:
-            print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(topic_desc)}")
+        print('Topic # \tFreq\tCount\tTop words')
+        for topic_id, frequency, frequency_count, top_words in topic_list:
+            print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(top_words)}")
 
     def top_words(self, topic_id: int, num_words: int):
         word_ids = np.argsort(self.word_distribution_for_topic(topic_id))[:-num_words - 1:-1]
         weighted_words = [(self.corpus.word_for_id(word_id), self.topic_word_matrix[topic_id, word_id]) for word_id in word_ids]
         return weighted_words
 
-    def print_top_docs(self, topics, top_n: int, weights: bool = False, num_words: int = 10):
+    def print_top_docs(self, topics=-1, top_n: int = 10, weights: bool = False, num_words: int = 10):
         for t in list(self.top_topic_docs(topics=topics, top_n=top_n, weights=weights)):
             top_terms = list(self.top_words(t[0], num_words))
             print('=' * 30)
             print(f'Topic {t[0]}: {top_terms}')
             for d in t[1]:
                 print('-' * 30)
-                print(f'Document {d}')
-                print(self.corpus.affiliation(d), self.corpus.date(d))
-                print(f'Title: {self.corpus.title(d)}')
-                print(self.corpus.full_text(d))
+                if weights:
+                    print(f'Document {d[0]}, weight for topic {d[1]:.6f}')
+                    doc_id = d[0]
+                else:
+                    print(f'Document {d}')
+                    doc_id = d
+                print(self.corpus.affiliation(doc_id), self.corpus.date(doc_id))
+                print(f'Title: {self.corpus.title(doc_id)}')
+                print(self.corpus.full_text(doc_id))
 
     def top_topic_docs(self, topics=-1, top_n: int = 10, weights: bool = False):
         '''Inspired by Textacy:
