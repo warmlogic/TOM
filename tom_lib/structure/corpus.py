@@ -1,9 +1,7 @@
 # coding: utf-8
 from pathlib import Path
-import itertools
 import pandas as pd
 import numpy as np
-from scipy import spatial
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.preprocessing import normalize
@@ -116,19 +114,20 @@ class Corpus:
         aff_str = str(self.data_frame.iloc[doc_id][self._affiliation_col])
         return aff_str.split(', ')
 
-    def documents_by_author(self, author, date=None):
-        ids = []
-        potential_ids = range(self.size)
+    def documents_by_author(self, author: str, date=None):
+        aut_doc_ids = []
         if date:
-            potential_ids = self.doc_ids(date)
-        for i in potential_ids:
-            if self.is_author(author, i):
-                ids.append(i)
-        return ids
+            potential_doc_ids = self.doc_ids(date)
+        else:
+            potential_doc_ids = self.data_frame.index.tolist()
+        for doc_id in potential_doc_ids:
+            if self.is_author(author, doc_id):
+                aut_doc_ids.append(doc_id)
+        return aut_doc_ids
 
     def all_authors(self):
         author_list = []
-        for doc_id in range(self.size):
+        for doc_id in self.data_frame.index.tolist():
             author_list.extend(self.author(doc_id))
         return list(set(author_list))
 
@@ -136,25 +135,15 @@ class Corpus:
         return author in self.author(doc_id)
 
     def docs_for_word(self, word_id):
-        ids = []
-        for i in range(self.size):
-            vector = self.vector_for_document(i)
-            if vector[word_id] > 0:
-                ids.append(i)
-        return ids
+        return np.where(self.sklearn_vector_space[:, word_id].T.toarray()[0] > 0)[0].tolist()
 
     def doc_ids(self, date):
         return self.data_frame[self.data_frame[self._date_col] == date].index.tolist()
 
-    def vector_for_document(self, doc_id):
-        vector = self.sklearn_vector_space[doc_id]
-        cx = vector.tocoo()
-        weights = [0.0] * len(self.vocabulary)
-        for row, word_id, weight in itertools.zip_longest(cx.row, cx.col, cx.data):
-            weights[word_id] = weight
-        return weights
+    def vector_for_document(self, doc_id: int):
+        return self.sklearn_vector_space[doc_id, :].toarray()[0]
 
-    def word_for_id(self, word_id):
+    def word_for_id(self, word_id: int):
         return self.vocabulary.get(word_id)
 
     def id_for_word(self, word):
@@ -163,26 +152,26 @@ class Corpus:
                 return i
         return -1
 
-    def similar_documents(self, doc_id, num_docs):
-        doc_weights = self.vector_for_document(doc_id)
-        similarities = []
-        for a_doc_id in range(self.size):
-            if a_doc_id != doc_id:
-                similarity = 1.0 - spatial.distance.cosine(doc_weights, self.vector_for_document(a_doc_id))
-                similarities.append((a_doc_id, similarity))
+    def similar_documents(self, doc_id: int, num_docs: int):
+        # compute pairwise similarities
+        similarities = np.dot(normalize(self.sklearn_vector_space[doc_id, :], axis=1),
+                              normalize(self.sklearn_vector_space, axis=1).T).toarray()[0]
+        # exclude self pair
+        similarities = [s for s in list(zip(self.data_frame.index.tolist(), similarities)) if s[0] != doc_id]
+        # sort by most similar first
         similarities.sort(key=lambda x: x[1], reverse=True)
         return similarities[:num_docs]
 
-    def find_similar_document_pairs(self, threshold):
+    def find_similar_document_pairs(self, threshold: float):
         '''find all the similar document pairs above a threshold.
         for a tf vectorized corpus, try threshold=0.83
         for a tfidf vectorized corpus, try threshold=0.88
         '''
         # compute pairwise similarities
-        result = np.dot(normalize(self.sklearn_vector_space, axis=1),
-                        normalize(self.sklearn_vector_space, axis=1).T)
+        similarities = np.dot(normalize(self.sklearn_vector_space, axis=1),
+                              normalize(self.sklearn_vector_space, axis=1).T)
         # keep similarities above threshold
-        similar_pairs = np.where(result.toarray() > threshold)
+        similar_pairs = np.where(similarities.toarray() > threshold)
         # remove self pairs
         similar_pairs = [frozenset([v0, v1]) for v0, v1 in zip(similar_pairs[0], similar_pairs[1]) if v0 != v1]
         # remove duplicate pairs
