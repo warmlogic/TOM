@@ -1,5 +1,6 @@
 # coding: utf-8
 import itertools
+from collections import Counter
 from abc import ABCMeta, abstractmethod
 import numpy as np
 from tom_lib.stats import symmetric_kl, agreement_score
@@ -111,7 +112,7 @@ class TopicModel(object):
             if verbose:
                 print(f'Iteration: {j+1} of {iterations}')
             kl_list = []
-            doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in range(self.corpus.size)])  # document length
+            doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in self.corpus.data_frame.index.tolist()])  # document length
             norm = np.linalg.norm(doc_len)
             for idx, i in enumerate(num_topics_infer):
                 if verbose:
@@ -166,7 +167,7 @@ class TopicModel(object):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 else:
                     raise TypeError(f'Unsupported model type: {type(self).__name__}')
-                mlt = np.array([self.most_likely_topic_for_document(idx_d) for idx_d in range(self.corpus.size)])
+                mlt = np.array([self.most_likely_topic_for_document(doc_id) for doc_id in self.corpus.data_frame.index.tolist()])
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
 
             if verbose:
@@ -235,7 +236,7 @@ class TopicModel(object):
             raise TypeError("Computing perplexity only supported for LDA with algorithm='variational'. Not running.")
         return train_perplexities, test_perplexities
 
-    def print_topics(self, num_words=10, sort_by_freq=''):
+    def print_topics(self, num_words: int = 10, sort_by_freq: str = ''):
         frequency = self.topics_frequency(count=False)
         frequency_count = self.topics_frequency(count=True)
         topic_list = []
@@ -251,12 +252,12 @@ class TopicModel(object):
         for topic_id, frequency, frequency_count, topic_desc in topic_list:
             print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(topic_desc)}")
 
-    def top_words(self, topic_id, num_words):
+    def top_words(self, topic_id: int, num_words: int):
         word_ids = np.argsort(self.word_distribution_for_topic(topic_id))[:-num_words - 1:-1]
         weighted_words = [(self.corpus.word_for_id(word_id), self.topic_word_matrix[topic_id, word_id]) for word_id in word_ids]
         return weighted_words
 
-    def print_top_docs(self, topics, top_n, weights=False, num_words=10):
+    def print_top_docs(self, topics, top_n: int, weights: bool = False, num_words: int = 10):
         for t in list(self.top_topic_docs(topics=topics, top_n=top_n, weights=weights)):
             top_terms = list(self.top_words(t[0], num_words))
             print('=' * 30)
@@ -268,7 +269,7 @@ class TopicModel(object):
                 print(f'Title: {self.corpus.title(d)}')
                 print(self.corpus.full_text(d))
 
-    def top_topic_docs(self, topics=-1, top_n=10, weights=False):
+    def top_topic_docs(self, topics=-1, top_n: int = 10, weights: bool = False):
         '''Inspired by Textacy:
         http://textacy.readthedocs.io/en/latest/_modules/textacy/tm/topic_model.html#TopicModel.top_topic_docs
         '''
@@ -287,73 +288,92 @@ class TopicModel(object):
                 yield (topic_id,
                        tuple((doc_id, self.document_topic_matrix[doc_id, topic_id]) for doc_id in doc_ids))
 
-    def top_documents(self, topic_id, num_docs):
+    def top_documents(self, topic_id: int, num_docs: int):
         doc_ids = np.argsort(self.document_distribution_for_topic(topic_id))[:-num_docs - 1:-1]
         weighted_docs = [(doc_id, self.document_topic_matrix[doc_id, topic_id]) for doc_id in doc_ids]
         return weighted_docs
 
-    def word_distribution_for_topic(self, topic_id):
-        return self.topic_word_matrix[topic_id, :].toarray()[0]
+    def word_distribution_for_topic(self, topic_id=None):
+        if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
+            return self.topic_word_matrix.toarray()
+        if isinstance(topic_id, int):
+            return self.topic_word_matrix[topic_id, :].toarray()[0]
+        elif isinstance(topic_id, list):
+            return self.topic_word_matrix[topic_id, :].toarray()
+        else:
+            print(f"Unknown dtype '{type(topic_id)}'")
 
-    def document_distribution_for_topic(self, topic_id):
-        return self.document_topic_matrix[:, topic_id].toarray().T[0]
+    def document_distribution_for_topic(self, topic_id=None):
+        if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
+            return self.document_topic_matrix.toarray()
+        if isinstance(topic_id, int):
+            return self.document_topic_matrix[:, topic_id].toarray().T[0]
+        elif isinstance(topic_id, list):
+            return self.document_topic_matrix[:, topic_id].toarray().T
+        else:
+            print(f"Unknown dtype '{type(topic_id)}'")
 
-    def topic_distribution_for_document(self, doc_id):
-        return self.document_topic_matrix[doc_id].toarray()[0]
+    def topic_distribution_for_document(self, doc_id=None):
+        if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
+            return self.document_topic_matrix.toarray()
+        if isinstance(doc_id, int):
+            return self.document_topic_matrix[doc_id, :].toarray()[0]
+        elif isinstance(doc_id, list):
+            return self.document_topic_matrix[doc_id, :].toarray()
+        else:
+            print(f"Unknown dtype '{type(doc_id)}'")
 
-    def topic_distribution_for_word(self, word_id):
-        return self.topic_word_matrix[:, word_id].toarray().T[0]
+    def topic_distribution_for_word(self, word_id=None):
+        if word_id is None or (isinstance(word_id, list) and (len(word_id) == 0)):
+            return self.topic_word_matrix.toarray()
+        if isinstance(word_id, int):
+            return self.topic_word_matrix[:, word_id].toarray().T[0]
+        elif isinstance(word_id, list):
+            return self.topic_word_matrix[:, word_id].toarray().T
+        else:
+            print(f"Unknown dtype '{type(word_id)}'")
 
-    def topic_distribution_for_author(self, author_name):
+    def topic_distribution_for_author(self, author_name: str):
         all_weights = []
         for document_id in self.corpus.documents_by_author(author_name):
             all_weights.append(self.topic_distribution_for_document(document_id))
         output = np.array(all_weights)
         return output.mean(axis=0)
 
-    def most_likely_topic_for_document(self, doc_id):
-        weights = list(self.topic_distribution_for_document(doc_id))
-        return weights.index(max(weights))
+    def most_likely_topic_for_document(self, doc_id: int = None):
+        if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
+            return np.argmax(self.document_topic_matrix.toarray(), axis=1)
+        if isinstance(doc_id, int):
+            return np.argmax(self.topic_distribution_for_document(doc_id), axis=0)
+        elif isinstance(doc_id, list):
+            return np.argmax(self.topic_distribution_for_document(doc_id), axis=1)
+        else:
+            print(f"Unknown dtype '{type(doc_id)}'")
 
-    def topic_frequency(self, topic, date=None, count=False):
+    def topic_frequency(self, topic, date=None, count: bool = False):
         return self.topics_frequency(date=date, count=count)[topic]
 
-    def topics_frequency(self, date=None, count=False):
-        frequency = np.zeros(self.nb_topics)
+    def topics_frequency(self, date=None, count: bool = False):
         if date is None:
-            ids = range(self.corpus.size)
+            doc_ids = self.corpus.data_frame.index.tolist()
         else:
-            ids = self.corpus.doc_ids(date)
-        for i in ids:
-            topic = self.most_likely_topic_for_document(i)
-            if count:
-                frequency[topic] += 1
-            else:
-                frequency[topic] += 1.0 / len(ids)
+            doc_ids = self.corpus.doc_ids(date)
+
+        topic_count = Counter(self.most_likely_topic_for_document(doc_ids))
+        frequency = np.array([topic_count[i] if i in topic_count else 0 for i in range(self.nb_topics)])
+
+        if not count:
+            frequency = frequency / len(doc_ids)
+
         return frequency
 
-    def documents_for_topic(self, topic_id):
-        doc_ids = []
-        for doc_id in range(self.corpus.size):
-            most_likely_topic = self.most_likely_topic_for_document(doc_id)
-            if most_likely_topic == topic_id:
-                doc_ids.append(doc_id)
-        return doc_ids
+    def documents_for_topic(self, topic_id: int):
+        return self.corpus.data_frame.index[self.most_likely_topic_for_document() == topic_id].tolist()
 
     def documents_per_topic(self):
-        topic_associations = {}
-        for i in range(self.corpus.size):
-            topic_id = self.most_likely_topic_for_document(i)
-            if topic_associations.get(topic_id):
-                documents = topic_associations[topic_id]
-                documents.append(i)
-                topic_associations[topic_id] = documents
-            else:
-                documents = [i]
-                topic_associations[topic_id] = documents
-        return topic_associations
+        return {i: self.documents_for_topic(i) for i in range(self.nb_topics)}
 
-    def affiliation_repartition(self, topic_id):
+    def affiliation_repartition(self, topic_id: int):
         counts = {}
         doc_ids = self.documents_for_topic(topic_id)
         for i in doc_ids:
