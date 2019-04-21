@@ -252,7 +252,7 @@ class TopicModel(object):
             print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(topic_desc)}")
 
     def top_words(self, topic_id, num_words):
-        word_ids = np.argsort(self.topic_word_matrix[topic_id, :].toarray()[0])[:-num_words - 1:-1]
+        word_ids = np.argsort(self.word_distribution_for_topic(topic_id))[:-num_words - 1:-1]
         weighted_words = [(self.corpus.word_for_id(word_id), self.topic_word_matrix[topic_id, word_id]) for word_id in word_ids]
         return weighted_words
 
@@ -278,7 +278,7 @@ class TopicModel(object):
             topics = (topics,)
 
         for topic_id in topics:
-            doc_ids = np.argsort(self.document_topic_matrix[:, topic_id].toarray(), axis=0).T[0][:-top_n - 1:-1]
+            doc_ids = np.argsort(self.document_distribution_for_topic(topic_id))[:-top_n - 1:-1]
 
             if weights is False:
                 yield (topic_id,
@@ -288,21 +288,21 @@ class TopicModel(object):
                        tuple((doc_id, self.document_topic_matrix[doc_id, topic_id]) for doc_id in doc_ids))
 
     def top_documents(self, topic_id, num_docs):
-        doc_ids = np.argsort(self.document_topic_matrix[:, topic_id].toarray(), axis=0).T[0][:-num_docs - 1:-1]
+        doc_ids = np.argsort(self.document_distribution_for_topic(topic_id))[:-num_docs - 1:-1]
         weighted_docs = [(doc_id, self.document_topic_matrix[doc_id, topic_id]) for doc_id in doc_ids]
         return weighted_docs
 
     def word_distribution_for_topic(self, topic_id):
-        vector = self.topic_word_matrix[topic_id].toarray()
-        return vector[0]
+        return self.topic_word_matrix[topic_id, :].toarray()[0]
+
+    def document_distribution_for_topic(self, topic_id):
+        return self.document_topic_matrix[:, topic_id].toarray().T[0]
 
     def topic_distribution_for_document(self, doc_id):
-        vector = self.document_topic_matrix[doc_id].toarray()
-        return vector[0]
+        return self.document_topic_matrix[doc_id].toarray()[0]
 
     def topic_distribution_for_word(self, word_id):
-        vector = self.topic_word_matrix[:, word_id].toarray()
-        return vector.T[0]
+        return self.topic_word_matrix[:, word_id].toarray().T[0]
 
     def topic_distribution_for_author(self, author_name):
         all_weights = []
