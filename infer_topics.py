@@ -134,45 +134,45 @@ for num_topics in num_topics_infer:
     print('\nFrequency of topics:', topic_model.topics_frequency())
     print('\nTop 10 most relevant words for topic 2:', topic_model.top_words(2, 10))
 
-# Estimate the optimal number of topics
-logger.info('Estimating the number of topics to choose. This could take a while...')
+# # Estimate the optimal number of topics
+# logger.info('Estimating the number of topics to choose. This could take a while...')
 
-viz = Visualization(topic_model)
+# viz = Visualization(topic_model)
 
-logger.info('Assessing Greene metric')
-viz.plot_greene_metric(
-    min_num_topics=min_num_topics,
-    max_num_topics=max_num_topics,
-    step=step,
-    tao=greene_tao,
-    top_n_words=greene_top_n_words,
-    sample=greene_sample,
-    verbose=verbose,
-)
-
-logger.info('Assessing Arun metric')
-viz.plot_arun_metric(
-    min_num_topics=min_num_topics,
-    max_num_topics=max_num_topics,
-    step=step,
-    iterations=iterations,
-    verbose=verbose,
-)
-
-logger.info('Assessing Brunet metric')
-viz.plot_brunet_metric(
-    min_num_topics=min_num_topics,
-    max_num_topics=max_num_topics,
-    step=step,
-    iterations=iterations,
-    verbose=verbose,
-)
-
-# logger.info('Assessing perplexity metric')
-# viz.plot_perplexity_metric(
+# logger.info('Assessing Greene metric')
+# viz.plot_greene_metric(
 #     min_num_topics=min_num_topics,
 #     max_num_topics=max_num_topics,
 #     step=step,
-#     train_size=perplexity_train_size,
+#     tao=greene_tao,
+#     top_n_words=greene_top_n_words,
+#     sample=greene_sample,
 #     verbose=verbose,
 # )
+
+# logger.info('Assessing Arun metric')
+# viz.plot_arun_metric(
+#     min_num_topics=min_num_topics,
+#     max_num_topics=max_num_topics,
+#     step=step,
+#     iterations=iterations,
+#     verbose=verbose,
+# )
+
+# logger.info('Assessing Brunet metric')
+# viz.plot_brunet_metric(
+#     min_num_topics=min_num_topics,
+#     max_num_topics=max_num_topics,
+#     step=step,
+#     iterations=iterations,
+#     verbose=verbose,
+# )
+
+# # logger.info('Assessing perplexity metric')
+# # viz.plot_perplexity_metric(
+# #     min_num_topics=min_num_topics,
+# #     max_num_topics=max_num_topics,
+# #     step=step,
+# #     train_size=perplexity_train_size,
+# #     verbose=verbose,
+# # )
