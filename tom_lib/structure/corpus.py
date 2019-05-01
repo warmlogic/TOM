@@ -131,11 +131,17 @@ class Corpus:
             author_list.extend(self.author(doc_id))
         return list(set(author_list))
 
-    def is_author(self, author, doc_id):
+    def is_author(self, author: str, doc_id: int):
         return author in self.author(doc_id)
 
-    def docs_for_word(self, word_id):
-        return np.where(self.sklearn_vector_space[:, word_id].T.toarray()[0] > 0)[0].tolist()
+    def docs_for_word(self, word_id: int, sort: bool = True):
+        # get the document indices
+        doc_idx = np.where(self.sklearn_vector_space[:, word_id].T.toarray()[0] > 0)[0]
+        if sort:
+            # sort with strongest association first
+            sorted_weight_idx = np.argsort(self.sklearn_vector_space[doc_idx, word_id].T.toarray()[0])[::-1]
+            doc_idx = doc_idx[sorted_weight_idx]
+        return doc_idx.tolist()
 
     def doc_ids(self, date):
         return self.data_frame.loc[self.data_frame[self._date_col] == date].index.tolist()
