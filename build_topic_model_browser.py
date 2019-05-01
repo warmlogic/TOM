@@ -293,7 +293,7 @@ def document_details(did):
 @app.route('/word/<wid>.html')
 def word_details(wid):
     documents = []
-    for document_id in topic_model.corpus.docs_for_word(int(wid)):
+    for document_id in topic_model.corpus.docs_for_word(int(wid), sort=True):
         documents.append(
             (topic_model.corpus.title(document_id).title(),
              ', '.join(topic_model.corpus.author(document_id)).title(),
