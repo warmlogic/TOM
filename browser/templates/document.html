@@ -68,11 +68,13 @@
             <ul>
                 {% for doc in documents %}
                     <li>
-                        <a href="../document/{{ doc[3] }}.html">{{ doc[0] }}</a> ({{ doc[4] }})
+                        <a href="../document/{{ doc[4] }}.html">{{ doc[0] }}</a> ({{ doc[5] }})
                         <br>
-                        {{ doc[1] }}
+                        Author: {{ doc[1] }}
                         <br>
-                        {{ doc[2] }}
+                        Date: {{ doc[2] }}
+                        <br>
+                        Affiliation: {{ doc[3] }}
                     </li>
                 {% endfor %}
             </ul>
@@ -92,7 +94,7 @@
 <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
 <script>
 var margin = {top: 10, right: 0, bottom: 250, left: 250},
-    width = 700 - margin.left - margin.right,
+    width = 900 - margin.left - margin.right,
     height = 550 - margin.top - margin.bottom;
 var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], .1);

@@ -265,9 +265,15 @@ def document_details(did):
     word_list.reverse()
     documents = []
     for another_doc in topic_model.corpus.similar_documents(int(did), 5):
-        documents.append((topic_model.corpus.title(another_doc[0]).title(),
-                          ', '.join(topic_model.corpus.author(another_doc[0])).title(),
-                          topic_model.corpus.date(another_doc[0]), another_doc[0], round(another_doc[1], 3)))
+        documents.append(
+            (topic_model.corpus.title(another_doc[0]).title(),
+             ', '.join(topic_model.corpus.author(another_doc[0])).title(),
+             topic_model.corpus.date(another_doc[0]),
+             ', '.join(topic_model.corpus.affiliation(another_doc[0])).title(),
+             another_doc[0],
+             round(another_doc[1], 3),
+             ),
+        )
     return render_template('document.html',
                            doc_id=did,
                            words=word_list[:21],
@@ -288,9 +294,14 @@ def document_details(did):
 def word_details(wid):
     documents = []
     for document_id in topic_model.corpus.docs_for_word(int(wid)):
-        documents.append((topic_model.corpus.title(document_id).title(),
-                          ', '.join(topic_model.corpus.author(document_id)).title(),
-                          topic_model.corpus.date(document_id), document_id))
+        documents.append(
+            (topic_model.corpus.title(document_id).title(),
+             ', '.join(topic_model.corpus.author(document_id)).title(),
+             topic_model.corpus.date(document_id),
+             ', '.join(topic_model.corpus.affiliation(document_id)).title(),
+             document_id,
+             ),
+        )
     return render_template('word.html',
                            word_id=wid,
                            word=topic_model.corpus.word_for_id(int(wid)),
