@@ -111,7 +111,7 @@ class TopicModel(object):
             if verbose:
                 print(f'Iteration: {j+1} of {iterations}')
             kl_list = []
-            doc_len = np.array([sum(self.corpus.vector_for_document(doc_id)) for doc_id in self.corpus.data_frame.index.tolist()])  # document length
+            doc_len = self.corpus.vector_for_document().sum(axis=1)  # document length
             norm = np.linalg.norm(doc_len)
             for idx, i in enumerate(num_topics_infer):
                 if verbose:
@@ -166,7 +166,7 @@ class TopicModel(object):
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 else:
                     raise TypeError(f'Unsupported model type: {type(self).__name__}')
-                mlt = np.array([self.most_likely_topic_for_document(doc_id) for doc_id in self.corpus.data_frame.index.tolist()])
+                mlt = self.most_likely_topic_for_document()
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
 
             if verbose:
@@ -343,7 +343,7 @@ class TopicModel(object):
         output = np.array(all_weights)
         return output.mean(axis=0)
 
-    def most_likely_topic_for_document(self, doc_id: int = None):
+    def most_likely_topic_for_document(self, doc_id=None):
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
             return np.argmax(self.document_topic_matrix.toarray(), axis=1)
         if isinstance(doc_id, int):
