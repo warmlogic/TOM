@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html">
-  <title>Details about word {{ word_id }}</title>
+  <title>Details about {{ word }}</title>
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
 </head>
 <style>
@@ -27,23 +27,23 @@
 </style>
 <body>
     <div id="navigation">
-        <select onChange="window.location.href=((this.value == 'topics') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
+        <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
             <option selected="selected" disabled="disabled">Overview</option>
-            <option>home</option>
-            <option>topics</option>
+            <option>topic list</option>
+            <option>topic cloud</option>
             <option>vocabulary</option>
         </select>
         -
         <select onChange="window.location.href='../topic/'+this.value.split(' ')[1].slice(0, -1)+'.html'">
-            <option selected="selected" disabled="disabled">Details about a topic</option>
+            <option selected="selected" disabled="disabled">Select a topic to see details</option>
             {% for i in topic_ids %}
                 <option>{{ i }}</option>
             {% endfor %}
         </select>
     </div>
     <div id="header">
-        <h1>Details about word {{ word_id }}</h1>
-        Word: {{ word }}
+        <h1>Details about <i></i>{{ word }}</h1>
+        Word: {{ word_id }}
     </div>
     <div id="wrap">
         <div id="left_column">
