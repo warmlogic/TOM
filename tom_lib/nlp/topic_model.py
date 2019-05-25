@@ -22,6 +22,7 @@ class TopicModel(object):
         self.nb_topics = None  # a scalar value > 1
         self._sample = corpus._sample
         self.model = None
+        self.model_type = None
 
     @abstractmethod
     def infer_topics(self, num_topics=10, **kwargs):
@@ -53,12 +54,12 @@ class TopicModel(object):
         for idx, k in enumerate(num_topics_infer):
             if verbose:
                 print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
-            if type(self).__name__ == 'NonNegativeMatrixFactorization':
+            if self.model_type == 'NMF':
                 self.infer_topics(num_topics=k, beta_loss=beta_loss)
-            elif type(self).__name__ == 'LatentDirichletAllocation':
+            elif self.model_type == 'LDA':
                 self.infer_topics(num_topics=k, algorithm=algorithm)
             else:
-                raise TypeError(f'Unsupported model type: {type(self).__name__}')
+                raise TypeError(f'Unsupported model type: {self.model_type}')
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
@@ -74,12 +75,12 @@ class TopicModel(object):
                     sample=sample,
                 )
                 tao_model = type(self)(tao_corpus)
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if self.model_type == 'NMF':
                     tao_model.infer_topics(num_topics=k, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif self.model_type == 'LDA':
                     tao_model.infer_topics(num_topics=k, algorithm=algorithm)
                 else:
-                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
+                    raise TypeError(f'Unsupported model type: {self.model_type}')
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
@@ -116,12 +117,12 @@ class TopicModel(object):
             for idx, i in enumerate(num_topics_infer):
                 if verbose:
                     print(f'    Topics={i} ({idx + 1} of {len(num_topics_infer)})')
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if self.model_type == 'NMF':
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif self.model_type == 'LDA':
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 else:
-                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
+                    raise TypeError(f'Unsupported model type: {self.model_type}')
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
@@ -160,12 +161,12 @@ class TopicModel(object):
             for j in range(iterations):
                 if verbose:
                     print(f'    Iteration: {j+1} of {iterations}')
-                if type(self).__name__ == 'NonNegativeMatrixFactorization':
+                if self.model_type == 'NMF':
                     self.infer_topics(num_topics=i, beta_loss=beta_loss)
-                elif type(self).__name__ == 'LatentDirichletAllocation':
+                elif self.model_type == 'LDA':
                     self.infer_topics(num_topics=i, algorithm=algorithm)
                 else:
-                    raise TypeError(f'Unsupported model type: {type(self).__name__}')
+                    raise TypeError(f'Unsupported model type: {self.model_type}')
                 mlt = self.most_likely_topic_for_document()
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
 
@@ -206,7 +207,7 @@ class TopicModel(object):
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         train_perplexities = []
         test_perplexities = []
-        if type(self).__name__ == 'LatentDirichletAllocation':
+        if self.model_type == 'LDA':
             print(f"Computing perplexity with algorithm='{algorithm}'")
             df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1 - train_size)
             corpus_train = Corpus(
@@ -400,6 +401,9 @@ class TopicModel(object):
 
 
 class LatentDirichletAllocation(TopicModel):
+    def __init__(self, corpus):
+        self.model_type = 'LDA'
+
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
         self.nb_topics = num_topics
         self.algorithm = algorithm
@@ -445,6 +449,10 @@ class LatentDirichletAllocation(TopicModel):
 
 
 class NonNegativeMatrixFactorization(TopicModel):
+    def __init__(self, corpus):
+        self.model_type = 'NMF'
+        self.corpus = corpus
+
     def infer_topics(self, num_topics=10, beta_loss='frobenius', **kwargs):
         self.nb_topics = num_topics
         self.beta_loss = beta_loss
