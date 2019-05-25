@@ -1,10 +1,15 @@
-# coding: utf-8"
+# coding: utf-8
+from typing import List, Tuple
+
 import matplotlib as mpl
 
 from tom_lib.utils import save_topic_number_metrics_data
 
 mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+import pandas as pd
+import seaborn as sns
 import codecs
 import numpy as np
 import json
@@ -16,7 +21,7 @@ class Visualization:
     def __init__(self, topic_model, output_dir=None):
         self.topic_model = topic_model
         if output_dir is None:
-            self.output_dir = Path(f'output_{self.model_type}_{self.nb_topics}_topics')
+            self.output_dir = Path(f'output_{self.topic_model.model_type}_{self.topic_model.nb_topics}_topics')
         else:
             if isinstance(output_dir, str):
                 self.output_dir = Path(output_dir)
@@ -177,3 +182,220 @@ class Visualization:
         json_graph['links'] = json_links
         with codecs.open(file_path, 'w', encoding='utf-8') as fp:
             json.dump(json_graph, fp, indent=4, separators=(',', ': '))
+
+    def plot_docs_above_thresh(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        thresh: float = 0.5,
+        kind: str = 'count',
+        n_words: int = 10,
+        figsize: Tuple[int, int] = (12, 8),
+        savefig: bool = False,
+    ):
+        '''plot the number of documents associated with each topic, above some threshold
+        kind = 'count' or 'percent'
+        '''
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if kind == 'count':
+            if normalized:
+                result = ((
+                    self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) > thresh).sum(axis=0)
+            else:
+                result = (self.topic_model.document_topic_matrix > thresh).sum(axis=0)
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
+            ax.set_ylabel('Count of documents')
+        elif kind == 'percent':
+            if normalized:
+                result = ((
+                    (self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) > thresh).sum(axis=0) / self.topic_model.corpus.size)
+            else:
+                result = ((
+                    self.topic_model.document_topic_matrix > thresh).sum(axis=0) / self.topic_model.corpus.size)
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
+            ax.set_ylabel('Percent of documents')
+
+        result = np.array(result)[0]
+        result = result[[tc in topic_cols for tc in topic_cols_all]]
+        sns.barplot(x=topic_cols, y=result, ax=ax)
+        # result = pd.DataFrame(data=result, columns=topic_cols_all)[topic_cols]
+        # sns.barplot(ax=ax, data=result)
+
+        title_str = f'Documents above {thresh} topic loading'
+        if normalized:
+            title_str = f'{title_str} (normalized)'
+        title_str = f'{title_str}; {self.topic_model.corpus.size:,} total docs'
+
+        ax.set_title(title_str)
+        fig.autofmt_xdate()
+
+        if savefig:
+            filename_out = f'hist_above_thresh_{kind}_{len(topic_cols)}_topics.png'
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
+    def plot_heatmap(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        mask_thresh: float = None,
+        cmap=None,
+        vmax: float = None,
+        vmin: float = None,
+        fmt: str = '.2f',
+        n_words: int = 10,
+        figsize: Tuple[int, int] = None,
+        savefig: bool = False,
+    ):
+        '''Plot a heatmap of a correlation dataframe
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if normalized:
+            corr = np.corrcoef(
+                (self.topic_model.document_topic_matrix /
+                    self.topic_model.document_topic_matrix.sum(axis=1)).T)
+            norm_str = 'normalized'
+        else:
+            corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
+            norm_str = ''
+
+        corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
+        corr = corr.loc[topic_cols, topic_cols]
+
+        if mask_thresh is None:
+            mask_thresh = 0
+        if figsize is None:
+            figsize = (max(25, len(topic_cols)), max(15, min(len(topic_cols) // 1.2, 15)))
+        if cmap is None:
+            cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+        if vmax is None:
+            vmax = corr.max().max()
+        # vmax=0.25
+        # vmin=-vmax
+        if vmin is None:
+            vmin = corr.min().min()
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        sns.heatmap(corr, ax=ax, center=0, annot=True, fmt=fmt,
+                    vmin=vmin, vmax=vmax,
+                    mask=((corr > -mask_thresh) & (corr < mask_thresh)),
+                    cmap=cmap,
+                    # square=True,
+                    )
+
+        ax.hlines(range(1, corr.shape[0]), *ax.get_xlim(), lw=0.5)
+        ax.vlines(range(1, corr.shape[1]), *ax.get_ylim(), lw=0.5)
+
+        fig.autofmt_xdate()
+        fig.tight_layout()
+
+        if savefig:
+            filename_out = f'topic-topic_corr{norm_str}_{len(topic_cols)}_topics.png'
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
+    def plot_clustermap(
+        self,
+        normalized: bool = True,
+        mask_thresh: float = None,
+        cmap=None,
+        vmax: float = None,
+        vmin: float = None,
+        fmt: str = '.2f',
+        n_words: int = 10,
+        figsize: Tuple[int, int] = None,
+        savefig: bool = False,
+        metric: str = None,
+        method: str = None,
+    ):
+        '''Plot a clustermap of a correlation dataframe (df.corr())
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+
+        if normalized:
+            corr = np.corrcoef(
+                (self.topic_model.document_topic_matrix /
+                    self.topic_model.document_topic_matrix.sum(axis=1)).T)
+            norm_str = 'normalized'
+        else:
+            corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
+            norm_str = ''
+
+        corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
+
+        if mask_thresh is None:
+            mask_thresh = 0
+        if figsize is None:
+            figsize = (max(25, len(topic_cols_all)), max(15, min(len(topic_cols_all) // 1.2, 15)))
+        if cmap is None:
+            cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+        if vmax is None:
+            vmax = corr.max().max()
+        # vmax=0.25
+        # vmin=-vmax
+        if vmin is None:
+            vmin = corr.min().min()
+
+        if metric is None:
+            metric = 'euclidean'
+            # metric = 'correlation'
+
+        if method is None:
+            # method = 'complete'
+            method = 'average'
+            # method = 'ward'
+
+        g = sns.clustermap(
+            corr,
+            center=0, annot=True, fmt=fmt,
+            metric=metric,
+            method=method,
+            vmin=vmin, vmax=vmax,
+            mask=((corr > -mask_thresh) & (corr < mask_thresh)),
+            cmap=cmap,
+            figsize=figsize,
+        )
+
+        g.ax_heatmap.hlines(range(1, corr.shape[0]), *g.ax_heatmap.get_xlim(), lw=0.5)
+        g.ax_heatmap.vlines(range(1, corr.shape[1]), *g.ax_heatmap.get_ylim(), lw=0.5)
+
+        g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xticklabels(), rotation=30, ha='right')
+
+        if savefig:
+            filename_out = f'topic-topic_corr_grouped{norm_str}_{len(topic_cols_all)}_topics.png'
+            # save image to disk
+            g.savefig(self.output_dir / '{}'.format(filename_out), dpi=150, transparent=False)
+            # save values to csv
+            corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv('{}.csv'.format(filename_out))
+        else:
+            plt.show()
+
+        return g
