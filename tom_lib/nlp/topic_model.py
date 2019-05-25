@@ -239,10 +239,10 @@ class TopicModel(object):
     def print_topics(self, num_words: int = 10, sort_by_freq: str = ''):
         frequency = self.topics_frequency(count=False)
         frequency_count = self.topics_frequency(count=True)
+        top_words_topics = self.top_words_topics(num_words)
         topic_list = []
         for topic_id in range(self.nb_topics):
-            top_words = [weighted_word[0] for weighted_word in self.top_words(topic_id, num_words)]
-            topic_list.append((topic_id, frequency[topic_id], frequency_count[topic_id], top_words))
+            topic_list.append((topic_id, frequency[topic_id], frequency_count[topic_id], top_words_topics[topic_id]))
         if sort_by_freq.lower() == 'asc':
             topic_list.sort(key=lambda x: x[1], reverse=False)
         elif sort_by_freq.lower() == 'desc':
@@ -251,10 +251,17 @@ class TopicModel(object):
         for topic_id, frequency, frequency_count, top_words in topic_list:
             print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(top_words)}")
 
-    def top_words(self, topic_id: int, num_words: int):
+    def top_words(self, topic_id: int, num_words: int = 10):
         word_ids = np.argsort(self.word_distribution_for_topic(topic_id))[:-num_words - 1:-1]
         weighted_words = [(self.corpus.word_for_id(word_id), self.topic_word_matrix[topic_id, word_id]) for word_id in word_ids]
         return weighted_words
+
+    def top_words_topics(self, num_words: int = 10):
+        top_words_topics = []
+        for i in range(self.nb_topics):
+            top_words = [weighted_word[0] for weighted_word in self.top_words(i, num_words)]
+            top_words_topics.append(top_words)
+        return top_words_topics
 
     def print_top_docs(self, topics=-1, top_n: int = 10, weights: bool = False, num_words: int = 10):
         for t in list(self.top_topic_docs(topics=topics, top_n=top_n, weights=weights)):
