@@ -16,7 +16,7 @@ class Visualization:
     def __init__(self, topic_model, output_dir=None):
         self.topic_model = topic_model
         if output_dir is None:
-            self.output_dir = Path('output')
+            self.output_dir = Path(f'output_{self.model_type}_{self.nb_topics}_topics')
         else:
             if isinstance(output_dir, str):
                 self.output_dir = Path(output_dir)
