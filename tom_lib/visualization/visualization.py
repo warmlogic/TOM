@@ -1,23 +1,43 @@
 # coding: utf-8
 from typing import List, Tuple
+import codecs
+import json
+from pathlib import Path
 
 import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
 from tom_lib.utils import save_topic_number_metrics_data
 
 mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
-import pandas as pd
-import seaborn as sns
-import codecs
-import numpy as np
-import json
-from pathlib import Path
+
+
+def split_string_sep(string: str, sep: str = None):
+    '''Split a string on spaces and put together with newlines
+    '''
+    if sep is None:
+        sep = ' '
+    string_new = sep.join(string.split(sep=sep)[:2])
+    if len(string.split()) > 2:
+        string_new = '\n'.join([string_new, sep.join(string.split()[2:4])])
+        if len(string.split()) > 4:
+            string_new = '\n'.join([string_new, sep.join(string.split()[4:7])])
+            if len(string.split()) > 7:
+                string_new = '\n'.join([string_new, sep.join(string.split()[7:])])
+    return string_new
+
+
+def split_string_nchar(string: str, nchar: int = 25):
+    '''Split a string into a given number of chunks based on number of characters
+    '''
+    return '\n'.join([string[(i * nchar):(i + 1) * nchar] for i in range(int(np.ceil(len(string) / nchar)))])
 
 
 class Visualization:
-
     def __init__(self, topic_model, output_dir=None):
         self.topic_model = topic_model
         if output_dir is None:
@@ -183,6 +203,112 @@ class Visualization:
         with codecs.open(file_path, 'w', encoding='utf-8') as fp:
             json.dump(json_graph, fp, indent=4, separators=(',', ': '))
 
+    def plot_docs_over_time_count(
+        self,
+        freq: str = '1Y',
+        by_source=False,
+        ma_window=None,
+        figsize: Tuple[int, int] = (12, 8),
+        savefig: bool = False,
+    ):
+        '''Plot count of documents per frequency window, optionally by source
+        '''
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        if by_source:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
+        result_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+            self.topic_model.corpus._date_col).groupby(
+            by=groupby).size()
+
+        if ma_window:
+            result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
+
+        if by_source:
+            result_count.unstack().plot(ax=ax, kind='line')
+            ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+        else:
+            result_count.plot(ax=ax, kind='line')
+
+        ax.set_title('Article counts')
+
+        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'doc_count'
+            if by_source:
+                source_string = 'source'
+            else:
+                source_string = 'overall'
+            if ma_window:
+                ma_string = f'_{ma_window}_MA'
+            else:
+                ma_string = ''
+
+            filename_out = f'{plot_string}_{source_string}{ma_string}.png'
+
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
+    def plot_docs_over_time_percent_source(
+        self,
+        freq: str = '1Y',
+        ma_window=None,
+        figsize: Tuple[int, int] = (12, 8),
+        savefig: bool = False,
+    ):
+        '''Plot percent of documents per source and frequency window
+        '''
+
+        total_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+            self.topic_model.corpus._date_col).groupby(
+            by=[pd.Grouper(freq=freq)]).size()
+
+        result_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+            self.topic_model.corpus._date_col).groupby(
+            by=[pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]).size() / total_count
+
+        if ma_window:
+            result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        result_count.unstack().plot(ax=ax, kind='line')
+        ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+
+        ax.set_title('Percent of articles per source per year')
+
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'doc_percent_source'
+            if ma_window:
+                ma_string = f'_{ma_window}_MA'
+            else:
+                ma_string = ''
+            filename_out = f'{plot_string}{ma_string}.png'
+
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
     def plot_docs_above_thresh(
         self,
         topic_cols: List[str] = None,
@@ -193,7 +319,7 @@ class Visualization:
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
     ):
-        '''plot the number of documents associated with each topic, above some threshold
+        '''Plot the number of documents associated with each topic, above some threshold
         kind = 'count' or 'percent'
         '''
 
@@ -205,21 +331,26 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
+        if normalized:
+            norm_string = 'normalized'
+        else:
+            norm_string = ''
+
         if kind == 'count':
             if normalized:
                 result = ((
-                    self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) > thresh).sum(axis=0)
+                    self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) >= thresh).sum(axis=0)
             else:
-                result = (self.topic_model.document_topic_matrix > thresh).sum(axis=0)
+                result = (self.topic_model.document_topic_matrix >= thresh).sum(axis=0)
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
             ax.set_ylabel('Count of documents')
         elif kind == 'percent':
             if normalized:
                 result = ((
-                    (self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) > thresh).sum(axis=0) / self.topic_model.corpus.size)
+                    (self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) >= thresh).sum(axis=0) / self.topic_model.corpus.size)
             else:
                 result = ((
-                    self.topic_model.document_topic_matrix > thresh).sum(axis=0) / self.topic_model.corpus.size)
+                    self.topic_model.document_topic_matrix >= thresh).sum(axis=0) / self.topic_model.corpus.size)
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
             ax.set_ylabel('Percent of documents')
 
@@ -231,14 +362,18 @@ class Visualization:
 
         title_str = f'Documents above {thresh} topic loading'
         if normalized:
-            title_str = f'{title_str} (normalized)'
+            title_str = f'{title_str} ({norm_string})'
         title_str = f'{title_str}; {self.topic_model.corpus.size:,} total docs'
 
         ax.set_title(title_str)
         fig.autofmt_xdate()
 
         if savefig:
-            filename_out = f'hist_above_thresh_{kind}_{len(topic_cols)}_topics.png'
+            plot_string = 'hist_above_thresh'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}_{kind}.png'
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
             plt.close('all')
@@ -272,10 +407,10 @@ class Visualization:
             corr = np.corrcoef(
                 (self.topic_model.document_topic_matrix /
                     self.topic_model.document_topic_matrix.sum(axis=1)).T)
-            norm_str = 'normalized'
+            norm_string = 'normalized'
         else:
             corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
-            norm_str = ''
+            norm_string = ''
 
         corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
         corr = corr.loc[topic_cols, topic_cols]
@@ -310,7 +445,11 @@ class Visualization:
         fig.tight_layout()
 
         if savefig:
-            filename_out = f'topic-topic_corr{norm_str}_{len(topic_cols)}_topics.png'
+            plot_string = 'topic-topic_corr'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
             plt.close('all')
@@ -321,6 +460,7 @@ class Visualization:
 
     def plot_clustermap(
         self,
+        topic_cols: List[str] = None,
         normalized: bool = True,
         mask_thresh: float = None,
         cmap=None,
@@ -338,17 +478,20 @@ class Visualization:
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
 
         if normalized:
             corr = np.corrcoef(
                 (self.topic_model.document_topic_matrix /
                     self.topic_model.document_topic_matrix.sum(axis=1)).T)
-            norm_str = 'normalized'
+            norm_string = 'normalized'
         else:
             corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
-            norm_str = ''
+            norm_string = ''
 
         corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
+        corr = corr.loc[topic_cols, topic_cols]
 
         if mask_thresh is None:
             mask_thresh = 0
@@ -390,12 +533,714 @@ class Visualization:
         g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xticklabels(), rotation=30, ha='right')
 
         if savefig:
-            filename_out = f'topic-topic_corr_grouped{norm_str}_{len(topic_cols_all)}_topics.png'
+            plot_string = 'topic-topic_corr_grouped'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}'
             # save image to disk
-            g.savefig(self.output_dir / '{}'.format(filename_out), dpi=150, transparent=False)
+            g.savefig(self.output_dir / f'{filename_out}.png', dpi=150, transparent=False)
             # save values to csv
-            corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv('{}.csv'.format(filename_out))
+            corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv(f'{filename_out}.csv')
+            plt.close('all')
         else:
             plt.show()
 
         return g
+
+    def plot_topic_loading_hist(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        bins=None,
+        ncols: int = None,
+        n_words: int = 10,
+        savefig: bool = False,
+    ):
+        '''Plot histogram of document loading distributions per topic
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if ncols is None:
+            ncols = 5
+        nrows = int(np.ceil(len(topic_cols) / ncols))
+
+        fig, axes = plt.subplots(
+            figsize=(ncols * 3, nrows * 3),
+            nrows=nrows, ncols=ncols,
+            sharey=True,
+            sharex=True,
+        )
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all)
+            norm_string = 'normalized'
+            if bins is None:
+                bins = np.arange(0, 1.05, 0.05)
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all)
+            norm_string = ''
+            if bins is None:
+                bins = 10
+
+        _df = _df[topic_cols]
+
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            _df[topic_col].plot(ax=ax, kind='hist', bins=bins)
+            title = split_string_nchar(topic_col)
+            ax.set_title(title)
+            xlabel = 'Topic Loading'
+            if normalized:
+                ax.set_xlabel(f'{xlabel}\n({norm_string})')
+                ax.set_xlim((0, 1))
+            else:
+                ax.set_xlabel(xlabel)
+            # ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
+            # ax.set_yticklabels([f'{int(x):,}' for x in ax.get_yticks().tolist()]);
+
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'topic_loading_hist'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            else:
+                norm_string = ''
+
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, axes
+
+    def plot_topic_loading_boxplot(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        figsize: Tuple[int, int] = (12, 8),
+        n_words: int = 10,
+        ylim: Tuple[float, float] = None,
+        savefig: bool = False,
+    ):
+        '''Marginal distributions of topic loadings
+
+        Plot Boxplot of document loading distributions per topic
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all)
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
+            norm_string = 'normalized'
+            ax.set_ylabel(f'Topic Loading ({norm_string})')
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all)
+            norm_string = ''
+            ax.set_ylabel('Topic Loading (absolute)')
+
+        _df = _df[topic_cols]
+        ax = sns.boxplot(ax=ax, data=_df)
+
+        ax.set_title('Topic Loading Distribution (boxplot)')
+
+        if ylim:
+            ax.set_ylim(ylim)
+
+        fig.autofmt_xdate()
+
+        if savefig:
+            plot_string = 'topic_loading_boxplot'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            else:
+                norm_string = ''
+
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
+    def plot_topic_loading_barplot(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        figsize: Tuple[int, int] = (12, 8),
+        n_words: int = 10,
+        ylim: Tuple[float, float] = None,
+        savefig: bool = False,
+    ):
+        '''Marginal distributions of topic loadings
+
+        Plot Barplot of document loading distributions per topic
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        fig, ax = plt.subplots(figsize=figsize)
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all)
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
+            norm_string = 'normalized'
+            ax.set_ylabel(f'Average Topic Loading ({norm_string})')
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all)
+            norm_string = ''
+            ax.set_ylabel('Average Topic Loading (absolute)')
+
+        _df = _df[topic_cols]
+        ax = sns.barplot(ax=ax, data=_df, estimator=np.mean)
+
+        ax.set_title('Topic Loading Distribution (barplot; 95% CI of the mean)')
+
+        if ylim:
+            ax.set_ylim(ylim)
+
+        fig.autofmt_xdate()
+
+        if savefig:
+            plot_string = 'topic_loading_barplot'
+            topics_string = f'{len(topic_cols)}_topics'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            else:
+                norm_string = ''
+
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+
+            # save image to disk
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, ax
+
+    def plot_one_topic_over_time_count(
+        self,
+        topic_col: str,
+        normalized: bool = True,
+        thresh: float = 0.1,
+        freq: str = '1Y',
+        n_words: int = 10,
+    ):
+
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+
+        idx = topic_cols_all.index(topic_col)
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1))[:, idx],
+                columns=[topic_col],
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix[:, idx],
+                columns=[topic_col],
+            )
+            norm_string = ''
+
+        addtl_cols = [self.topic_model.corpus._date_col]
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        result = _df[_df[topic_col] >= thresh].groupby(
+            pd.Grouper(freq=freq))[topic_col].size()
+
+        if result.empty:
+            print(f"No articles >= {thresh}")
+            fig = None
+            ax = None
+        else:
+            fig, ax = plt.subplots()
+            result.plot(ax=ax, kind='line', marker='o')
+
+            ax.set_title(topic_col)
+
+            ylabel = f"# of year's articles >= {thresh}"
+            if normalized:
+                # ax.set_ylim((-0.05, 1.05))
+                ylabel = f"{ylabel}\n({norm_string})"
+
+            ax.set_ylabel(ylabel)
+            ax.set_xlabel("Publication year")
+            plt.show()
+
+        return fig, ax
+
+    def plot_one_topic_over_time_percent(
+        self,
+        topic_col: str,
+        normalized: bool = True,
+        thresh: float = 0.1,
+        freq: str = '1Y',
+        n_words: int = 10,
+    ):
+
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+
+        idx = topic_cols_all.index(topic_col)
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1))[:, idx],
+                columns=[topic_col],
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix[:, idx],
+                columns=[topic_col],
+            )
+            norm_string = ''
+
+        addtl_cols = [self.topic_model.corpus._date_col]
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        result_total = _df.groupby(pd.Grouper(freq=freq))[topic_col].size()
+        result_thresh = _df[_df[topic_col] >= thresh].groupby(
+            pd.Grouper(freq=freq))[topic_col].size()
+        result = result_thresh / result_total
+
+        if result.empty:
+            print(f"No articles >= {thresh}")
+            fig = None
+            ax = None
+        else:
+            fig, ax = plt.subplots()
+            result.plot(ax=ax, kind='line', marker='o')
+
+            ax.set_title(topic_col)
+
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+            ylabel = f"% of year's articles >= {thresh}"
+            if normalized:
+                ylabel = f"{ylabel}\n({norm_string})"
+
+            ax.set_ylabel(ylabel)
+            ax.set_xlabel("Publication year")
+            plt.show()
+
+        return fig, ax
+
+    def plot_topic_over_time_count(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        thresh: float = 0.1,
+        freq: str = '1Y',
+        n_words: int = 10,
+        ncols: int = None,
+        ma_window=None,
+        by_source=False,
+        savefig: bool = False,
+    ):
+        '''Plot count of documents >= a given threshold per frequency window
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if ncols is None:
+            ncols = 5
+        nrows = int(np.ceil(len(topic_cols) / ncols))
+
+        fig, axes = plt.subplots(
+            figsize=(ncols * 3, nrows * 3),
+            nrows=nrows, ncols=ncols,
+            sharey=True,
+            sharex=True,
+        )
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all,
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all,
+            )
+            norm_string = ''
+
+        _df = _df[topic_cols]
+
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        # so all have the same axes
+        idx = _df.groupby(
+            by=[pd.Grouper(freq=freq),
+                self.topic_model.corpus._affiliation_col,
+                ])[topic_cols].size().unstack().index
+
+        if by_source:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            result_thresh = _df[_df[topic_col] >= thresh].groupby(
+                by=groupby)[topic_col].size()
+            result = pd.DataFrame(index=idx)
+            if by_source:
+                result = result.merge(result_thresh.unstack(), how='outer',
+                                      left_index=True, right_index=True).fillna(0)
+            else:
+                result = result.merge(result_thresh, how='outer',
+                                      left_index=True, right_index=True).fillna(0)
+            if ma_window:
+                result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
+            result.plot(ax=ax, kind='line', marker='', legend=None)
+
+            title = split_string_nchar(topic_col)
+            ax.set_title(title)
+            ylabel = f"# of year's articles >= {thresh}"
+            if normalized:
+                ylabel = f"{ylabel}\n({norm_string})"
+            ax.set_ylabel(ylabel)
+            ax.set_xlabel("Publication year")
+
+        # for placing the source_name legend
+        if by_source:
+            handles, labels = ax.get_legend_handles_labels()
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+
+        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'topic_count'
+            if by_source:
+                source_string = 'source'
+            else:
+                source_string = 'overall'
+            topics_string = f'{len(topic_cols)}_topics'
+            thresh_string = f'{int(thresh * 100)}_topicthresh'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            else:
+                norm_string = ''
+            if ma_window:
+                ma_string = f'_{ma_window}_MA'
+            else:
+                ma_string = ''
+
+            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+
+            # save image to disk
+            if by_source:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+            else:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, axes
+
+    def plot_topic_over_time_percent(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        thresh: float = 0.1,
+        freq: str = '1Y',
+        n_words: int = 10,
+        ncols: int = None,
+        ma_window=None,
+        by_source=False,
+        savefig: bool = False,
+    ):
+        '''Plot the percent of articles that are above the threshold for that year.
+        Therefore, a given year across topics adds up to 100%.
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if ncols is None:
+            ncols = 5
+        nrows = int(np.ceil(len(topic_cols) / ncols))
+
+        fig, axes = plt.subplots(
+            figsize=(ncols * 3, nrows * 3),
+            nrows=nrows, ncols=ncols,
+            sharey=True,
+            sharex=True,
+        )
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all,
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all,
+            )
+            norm_string = ''
+
+        _df = _df[topic_cols]
+
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+
+        # join the date with boolean >= thresh
+        if by_source:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+            result_thresh = _df[[self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]].join(
+                _df[topic_cols] >= thresh).reset_index().set_index(
+                    self.topic_model.corpus._date_col).groupby(
+                        by=groupby)[topic_cols].sum()
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+            result_thresh = _df[[self.topic_model.corpus._date_col]].join(
+                _df[topic_cols] >= thresh).reset_index().set_index(
+                    self.topic_model.corpus._date_col).groupby(
+                        by=groupby)[topic_cols].sum()
+
+        result = result_thresh.div(result_thresh.sum(axis=1), axis='index')
+
+        if ma_window:
+            result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
+
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            if by_source:
+                result[topic_col].unstack().plot(ax=ax, kind='line', marker='', legend=None)
+            else:
+                result[topic_col].plot(ax=ax, kind='line', marker='', legend=None)
+
+            title = split_string_nchar(topic_col)
+            ax.set_title(title)
+            ylabel = f"% of year's articles >= {thresh}"
+            if normalized:
+                ylabel = f"{ylabel}\n({norm_string})"
+            ax.set_ylabel(ylabel)
+            ax.set_xlabel("Publication year")
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+        # for placing the source_name legend
+        if by_source:
+            handles, labels = ax.get_legend_handles_labels()
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+
+        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'topic_percent'
+            if by_source:
+                source_string = 'source'
+            else:
+                source_string = 'overall'
+            topics_string = f'{len(topic_cols)}_topics'
+            thresh_string = f'{int(thresh * 100)}_topicthresh'
+            if normalized:
+                norm_string = f'_{norm_string}'
+            if ma_window:
+                ma_string = f'_{ma_window}_MA'
+            else:
+                ma_string = ''
+
+            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+
+            # save image to disk
+            if by_source:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+            else:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, axes
+
+    def plot_topic_over_time_loading(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        thresh: float = 0.1,
+        freq: str = '1Y',
+        n_words: int = 10,
+        ncols: int = None,
+        ma_window=None,
+        by_source=False,
+        savefig: bool = False,
+    ):
+        '''For each topic (separately), of the articles above the threshold,
+        plot the average article composition for that year.
+        '''
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if ncols is None:
+            ncols = 5
+        nrows = int(np.ceil(len(topic_cols) / ncols))
+
+        fig, axes = plt.subplots(
+            figsize=(ncols * 3, nrows * 3),
+            nrows=nrows, ncols=ncols,
+            sharey=True,
+            sharex=True,
+        )
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix /
+                      self.topic_model.document_topic_matrix.sum(axis=1)),
+                columns=topic_cols_all,
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix.todense(),
+                columns=topic_cols_all,
+            )
+            norm_string = ''
+
+        _df = _df[topic_cols]
+
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        # so all have the same axes
+        idx = _df.groupby(
+            by=[pd.Grouper(freq=freq),
+                self.topic_model.corpus._affiliation_col,
+                ])[topic_cols].size().unstack().index
+
+        if by_source:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            result_thresh = _df[_df[topic_col] >= thresh].groupby(
+                by=groupby)[topic_col].mean()
+            result = pd.DataFrame(index=idx)
+            if by_source:
+                result = result.merge(result_thresh.unstack(), how='outer',
+                                      left_index=True, right_index=True).fillna(0)
+            else:
+                result = result.merge(result_thresh, how='outer',
+                                      left_index=True, right_index=True).fillna(0)
+            if ma_window:
+                result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
+            result.plot(ax=ax, kind='line', marker='', legend=None)
+
+            title = split_string_nchar(topic_col)
+            ax.set_title(title)
+            ylabel = "Avg. Topic Load per Year"
+            if normalized:
+                ylabel = f"{ylabel}\n({norm_string})"
+                ax.set_ylim((-0.05, 1.05))
+                ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+
+            ax.set_ylabel(ylabel)
+            ax.set_xlabel("Publication year")
+
+        # for placing the source_name legend
+        if by_source:
+            handles, labels = ax.get_legend_handles_labels()
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+
+        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
+        fig.tight_layout()
+
+        if savefig:
+            plot_string = 'topic_loading'
+            if by_source:
+                source_string = 'source'
+            else:
+                source_string = 'overall'
+            topics_string = f'{len(topic_cols)}_topics'
+            thresh_string = f'{int(thresh * 100)}_topicthresh'
+            if normalized:
+                norm_string = '_normalized'
+            else:
+                norm_string = ''
+            if ma_window:
+                ma_string = f'_{ma_window}_MA'
+            else:
+                ma_string = ''
+
+            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+
+            # save image to disk
+            if by_source:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+            else:
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+
+            plt.close('all')
+        else:
+            plt.show()
+
+        return fig, axes
