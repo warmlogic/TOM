@@ -47,10 +47,17 @@ class Corpus:
 
         if isinstance(source_filepath, str) or isinstance(source_filepath, Path):
             self._source_filepath = source_filepath
-            self.data_frame = pd.read_csv(source_filepath, sep=self._sep, encoding='utf-8')
+            self.data_frame = pd.read_csv(
+                source_filepath,
+                sep=self._sep,
+                encoding='utf-8',
+                parse_dates=[self._date_col],
+            )
         elif isinstance(source_filepath, pd.DataFrame):
             self._source_filepath = 'pd.DataFrame from memory'
             self.data_frame = source_filepath.copy()
+
+        self.data_frame[self._date_col]
 
         if self._sample < 1.0:
             self.data_frame = self.data_frame.sample(frac=self._sample)
