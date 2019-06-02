@@ -127,14 +127,35 @@ body {
 }
 
 .two_images img {
-  width: 600px;
+  width: 700px;
 	padding: 5px;
   float: left;
   /* display: inline; */
 }
 
-.one_image img {
+.one_image_1000 img {
+  width: 1000px;
+	padding: 5px;
+  float: left;
+  /* display: inline; */
+}
+
+.one_image_1200 img {
   width: 1200px;
+	padding: 5px;
+  float: left;
+  /* display: inline; */
+}
+
+.one_image_1400 img {
+  width: 1400px;
+	padding: 5px;
+  float: left;
+  /* display: inline; */
+}
+
+.one_image_100percent img {
+  width: 100%;
 	padding: 5px;
   float: left;
   /* display: inline; */
