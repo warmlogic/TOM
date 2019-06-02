@@ -6,6 +6,7 @@ import tom_lib.utils as ut
 from flask import Flask, render_template, request, send_from_directory
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
+from tom_lib.visualization.visualization import Visualization
 import logging
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
@@ -86,6 +87,7 @@ affiliation_repartition_folder = data_folder / 'affiliation_repartition'
 # author_network_folder = data_folder / 'author_network'
 topic_distribution_d_folder = data_folder / 'topic_distribution_d'
 topic_distribution_w_folder = data_folder / 'topic_distribution_w'
+figs_folder = data_folder / 'figs'
 
 app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
@@ -149,8 +151,8 @@ else:
         ut.save_affiliation_repartition(topic_model.affiliation_repartition(topic_id),
                                         static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv')
 
-        min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].min()
-        max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].max()
+        min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
+        max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
 
         evolution = []
         for i in range(min_year, max_year + 1):
@@ -182,6 +184,20 @@ else:
     #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_associations[topic_id]),
     #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
 
+viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
+normalized = True
+freq = '1Y'
+by_source = False
+ma_window = None
+savefig = True
+
+fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
+    freq=freq,
+    by_source=True,
+    ma_window=ma_window,
+    savefig=savefig,
+)
+
 topic_model.print_topics(num_words=10)
 
 topic_description = []
@@ -192,25 +208,29 @@ for i in range(topic_model.nb_topics):
 
 @app.route('/')
 def index():
-    return render_template('index.html',
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           method=type(topic_model).__name__,
-                           corpus_size=topic_model.corpus.size,
-                           vocabulary_size=len(topic_model.corpus.vocabulary),
-                           max_relative_frequency=max_relative_frequency,
-                           min_absolute_frequency=min_absolute_frequency,
-                           vectorization=vectorization,
-                           num_topics=num_topics)
+    return render_template(
+        'index.html',
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        method=type(topic_model).__name__,
+        corpus_size=topic_model.corpus.size,
+        vocabulary_size=len(topic_model.corpus.vocabulary),
+        max_relative_frequency=max_relative_frequency,
+        min_absolute_frequency=min_absolute_frequency,
+        vectorization=vectorization,
+        num_topics=num_topics,
+        fig_docs_over_time_count=figs_folder / fig_docs_over_time_count,
+    )
 
 
 @app.route('/topic_cloud.html')
 def topic_cloud():
-    return render_template('topic_cloud.html',
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           topic_cloud_filename=topic_cloud_folder / f'topic_cloud.json',
-                           )
+    return render_template(
+        'topic_cloud.html',
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        topic_cloud_filename=topic_cloud_folder / f'topic_cloud.json',
+    )
 
 
 @app.route('/vocabulary.html')
@@ -225,11 +245,13 @@ def vocabulary():
         for l in range(j * words_per_column, (j + 1) * words_per_column):
             sub_vocabulary.append(word_list[l])
         splitted_vocabulary.append(sub_vocabulary)
-    return render_template('vocabulary.html',
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           splitted_vocabulary=splitted_vocabulary,
-                           vocabulary_size=len(word_list))
+    return render_template(
+        'vocabulary.html',
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        splitted_vocabulary=splitted_vocabulary,
+        vocabulary_size=len(word_list),
+    )
 
 
 @app.route('/topic/<tid>.html')
@@ -242,17 +264,18 @@ def topic_details(tid):
                           ', '.join(topic_model.corpus.affiliation(document_id)).title(),
                           ', '.join(topic_model.corpus.author(document_id)).title(),
                           topic_model.corpus.date(document_id), document_id))
-    return render_template('topic.html',
-                           topic_id=tid,
-                           frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
-                           documents=documents,
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
-                           frequency_filename=frequency_folder / f'frequency{tid}.tsv',
-                           affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
-                           # author_network_filename=author_network_folder / f'author_network{tid}.json',
-                           )
+    return render_template(
+        'topic.html',
+        topic_id=tid,
+        frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
+        documents=documents,
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
+        frequency_filename=frequency_folder / f'frequency{tid}.tsv',
+        affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
+        # author_network_filename=author_network_folder / f'author_network{tid}.json',
+    )
 
 
 @app.route('/document/<did>.html')
@@ -274,20 +297,21 @@ def document_details(did):
              round(another_doc[1], 3),
              ),
         )
-    return render_template('document.html',
-                           doc_id=did,
-                           words=word_list[:21],
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           documents=documents,
-                           title=topic_model.corpus.title(int(did)).title(),
-                           authors=', '.join(topic_model.corpus.author(int(did))).title(),
-                           year=topic_model.corpus.date(int(did)),
-                           short_content=topic_model.corpus.title(int(did)).title(),
-                           affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
-                           full_text=topic_model.corpus.full_text(int(did)),
-                           topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
-                           )
+    return render_template(
+        'document.html',
+        doc_id=did,
+        words=word_list[:21],
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        documents=documents,
+        title=topic_model.corpus.title(int(did)).title(),
+        authors=', '.join(topic_model.corpus.author(int(did))).title(),
+        year=topic_model.corpus.date(int(did)),
+        short_content=topic_model.corpus.title(int(did)).title(),
+        affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
+        full_text=topic_model.corpus.full_text(int(did)),
+        topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
+    )
 
 
 @app.route('/word/<wid>.html')
@@ -302,14 +326,15 @@ def word_details(wid):
              document_id,
              ),
         )
-    return render_template('word.html',
-                           word_id=wid,
-                           word=topic_model.corpus.word_for_id(int(wid)),
-                           topic_ids=topic_description,
-                           doc_ids=range(topic_model.corpus.size),
-                           documents=documents,
-                           topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
-                           )
+    return render_template(
+        'word.html',
+        word_id=wid,
+        word=topic_model.corpus.word_for_id(int(wid)),
+        topic_ids=topic_description,
+        doc_ids=range(topic_model.corpus.size),
+        documents=documents,
+        topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
+    )
 
 
 @app.route('/robots.txt')
