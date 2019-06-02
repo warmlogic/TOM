@@ -33,7 +33,7 @@
                     <li><a href="../topic/{{ loop.index - 1}}.html">{{ topic }}</a></li>
                 {% endfor %}
             </ul>
-    </div>
+        </div>
         <div id="right_column">
             <h2>Dataset and model details</h2>
             <ul>
@@ -43,6 +43,11 @@
                 <li>Vectorization: {{ vectorization }}</li>
                 <li>Number of topics: {{ num_topics }}</li>
             </ul>
+        </div>
+    </div>
+    <div id="one_column">
+        <div class="two_images">
+            <img src={{ url_for('static', filename=fig_docs_over_time_count) }}>
         </div>
     </div>
 </body>
