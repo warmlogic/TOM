@@ -54,13 +54,19 @@
     </div>
     <div id="one_column">
         <div class="one_image_1000">
-            <p>Average topic loadings</p>
+            <p>Barplot of average topic loadings, with 95% CI error bars</p>
             <img src={{ url_for('static', filename=fig_topic_barplot) }}>
         </div>
     </div>
+    <!-- <div id="one_column">
+        <div class="one_image_1400">
+            <p>Heatmap of topic-topic correlation values (Pearson correlation coefficient)</p>
+            <img src={{ url_for('static', filename=fig_topic_heatmap) }}>
+        </div>
+    </div> -->
     <div id="one_column">
             <div class="one_image_1400">
-            <p>Hierarchically-clustered heatmap of topics</p>
+            <p>Hierarchically-clustered topic-topic correlation values (Pearson correlation coefficient)</p>
             <img src={{ url_for('static', filename=fig_topic_clustermap) }}>
         </div>
     </div>
@@ -72,8 +78,14 @@
     </div>
     <div id="one_column">
         <div class="one_image_1200">
-            <p>Topics over time: A given year across topics adds up to 100%</p>
+            <p>Topics over time: Percent of documents above the threshold that are above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
+        </div>
+    </div>
+    <div id="one_column">
+        <div class="one_image_1200">
+            <p>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</p>
+            <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>
     </div>
 </body>

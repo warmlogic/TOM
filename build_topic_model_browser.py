@@ -278,18 +278,18 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
     figformat=figformat,
 )
 
-# fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
-#     normalized=normalized,
-#     thresh=thresh,
-#     freq=freq,
-#     by_affil=by_affil,
-#     ma_window=ma_window,
-#     nchar_title=nchar_title,
-#     ncols=ncols,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_affil=by_affil,
+    ma_window=ma_window,
+    nchar_title=nchar_title,
+    ncols=ncols,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
 logger.info('Done.')
 
@@ -325,7 +325,7 @@ def index():
         fig_topic_clustermap=figs_folder / fig_topic_clustermap,
         fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
         fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
-        # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
+        fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
     )
 
 
