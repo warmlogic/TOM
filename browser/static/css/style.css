@@ -71,50 +71,64 @@ body {
 }
 
 #wrap {
-  width:1200px;
+  width:97%;
+  /* margin: auto; */
   margin:0 auto;
 }
 
 #left_column {
   text-align: left;
-  width:700px;
+  width:70%;
   margin:0 auto;
   float:left;
 }
 
 #right_column {
   text-align: left;
-  width:300px;
+  width:30%;
   margin:0 auto;
   float:right;
 }
 
 #five_columns {
   text-align: left;
-  width:200px;
+  width:20%;
   margin:0 auto;
   float:left;
 }
 
 #three_columns {
   text-align: left;
-  width:333px;
+  width:33%;
+  margin:0 auto;
+  float:left;
+}
+
+#two_columns {
+  text-align: left;
+  width:50%;
   margin:0 auto;
   float:left;
 }
 
 #one_column {
   text-align: left;
-  width:1000px;
+  width:100%;
   margin:0 auto;
   float:left;
 }
 
 .main-content {
-	max-width: 900px;
-	min-width: 900px;
+	max-width: 100%;
+	min-width: 100%;
 	text-align: justify;
 	margin: auto;
+	padding: 5px;
+}
+
+.two_images img {
+  width: 600px;
+  display: inline;
 	padding: 5px;
 }
 
