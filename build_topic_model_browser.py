@@ -206,6 +206,8 @@ ma_window = None
 savefig = True
 ncols = 7
 nchar_title = 30
+dpi = 72
+figformat = 'png'
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
@@ -214,27 +216,37 @@ fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
     by_affil=True,
     ma_window=ma_window,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
     freq=freq,
     ma_window=ma_window,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
     normalized=normalized,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 # fig, ax, fig_topic_heatmap = viz.plot_heatmap(
 #     normalized=normalized,
 #     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
 # )
 
 g, fig_topic_clustermap = viz.plot_clustermap(
     normalized=normalized,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
@@ -246,6 +258,8 @@ fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
     nchar_title=nchar_title,
     ncols=ncols,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
@@ -257,6 +271,8 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
     nchar_title=nchar_title,
     ncols=ncols,
     savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
 )
 
 # fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
@@ -268,6 +284,8 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
 #     nchar_title=nchar_title,
 #     ncols=ncols,
 #     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
 # )
 
 logger.info('Done.')

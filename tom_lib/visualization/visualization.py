@@ -215,6 +215,8 @@ class Visualization:
         ma_window=None,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot count of documents per frequency window, optionally by affiliation
         '''
@@ -255,10 +257,10 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}{ma_string}.{figformat}'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -272,6 +274,8 @@ class Visualization:
         ma_window=None,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot percent of documents per affiliation and frequency window
         '''
@@ -305,10 +309,10 @@ class Visualization:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
-            filename_out = f'{plot_string}{ma_string}.png'
+            filename_out = f'{plot_string}{ma_string}.{figformat}'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -325,6 +329,8 @@ class Visualization:
         n_words: int = 10,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot the number of documents associated with each topic, above some threshold
         kind = 'count' or 'percent'
@@ -380,9 +386,9 @@ class Visualization:
             topics_string = f'{len(topic_cols)}_topics'
             if normalized:
                 norm_string = f'_{norm_string}'
-            filename_out = f'{plot_string}_{topics_string}{norm_string}_{kind}.png'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}_{kind}.{figformat}'
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -402,6 +408,8 @@ class Visualization:
         n_words: int = 10,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot a heatmap of a correlation dataframe
         '''
@@ -457,9 +465,9 @@ class Visualization:
             topics_string = f'{len(topic_cols)}_topics'
             if normalized:
                 norm_string = f'_{norm_string}'
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -479,6 +487,8 @@ class Visualization:
         n_words: int = 10,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
         metric: str = None,
         method: str = None,
     ):
@@ -548,10 +558,10 @@ class Visualization:
             if normalized:
                 norm_string = f'_{norm_string}'
             filename_out = f'{plot_string}_{topics_string}{norm_string}'
-            filename_out_img = f'{filename_out}.png'
+            filename_out_img = f'{filename_out}.{figformat}'
             filename_out_data = f'{filename_out}.csv'
             # save image to disk
-            g.savefig(self.output_dir / filename_out_img, dpi=150, transparent=False, bbox_inches='tight')
+            g.savefig(self.output_dir / filename_out_img, dpi=dpi, transparent=False, bbox_inches='tight')
             # save values to csv
             corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv(self.output_dir / filename_out_data)
             plt.close('all')
@@ -570,6 +580,8 @@ class Visualization:
         n_words: int = 10,
         nchar_title: int = None,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot histogram of document loading distributions per topic
         '''
@@ -640,10 +652,10 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -659,6 +671,8 @@ class Visualization:
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Marginal distributions of topic loadings
 
@@ -705,10 +719,10 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -724,6 +738,8 @@ class Visualization:
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Marginal distributions of topic loadings
 
@@ -770,10 +786,10 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
+            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -910,6 +926,8 @@ class Visualization:
         ma_window=None,
         by_affil=False,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot count of documents >= a given threshold per frequency window
         '''
@@ -1016,13 +1034,13 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
@@ -1043,6 +1061,8 @@ class Visualization:
         ma_window=None,
         by_affil=False,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''Plot the percent of documents that are above the threshold for that year.
         Therefore, a given year across topics adds up to 100%.
@@ -1148,13 +1168,13 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
@@ -1175,6 +1195,8 @@ class Visualization:
         ma_window=None,
         by_affil=False,
         savefig: bool = False,
+        dpi: int = 72,
+        figformat: str = 'png',
     ):
         '''For each topic (separately), of the documents above the threshold,
         plot the average topic loading for that year.
@@ -1285,13 +1307,13 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
