@@ -91,6 +91,10 @@ figs_folder = data_folder / 'figs'
 
 app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
+# ##################################
+# Load or train model
+# ##################################
+
 if load_if_existing_model and (static_folder / topic_model_filepath).exists():
     # Load model from disk:
     logger.info(f'Loading topic model: {static_folder / topic_model_filepath}')
@@ -184,12 +188,24 @@ else:
     #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_associations[topic_id]),
     #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
 
-viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
+logger.info('Done.')
+
+# ##################################
+# Make plots
+# ##################################
+
+logger.info('Creating plots...')
+
+# always create these images so they are up to date, and we have the paths based on the variables
+
 normalized = True
+thresh = 0.1
 freq = '1Y'
 by_source = False
 ma_window = None
 savefig = True
+
+viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
 fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
     freq=freq,
@@ -197,6 +213,60 @@ fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
     ma_window=ma_window,
     savefig=savefig,
 )
+
+fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_source(
+    freq=freq,
+    ma_window=ma_window,
+    savefig=savefig,
+)
+
+fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
+    normalized=normalized,
+    savefig=savefig,
+)
+
+# fig, ax, fig_topic_heatmap = viz.plot_heatmap(
+#     normalized=normalized,
+#     savefig=savefig,
+# )
+
+g, fig_topic_clustermap = viz.plot_clustermap(
+    normalized=normalized,
+    savefig=savefig,
+)
+
+fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_source=by_source,
+    ma_window=ma_window,
+    savefig=savefig,
+)
+
+fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_source=by_source,
+    ma_window=ma_window,
+    savefig=savefig,
+)
+
+# fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+#     normalized=normalized,
+#     thresh=thresh,
+#     freq=freq,
+#     by_source=by_source,
+#     ma_window=ma_window,
+#     savefig=savefig,
+# )
+
+logger.info('Done.')
+
+# ##################################
+# Print info and serve pages
+# ##################################
 
 topic_model.print_topics(num_words=10)
 
@@ -220,6 +290,13 @@ def index():
         vectorization=vectorization,
         num_topics=num_topics,
         fig_docs_over_time_count=figs_folder / fig_docs_over_time_count,
+        fig_docs_over_time_percent=figs_folder / fig_docs_over_time_percent,
+        fig_topic_barplot=figs_folder / fig_topic_barplot,
+        # fig_topic_heatmap=figs_folder / fig_topic_heatmap,
+        fig_topic_clustermap=figs_folder / fig_topic_clustermap,
+        fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
+        fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
+        # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
     )
 
 
