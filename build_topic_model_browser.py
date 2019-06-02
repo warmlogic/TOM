@@ -204,7 +204,7 @@ freq = '1Y'
 by_affil = False
 ma_window = None
 savefig = True
-ncols = 6
+ncols = 7
 nchar_title = 30
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
