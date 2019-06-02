@@ -411,7 +411,7 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot a heatmap of a correlation dataframe
+        '''Plot a heatmap of topic-topic Pearson correlation coefficient values
         '''
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
@@ -492,7 +492,8 @@ class Visualization:
         metric: str = None,
         method: str = None,
     ):
-        '''Plot a clustermap of a correlation dataframe (df.corr())
+        '''Plot a hierarchical clustermap of topic-topic Pearson correlation coefficient values
+        (computed with np.corrcoef). Plot is made with Seaborn's clustermap.
         '''
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
@@ -1064,8 +1065,9 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot the percent of documents that are above the threshold for that year.
-        Therefore, a given year across topics adds up to 100%.
+        '''Plot the percent of documents above the threshold that are above the threshold for each topic, per year.
+        Each year across topics adds up to 100%.
+        One document can contribute to multiple topics.
         '''
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
