@@ -204,6 +204,7 @@ freq = '1Y'
 by_source = False
 ma_window = None
 savefig = True
+ncols = 6
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
@@ -241,6 +242,7 @@ fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
     freq=freq,
     by_source=by_source,
     ma_window=ma_window,
+    ncols=ncols,
     savefig=savefig,
 )
 
@@ -250,6 +252,7 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
     freq=freq,
     by_source=by_source,
     ma_window=ma_window,
+    ncols=ncols,
     savefig=savefig,
 )
 
@@ -259,6 +262,7 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
 #     freq=freq,
 #     by_source=by_source,
 #     ma_window=ma_window,
+#     ncols=ncols,
 #     savefig=savefig,
 # )
 
