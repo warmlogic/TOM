@@ -99,6 +99,9 @@ if load_if_existing_model and (static_folder / topic_model_filepath).exists():
     # Load model from disk:
     logger.info(f'Loading topic model: {static_folder / topic_model_filepath}')
     topic_model = ut.load_topic_model(static_folder / topic_model_filepath)
+
+    logger.info(f'Corpus size: {topic_model.corpus.size:,}')
+    logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
 else:
     # Clean the topic model directory
     if (static_folder / tm_folder).exists():
