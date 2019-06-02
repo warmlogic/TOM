@@ -57,8 +57,6 @@ class Corpus:
             self._source_filepath = 'pd.DataFrame from memory'
             self.data_frame = source_filepath.copy()
 
-        self.data_frame[self._date_col]
-
         if self._sample < 1.0:
             self.data_frame = self.data_frame.sample(frac=self._sample)
 
@@ -111,7 +109,7 @@ class Corpus:
         return self.data_frame.iloc[doc_id][self._title_col]
 
     def date(self, doc_id):
-        return self.data_frame.iloc[doc_id][self._date_col]
+        return self.data_frame.iloc[doc_id][self._date_col].year
 
     def author(self, doc_id):
         aut_str = str(self.data_frame.iloc[doc_id][self._author_col])
@@ -151,7 +149,7 @@ class Corpus:
         return doc_idx.tolist()
 
     def doc_ids(self, date):
-        return self.data_frame.loc[self.data_frame[self._date_col] == date].index.tolist()
+        return self.data_frame.loc[self.data_frame[self._date_col].dt.year == date].index.tolist()
 
     def vector_for_document(self, doc_id=None):
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
