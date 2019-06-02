@@ -13,6 +13,9 @@ import seaborn as sns
 
 from tom_lib.utils import save_topic_number_metrics_data
 
+sns.set(rc={"lines.linewidth": 2})
+sns.set_style("whitegrid")
+
 mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
 
 
@@ -421,7 +424,7 @@ class Visualization:
         if mask_thresh is None:
             mask_thresh = 0
         if figsize is None:
-            figsize = (max(25, len(topic_cols)), max(15, min(len(topic_cols) // 1.2, 15)))
+            figsize = (max(25, min(len(topic_cols) // 1.1, 25)), max(15, min(len(topic_cols) // 1.2, 15)))
         if cmap is None:
             cmap = sns.diverging_palette(220, 10, as_cmap=True)
 
@@ -434,18 +437,18 @@ class Visualization:
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        sns.heatmap(corr, ax=ax, center=0, annot=True, fmt=fmt,
-                    vmin=vmin, vmax=vmax,
-                    mask=((corr > -mask_thresh) & (corr < mask_thresh)),
-                    cmap=cmap,
-                    # square=True,
-                    )
+        ax = sns.heatmap(corr, ax=ax, center=0, annot=True, fmt=fmt, annot_kws={"fontsize": 13},
+                         vmin=vmin, vmax=vmax,
+                         mask=((corr > -mask_thresh) & (corr < mask_thresh)),
+                         cmap=cmap,
+                         # square=True,
+                         )
 
         ax.hlines(range(1, corr.shape[0]), *ax.get_xlim(), lw=0.5)
         ax.vlines(range(1, corr.shape[1]), *ax.get_ylim(), lw=0.5)
 
-        fig.autofmt_xdate()
-        fig.tight_layout()
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=30, ha='right', fontsize=18)
+        ax.set_yticklabels(ax.get_yticklabels(), fontsize=18)
 
         if savefig:
             plot_string = 'topic-topic_corr'
@@ -500,7 +503,7 @@ class Visualization:
         if mask_thresh is None:
             mask_thresh = 0
         if figsize is None:
-            figsize = (max(25, len(topic_cols_all)), max(15, min(len(topic_cols_all) // 1.2, 15)))
+            figsize = (max(25, min(len(topic_cols) // 1.1, 25)), max(15, min(len(topic_cols) // 1.2, 15)))
         if cmap is None:
             cmap = sns.diverging_palette(220, 10, as_cmap=True)
 
@@ -522,7 +525,7 @@ class Visualization:
 
         g = sns.clustermap(
             corr,
-            center=0, annot=True, fmt=fmt,
+            center=0, annot=True, fmt=fmt, annot_kws={"fontsize": 13},
             metric=metric,
             method=method,
             vmin=vmin, vmax=vmax,
@@ -534,7 +537,8 @@ class Visualization:
         g.ax_heatmap.hlines(range(1, corr.shape[0]), *g.ax_heatmap.get_xlim(), lw=0.5)
         g.ax_heatmap.vlines(range(1, corr.shape[1]), *g.ax_heatmap.get_ylim(), lw=0.5)
 
-        g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xticklabels(), rotation=30, ha='right')
+        g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xticklabels(), rotation=30, ha='right', fontsize=18)
+        g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_yticklabels(), fontsize=18)
 
         if savefig:
             plot_string = 'topic-topic_corr_grouped'
