@@ -626,6 +626,10 @@ class Visualization:
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             plt.setp(ax.get_xticklabels(), visible=True)
 
+        # removed unused axes
+        for i in range(len(topic_cols), nrows * ncols):
+            axes.ravel()[i].axis('off')
+
         fig.tight_layout()
 
         if savefig:
