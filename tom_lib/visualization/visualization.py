@@ -34,9 +34,11 @@ def split_string_sep(string: str, sep: str = None):
     return string_new
 
 
-def split_string_nchar(string: str, nchar: int = 25):
+def split_string_nchar(string: str, nchar: int = None):
     '''Split a string into a given number of chunks based on number of characters
     '''
+    if nchar is None:
+        nchar = 25
     return '\n'.join([string[(i * nchar):(i + 1) * nchar] for i in range(int(np.ceil(len(string) / nchar)))])
 
 
@@ -209,17 +211,17 @@ class Visualization:
     def plot_docs_over_time_count(
         self,
         freq: str = '1Y',
-        by_source=False,
+        by_affil=False,
         ma_window=None,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
     ):
-        '''Plot count of documents per frequency window, optionally by source
+        '''Plot count of documents per frequency window, optionally by affiliation
         '''
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        if by_source:
+        if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
         else:
             groupby = [pd.Grouper(freq=freq)]
@@ -231,29 +233,29 @@ class Visualization:
         if ma_window:
             result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
 
-        if by_source:
+        if by_affil:
             result_count.unstack().plot(ax=ax, kind='line')
             ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
         else:
             result_count.plot(ax=ax, kind='line')
 
-        ax.set_title('Article counts')
+        ax.set_title('Document counts')
 
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
         fig.tight_layout()
 
         if savefig:
             plot_string = 'doc_count'
-            if by_source:
-                source_string = 'source'
+            if by_affil:
+                affil_string = 'affil'
             else:
-                source_string = 'overall'
+                affil_string = 'overall'
             if ma_window:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{source_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}{ma_string}.png'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
@@ -264,14 +266,14 @@ class Visualization:
 
         return fig, ax, filename_out
 
-    def plot_docs_over_time_percent_source(
+    def plot_docs_over_time_percent_affil(
         self,
         freq: str = '1Y',
         ma_window=None,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
     ):
-        '''Plot percent of documents per source and frequency window
+        '''Plot percent of documents per affiliation and frequency window
         '''
 
         total_count = self.topic_model.corpus.data_frame.reset_index().set_index(
@@ -290,7 +292,7 @@ class Visualization:
         result_count.unstack().plot(ax=ax, kind='line')
         ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
 
-        ax.set_title('Percent of articles per source per year')
+        ax.set_title('Percent of documents per affiliation per year')
 
         ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
 
@@ -298,7 +300,7 @@ class Visualization:
         fig.tight_layout()
 
         if savefig:
-            plot_string = 'doc_percent_source'
+            plot_string = 'doc_percent_affil'
             if ma_window:
                 ma_string = f'_{ma_window}_MA'
             else:
@@ -566,6 +568,7 @@ class Visualization:
         bins=None,
         ncols: int = None,
         n_words: int = 10,
+        nchar_title: int = None,
         savefig: bool = False,
     ):
         '''Plot histogram of document loading distributions per topic
@@ -607,7 +610,7 @@ class Visualization:
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             _df[topic_col].plot(ax=ax, kind='hist', bins=bins)
-            title = split_string_nchar(topic_col)
+            title = split_string_nchar(topic_col, nchar=nchar_title)
             ax.set_title(title)
             xlabel = 'Topic Loading'
             if normalized:
@@ -618,6 +621,10 @@ class Visualization:
             # ax.yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
             # ax.set_yticklabels([f'{int(x):,}' for x in ax.get_yticks().tolist()]);
+
+        # show xticklabels on all axes
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            plt.setp(ax.get_xticklabels(), visible=True)
 
         fig.tight_layout()
 
@@ -807,7 +814,7 @@ class Visualization:
             pd.Grouper(freq=freq))[topic_col].size()
 
         if result.empty:
-            print(f"No articles >= {thresh}")
+            print(f"No documents >= {thresh}")
             fig = None
             ax = None
         else:
@@ -816,7 +823,7 @@ class Visualization:
 
             ax.set_title(topic_col)
 
-            ylabel = f"# of year's articles >= {thresh}"
+            ylabel = f"# of year's documents >= {thresh}"
             if normalized:
                 # ax.set_ylim((-0.05, 1.05))
                 ylabel = f"{ylabel}\n({norm_string})"
@@ -866,7 +873,7 @@ class Visualization:
         result = result_thresh / result_total
 
         if result.empty:
-            print(f"No articles >= {thresh}")
+            print(f"No documents >= {thresh}")
             fig = None
             ax = None
         else:
@@ -877,7 +884,7 @@ class Visualization:
 
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
 
-            ylabel = f"% of year's articles >= {thresh}"
+            ylabel = f"% of year's documents >= {thresh}"
             if normalized:
                 ylabel = f"{ylabel}\n({norm_string})"
 
@@ -894,9 +901,10 @@ class Visualization:
         thresh: float = 0.1,
         freq: str = '1Y',
         n_words: int = 10,
+        nchar_title: int = None,
         ncols: int = None,
         ma_window=None,
-        by_source=False,
+        by_affil=False,
         savefig: bool = False,
     ):
         '''Plot count of documents >= a given threshold per frequency window
@@ -944,7 +952,7 @@ class Visualization:
                 self.topic_model.corpus._affiliation_col,
                 ])[topic_cols].size().unstack().index
 
-        if by_source:
+        if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
         else:
             groupby = [pd.Grouper(freq=freq)]
@@ -953,7 +961,7 @@ class Visualization:
             result_thresh = _df[_df[topic_col] >= thresh].groupby(
                 by=groupby)[topic_col].size()
             result = pd.DataFrame(index=idx)
-            if by_source:
+            if by_affil:
                 result = result.merge(result_thresh.unstack(), how='outer',
                                       left_index=True, right_index=True).fillna(0)
             else:
@@ -963,20 +971,24 @@ class Visualization:
                 result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
             result.plot(ax=ax, kind='line', marker='', legend=None)
 
-            title = split_string_nchar(topic_col)
+            title = split_string_nchar(topic_col, nchar=nchar_title)
             ax.set_title(title)
-            ylabel = f"# of year's articles >= {thresh}"
+            ylabel = f"# of year's documents >= {thresh}"
             if normalized:
                 ylabel = f"{ylabel}\n({norm_string})"
             ax.set_ylabel(ylabel)
             ax.set_xlabel("Publication year")
 
+        # show xticklabels on all axes
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            plt.setp(ax.get_xticklabels(), visible=True)
+
         # removed unused axes
         for i in range(len(topic_cols), nrows * ncols):
             axes.ravel()[i].axis('off')
 
-        # for placing the source_name legend
-        if by_source:
+        # for placing the affiliation legend
+        if by_affil:
             handles, labels = ax.get_legend_handles_labels()
             lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
 
@@ -985,10 +997,10 @@ class Visualization:
 
         if savefig:
             plot_string = 'topic_count'
-            if by_source:
-                source_string = 'source'
+            if by_affil:
+                affil_string = 'affil'
             else:
-                source_string = 'overall'
+                affil_string = 'overall'
             topics_string = f'{len(topic_cols)}_topics'
             thresh_string = f'{int(thresh * 100)}_topicthresh'
             if normalized:
@@ -1000,10 +1012,10 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
 
             # save image to disk
-            if by_source:
+            if by_affil:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
@@ -1022,12 +1034,13 @@ class Visualization:
         thresh: float = 0.1,
         freq: str = '1Y',
         n_words: int = 10,
+        nchar_title: int = None,
         ncols: int = None,
         ma_window=None,
-        by_source=False,
+        by_affil=False,
         savefig: bool = False,
     ):
-        '''Plot the percent of articles that are above the threshold for that year.
+        '''Plot the percent of documents that are above the threshold for that year.
         Therefore, a given year across topics adds up to 100%.
         '''
         topic_cols_all = []
@@ -1067,7 +1080,7 @@ class Visualization:
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
 
         # join the date with boolean >= thresh
-        if by_source:
+        if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
             result_thresh = _df[[self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]].join(
                 _df[topic_cols] >= thresh).reset_index().set_index(
@@ -1086,26 +1099,30 @@ class Visualization:
             result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
-            if by_source:
+            if by_affil:
                 result[topic_col].unstack().plot(ax=ax, kind='line', marker='', legend=None)
             else:
                 result[topic_col].plot(ax=ax, kind='line', marker='', legend=None)
 
-            title = split_string_nchar(topic_col)
+            title = split_string_nchar(topic_col, nchar=nchar_title)
             ax.set_title(title)
-            ylabel = f"% of year's articles >= {thresh}"
+            ylabel = f"% of year's documents >= {thresh}"
             if normalized:
                 ylabel = f"{ylabel}\n({norm_string})"
             ax.set_ylabel(ylabel)
             ax.set_xlabel("Publication year")
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
 
+        # show xticklabels on all axes
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            plt.setp(ax.get_xticklabels(), visible=True)
+
         # removed unused axes
         for i in range(len(topic_cols), nrows * ncols):
             axes.ravel()[i].axis('off')
 
-        # for placing the source_name legend
-        if by_source:
+        # for placing the affiliation legend
+        if by_affil:
             handles, labels = ax.get_legend_handles_labels()
             lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
 
@@ -1114,10 +1131,10 @@ class Visualization:
 
         if savefig:
             plot_string = 'topic_percent'
-            if by_source:
-                source_string = 'source'
+            if by_affil:
+                affil_string = 'affil'
             else:
-                source_string = 'overall'
+                affil_string = 'overall'
             topics_string = f'{len(topic_cols)}_topics'
             thresh_string = f'{int(thresh * 100)}_topicthresh'
             if normalized:
@@ -1127,10 +1144,10 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
 
             # save image to disk
-            if by_source:
+            if by_affil:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
@@ -1149,13 +1166,14 @@ class Visualization:
         thresh: float = 0.1,
         freq: str = '1Y',
         n_words: int = 10,
+        nchar_title: int = None,
         ncols: int = None,
         ma_window=None,
-        by_source=False,
+        by_affil=False,
         savefig: bool = False,
     ):
-        '''For each topic (separately), of the articles above the threshold,
-        plot the average article composition for that year.
+        '''For each topic (separately), of the documents above the threshold,
+        plot the average topic loading for that year.
         '''
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
@@ -1200,7 +1218,7 @@ class Visualization:
                 self.topic_model.corpus._affiliation_col,
                 ])[topic_cols].size().unstack().index
 
-        if by_source:
+        if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
         else:
             groupby = [pd.Grouper(freq=freq)]
@@ -1209,7 +1227,7 @@ class Visualization:
             result_thresh = _df[_df[topic_col] >= thresh].groupby(
                 by=groupby)[topic_col].mean()
             result = pd.DataFrame(index=idx)
-            if by_source:
+            if by_affil:
                 result = result.merge(result_thresh.unstack(), how='outer',
                                       left_index=True, right_index=True).fillna(0)
             else:
@@ -1219,7 +1237,7 @@ class Visualization:
                 result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
             result.plot(ax=ax, kind='line', marker='', legend=None)
 
-            title = split_string_nchar(topic_col)
+            title = split_string_nchar(topic_col, nchar=nchar_title)
             ax.set_title(title)
             ylabel = "Avg. Topic Load per Year"
             if normalized:
@@ -1230,12 +1248,16 @@ class Visualization:
             ax.set_ylabel(ylabel)
             ax.set_xlabel("Publication year")
 
+        # show xticklabels on all axes
+        for topic_col, ax in zip(topic_cols, axes.ravel()):
+            plt.setp(ax.get_xticklabels(), visible=True)
+
         # removed unused axes
         for i in range(len(topic_cols), nrows * ncols):
             axes.ravel()[i].axis('off')
 
-        # for placing the source_name legend
-        if by_source:
+        # for placing the affiliation legend
+        if by_affil:
             handles, labels = ax.get_legend_handles_labels()
             lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
 
@@ -1244,10 +1266,10 @@ class Visualization:
 
         if savefig:
             plot_string = 'topic_loading'
-            if by_source:
-                source_string = 'source'
+            if by_affil:
+                affil_string = 'affil'
             else:
-                source_string = 'overall'
+                affil_string = 'overall'
             topics_string = f'{len(topic_cols)}_topics'
             thresh_string = f'{int(thresh * 100)}_topicthresh'
             if normalized:
@@ -1259,10 +1281,10 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{source_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
+            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.png'
 
             # save image to disk
-            if by_source:
+            if by_affil:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
                 fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')

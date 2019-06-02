@@ -201,21 +201,22 @@ logger.info('Creating plots...')
 normalized = True
 thresh = 0.1
 freq = '1Y'
-by_source = False
+by_affil = False
 ma_window = None
 savefig = True
 ncols = 6
+nchar_title = 30
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
 fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
     freq=freq,
-    by_source=True,
+    by_affil=True,
     ma_window=ma_window,
     savefig=savefig,
 )
 
-fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_source(
+fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
     freq=freq,
     ma_window=ma_window,
     savefig=savefig,
@@ -240,8 +241,9 @@ fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
     normalized=normalized,
     thresh=thresh,
     freq=freq,
-    by_source=by_source,
+    by_affil=by_affil,
     ma_window=ma_window,
+    nchar_title=nchar_title,
     ncols=ncols,
     savefig=savefig,
 )
@@ -250,8 +252,9 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
     normalized=normalized,
     thresh=thresh,
     freq=freq,
-    by_source=by_source,
+    by_affil=by_affil,
     ma_window=ma_window,
+    nchar_title=nchar_title,
     ncols=ncols,
     savefig=savefig,
 )
@@ -260,8 +263,9 @@ fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
 #     normalized=normalized,
 #     thresh=thresh,
 #     freq=freq,
-#     by_source=by_source,
+#     by_affil=by_affil,
 #     ma_window=ma_window,
+#     nchar_title=nchar_title,
 #     ncols=ncols,
 #     savefig=savefig,
 # )
