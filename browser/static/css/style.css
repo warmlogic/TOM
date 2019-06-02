@@ -72,7 +72,6 @@ body {
 
 #wrap {
   width:97%;
-  /* margin: auto; */
   margin:0 auto;
 }
 
@@ -116,6 +115,7 @@ body {
   width:100%;
   margin:0 auto;
   float:left;
+	padding: 5px;
 }
 
 .main-content {
@@ -128,8 +128,16 @@ body {
 
 .two_images img {
   width: 600px;
-  display: inline;
 	padding: 5px;
+  float: left;
+  /* display: inline; */
+}
+
+.one_image img {
+  width: 1200px;
+	padding: 5px;
+  float: left;
+  /* display: inline; */
 }
 
 a.class1{
