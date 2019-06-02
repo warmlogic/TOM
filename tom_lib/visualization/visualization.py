@@ -253,7 +253,7 @@ class Visualization:
             filename_out = f'{plot_string}_{source_string}{ma_string}.png'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
             filename_out = None
@@ -303,12 +303,13 @@ class Visualization:
             filename_out = f'{plot_string}{ma_string}.png'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_docs_above_thresh(
         self,
@@ -376,12 +377,13 @@ class Visualization:
                 norm_string = f'_{norm_string}'
             filename_out = f'{plot_string}_{topics_string}{norm_string}_{kind}.png'
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_heatmap(
         self,
@@ -452,12 +454,13 @@ class Visualization:
                 norm_string = f'_{norm_string}'
             filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_clustermap(
         self,
@@ -539,15 +542,18 @@ class Visualization:
             if normalized:
                 norm_string = f'_{norm_string}'
             filename_out = f'{plot_string}_{topics_string}{norm_string}'
+            filename_out_img = f'{filename_out}.png'
+            filename_out_data = f'{filename_out}.csv'
             # save image to disk
-            g.savefig(self.output_dir / f'{filename_out}.png', dpi=150, transparent=False)
+            g.savefig(self.output_dir / filename_out_img, dpi=150, transparent=False, bbox_inches='tight')
             # save values to csv
-            corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv(f'{filename_out}.csv')
+            corr.iloc[g.dendrogram_row.reordered_ind, g.dendrogram_col.reordered_ind].to_csv(self.output_dir / filename_out_data)
             plt.close('all')
         else:
+            filename_out_img = None
             plt.show()
 
-        return g
+        return g, filename_out_img
 
     def plot_topic_loading_hist(
         self,
@@ -622,12 +628,13 @@ class Visualization:
             filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, axes
+        return fig, axes, filename_out
 
     def plot_topic_loading_boxplot(
         self,
@@ -686,12 +693,13 @@ class Visualization:
             filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_topic_loading_barplot(
         self,
@@ -750,12 +758,13 @@ class Visualization:
             filename_out = f'{plot_string}_{topics_string}{norm_string}.png'
 
             # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+            fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_one_topic_over_time_count(
         self,
@@ -958,6 +967,10 @@ class Visualization:
             ax.set_ylabel(ylabel)
             ax.set_xlabel("Publication year")
 
+        # removed unused axes
+        for i in range(len(topic_cols), nrows * ncols):
+            axes.ravel()[i].axis('off')
+
         # for placing the source_name legend
         if by_source:
             handles, labels = ax.get_legend_handles_labels()
@@ -987,15 +1000,16 @@ class Visualization:
 
             # save image to disk
             if by_source:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, axes
+        return fig, axes, filename_out
 
     def plot_topic_over_time_percent(
         self,
@@ -1082,6 +1096,10 @@ class Visualization:
             ax.set_xlabel("Publication year")
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
 
+        # removed unused axes
+        for i in range(len(topic_cols), nrows * ncols):
+            axes.ravel()[i].axis('off')
+
         # for placing the source_name legend
         if by_source:
             handles, labels = ax.get_legend_handles_labels()
@@ -1109,15 +1127,16 @@ class Visualization:
 
             # save image to disk
             if by_source:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, axes
+        return fig, axes, filename_out
 
     def plot_topic_over_time_loading(
         self,
@@ -1207,6 +1226,10 @@ class Visualization:
             ax.set_ylabel(ylabel)
             ax.set_xlabel("Publication year")
 
+        # removed unused axes
+        for i in range(len(topic_cols), nrows * ncols):
+            axes.ravel()[i].axis('off')
+
         # for placing the source_name legend
         if by_source:
             handles, labels = ax.get_legend_handles_labels()
@@ -1236,12 +1259,13 @@ class Visualization:
 
             # save image to disk
             if by_source:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_extra_artists=(lgd,), bbox_inches='tight')
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight', bbox_extra_artists=(lgd,))
             else:
-                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
+                fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False, bbox_inches='tight')
 
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, axes
+        return fig, axes, filename_out
