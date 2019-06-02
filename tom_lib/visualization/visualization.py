@@ -256,9 +256,10 @@ class Visualization:
             fig.savefig(self.output_dir / filename_out, dpi=150, transparent=False)
             plt.close('all')
         else:
+            filename_out = None
             plt.show()
 
-        return fig, ax
+        return fig, ax, filename_out
 
     def plot_docs_over_time_percent_source(
         self,
