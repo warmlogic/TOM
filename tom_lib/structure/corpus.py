@@ -26,6 +26,7 @@ class Corpus:
                  author_col: str=None,
                  affiliation_col: str=None,
                  date_col: str=None,
+                 id_col: str=None,
                  ):
 
         self._sep = sep
@@ -42,6 +43,7 @@ class Corpus:
         self._author_col = author_col or 'author'
         self._affiliation_col = affiliation_col or 'affiliation'
         self._date_col = date_col or 'date'
+        self._id_col = id_col
 
         self.max_features = max_features
 
@@ -118,6 +120,12 @@ class Corpus:
     def affiliation(self, doc_id):
         aff_str = str(self.data_frame.iloc[doc_id][self._affiliation_col])
         return aff_str.split(', ')
+
+    def id(self, doc_id):
+        if self._id_col:
+            return str(self.data_frame.iloc[doc_id][self._id_col])
+        else:
+            return str(doc_id)
 
     def documents_by_author(self, author: str, date=None):
         aut_doc_ids = []
