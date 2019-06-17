@@ -11,6 +11,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+import plotly
+import plotly.graph_objs as go
+
 from tom_lib.utils import save_topic_number_metrics_data
 
 sns.set(rc={"lines.linewidth": 2})
@@ -1323,3 +1326,105 @@ class Visualization:
             plt.show()
 
         return fig, axes, filename_out
+
+    def plotly_doc_topic_loading(
+        self,
+        did: int,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        n_words: int = 10,
+        output_type: str = 'div',
+    ):
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        if normalized:
+            _df = pd.DataFrame(
+                data=(self.topic_model.document_topic_matrix[did, :] /
+                      self.topic_model.document_topic_matrix[did, :].sum(axis=1)),
+                columns=topic_cols_all,
+            )
+            norm_string = 'normalized'
+        else:
+            _df = pd.DataFrame(
+                data=self.topic_model.document_topic_matrix[did, :].todense(),
+                columns=topic_cols_all,
+            )
+            norm_string = ''
+
+        x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols_all)]
+
+        y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
+        y_text = [np.round(v, decimals=3) for v in y]
+        ylabel = "Weight"
+        if normalized:
+            ylabel = f"{ylabel} ({norm_string})"
+
+        data = [
+            go.Bar(
+                x=x,
+                y=y,
+                text=y_text,
+                textposition='auto',
+                marker=dict(
+                    color='rgb(49, 130, 189)'
+                ),
+                # opacity=0.85,
+            )
+        ]
+
+        layout = go.Layout(
+            xaxis=go.layout.XAxis(
+                tickangle=-30,
+                # automargin=True,
+                # autorange=True,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            ),
+            yaxis=go.layout.YAxis(
+                title=ylabel,
+                # automargin=True,
+                autorange=True,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            ),
+            margin=go.layout.Margin(
+                t=0,
+                b=210,
+                l=240,
+                r=0,
+                pad=4,
+            ),
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            # return json.dumps(figure, cls=plotly.utils.PlotlyJSONEncoder)
+
+            return plotly.offline.plot(
+                figure,
+                # config={"displayModeBar": False},
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+        # else:
+        #     from plotly.offline import init_notebook_mode
+        #     init_notebook_mode(connected=True)
+        #     return plotly.offline.plot(
+        #         figure,
+        #         # config={"displayModeBar": False},
+        #         show_link=False,
+        #         include_plotlyjs=False,
+        #         # output_type='div',
+        #     )
