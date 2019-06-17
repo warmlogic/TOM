@@ -410,6 +410,7 @@ class TopicModel(object):
 class LatentDirichletAllocation(TopicModel):
     def __init__(self, corpus):
         self.model_type = 'LDA'
+        self.corpus = corpus
 
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
         self.nb_topics = num_topics
