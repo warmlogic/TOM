@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html">
-  <title>Details about document {{ doc_id }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html">
+    <title>Details about document {{ doc_id }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <!-- <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script> -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<style>
+<!-- <style>
 .axis path,
 .axis line {
   fill: none;
@@ -24,7 +27,7 @@
 .x.axis path {
   display: none;
 }
-</style>
+</style> -->
 <body>
     <div id="navigation">
         <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
@@ -42,14 +45,15 @@
         </select>
     </div>
     <div id="header">
-        <h1>Details about document {{ doc_id }}</h1>
-        Title: {{ title }}<br>
-        Author: {{ authors }} --- Date: {{ year }} --- Affiliation: {{ affiliation }}
+        <h1>Details for document {{ doc_id }}</h1>
+        <p>Title: {{ title }}</p>
+        <p>Author: {{ authors }} --- Date: {{ year }} --- Affiliation: {{ affiliation }} --- Identifier: {{ id }}</p>
     </div>
     <div id="wrap">
         <div id="left_column">
-            <h2>Topic repartition</h2>
-            <bar-chart></bar-chart>
+            <h2>Topic loading</h2>
+            <!-- <bar-chart></bar-chart> -->
+            {{ doc_topic_loading_barplot | safe }}
         </div>
         <div id="right_column">
             <h2>Vector representation</h2>
@@ -87,12 +91,12 @@
             <h4>Author: {{ authors }}</h4>
             <h4>Date: {{ year }}</h4>
             <h4>Affiliation: {{ affiliation }}</h4>
+            <h4>Identifier: {{ id }}</h4>
             {{ full_text }}
         </div>
     </div>
 </body>
-<script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
-<script>
+<!-- <script>
 var margin = {top: 10, right: 0, bottom: 250, left: 250},
     width = 900 - margin.left - margin.right,
     height = 550 - margin.top - margin.bottom;
@@ -146,4 +150,4 @@ function type(d) {
   d.weight = +d.weight;
   return d;
 }
-</script>
+</script> -->
