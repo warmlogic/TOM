@@ -2,11 +2,13 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html">
-    <title>Details about topic {{ topic_id }}</title>
+    <title>Details for topic {{ topic_id }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
     <link href="../static/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
     <script src="../static/js/jquery-1.12.0.min.js" charset="utf-8"></script>
     <script src="../static/js/jquery.dataTables.min.js" charset="utf-8"></script>
+    <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
+    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
 </head>
 <style>
     .axis path,
@@ -105,7 +107,6 @@
         $('#documents').DataTable();
     });
 </script>
-<script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
 <script>
     // (document.body.clientWidth)*0.6
     var margin = {top: 10, right: 0, bottom: 100, left: 40},
