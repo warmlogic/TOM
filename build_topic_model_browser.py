@@ -89,6 +89,9 @@ topic_distribution_d_folder = data_folder / 'topic_distribution_d'
 topic_distribution_w_folder = data_folder / 'topic_distribution_w'
 figs_folder = data_folder / 'figs'
 
+full_text_col = 'orig_text'
+id_col = 'access_num'
+
 app = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
 # ##################################
@@ -118,7 +121,8 @@ else:
                     min_absolute_frequency=min_absolute_frequency,
                     max_features=max_features,
                     sample=sample,
-                    full_text_col='orig_text',
+                    full_text_col=full_text_col,
+                    id_col=id_col,
                     )
     # Initialize topic model
     if model_type == 'NMF':
@@ -214,82 +218,91 @@ figformat = 'png'
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
-fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
-    freq=freq,
-    by_affil=True,
-    ma_window=ma_window,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
+#     freq=freq,
+#     by_affil=True,
+#     ma_window=ma_window,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
 
-fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
-    freq=freq,
-    ma_window=ma_window,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
+#     freq=freq,
+#     ma_window=ma_window,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
 
-fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
-    normalized=normalized,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
-
-# fig, ax, fig_topic_heatmap = viz.plot_heatmap(
+# fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
 #     normalized=normalized,
 #     savefig=savefig,
 #     dpi=dpi,
 #     figformat=figformat,
 # )
 
-g, fig_topic_clustermap = viz.plot_clustermap(
-    normalized=normalized,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# # fig, ax, fig_topic_heatmap = viz.plot_heatmap(
+# #     normalized=normalized,
+# #     savefig=savefig,
+# #     dpi=dpi,
+# #     figformat=figformat,
+# # )
 
-fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
-    normalized=normalized,
-    thresh=thresh,
-    freq=freq,
-    by_affil=by_affil,
-    ma_window=ma_window,
-    nchar_title=nchar_title,
-    ncols=ncols,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# g, fig_topic_clustermap = viz.plot_clustermap(
+#     normalized=normalized,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
 
-fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
-    normalized=normalized,
-    thresh=thresh,
-    freq=freq,
-    by_affil=by_affil,
-    ma_window=ma_window,
-    nchar_title=nchar_title,
-    ncols=ncols,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
+#     normalized=normalized,
+#     thresh=thresh,
+#     freq=freq,
+#     by_affil=by_affil,
+#     ma_window=ma_window,
+#     nchar_title=nchar_title,
+#     ncols=ncols,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
 
-fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
-    normalized=normalized,
-    thresh=thresh,
-    freq=freq,
-    by_affil=by_affil,
-    ma_window=ma_window,
-    nchar_title=nchar_title,
-    ncols=ncols,
-    savefig=savefig,
-    dpi=dpi,
-    figformat=figformat,
-)
+# fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
+#     normalized=normalized,
+#     thresh=thresh,
+#     freq=freq,
+#     by_affil=by_affil,
+#     ma_window=ma_window,
+#     nchar_title=nchar_title,
+#     ncols=ncols,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
+
+# fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+#     normalized=normalized,
+#     thresh=thresh,
+#     freq=freq,
+#     by_affil=by_affil,
+#     ma_window=ma_window,
+#     nchar_title=nchar_title,
+#     ncols=ncols,
+#     savefig=savefig,
+#     dpi=dpi,
+#     figformat=figformat,
+# )
+
+fig_docs_over_time_count = None
+fig_docs_over_time_percent = None
+fig_topic_barplot = None
+# fig_topic_heatmap = None
+fig_topic_clustermap = None
+fig_topic_over_time_count = None
+fig_topic_over_time_percent = None
+fig_topic_over_time_loading = None
 
 logger.info('Done.')
 
@@ -415,8 +428,10 @@ def document_details(did):
         year=topic_model.corpus.date(int(did)),
         short_content=topic_model.corpus.title(int(did)).title(),
         affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
+        id=topic_model.corpus.id(int(did)),
         full_text=topic_model.corpus.full_text(int(did)),
         topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
+        doc_topic_loading_barplot=viz.plotly_doc_topic_loading(int(did), normalized=True, n_words=5, output_type='div'),
     )
 
 
