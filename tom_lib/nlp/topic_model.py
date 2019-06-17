@@ -439,7 +439,7 @@ class LatentDirichletAllocation(TopicModel):
                 col.append(i)
                 data.append(topic[i])
         self.topic_word_matrix = coo_matrix((data, (row, col)),
-                                            shape=(self.nb_topics, len(self.corpus.vocabulary))).tocsr()
+                                            shape=(self.nb_topics, vocabulary_size)).tocsr()
         row = []
         col = []
         data = []
@@ -482,7 +482,7 @@ class NonNegativeMatrixFactorization(TopicModel):
                 col.append(i)
                 data.append(topic[i])
         self.topic_word_matrix = coo_matrix((data, (row, col)),
-                                            shape=(self.nb_topics, len(self.corpus.vocabulary))).tocsr()
+                                            shape=(self.nb_topics, vocabulary_size)).tocsr()
         row = []
         col = []
         data = []
