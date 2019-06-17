@@ -48,7 +48,7 @@ if isinstance(max_features, str):
         max_features = None
 assert isinstance(max_features, int) or (max_features is None)
 sample = config[webserver_section].getfloat('sample', 1.0)
-top_words_description = config[webserver_section].getint('top_words_description', 5)
+top_words_description = config[webserver_section].getint('top_words_description', 10)
 top_words_cloud = config[webserver_section].getint('top_words_cloud', 5)
 model_type = config[webserver_section].get('model_type', 'NMF')
 nmf_beta_loss = config[webserver_section].get('nmf_beta_loss', 'frobenius')
@@ -186,13 +186,10 @@ else:
                                    topic_description,
                                    )
 
-    # # Associate documents with topics
-    # topic_associations = topic_model.documents_per_topic()
-
-    # # Export per-topic author network
+    # # Export per-topic author network using the most likely documents for each topic
     # logger.info('Saving author network details')
     # for topic_id in range(topic_model.nb_topics):
-    #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_associations[topic_id]),
+    #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_model.documents_for_topic(topic_id)),
     #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
 
 logger.info('Done.')
@@ -376,8 +373,10 @@ def vocabulary():
 
 @app.route('/topic/<tid>.html')
 def topic_details(tid):
-    # ids = topic_associations[int(tid)]
-    ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
+    # get the most likely documents per topic
+    ids = topic_model.documents_for_topic(int(tid))
+    # # get the top 100 documents per topic
+    # ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
     documents = []
     for i, document_id in enumerate(ids):
         documents.append((i + 1, topic_model.corpus.title(document_id).title(),
