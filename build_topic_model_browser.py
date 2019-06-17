@@ -218,91 +218,92 @@ figformat = 'png'
 
 viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
-# fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
-#     freq=freq,
-#     by_affil=True,
-#     ma_window=ma_window,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
+    freq=freq,
+    by_affil=True,
+    ma_window=ma_window,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
-#     freq=freq,
-#     ma_window=ma_window,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
+    freq=freq,
+    ma_window=ma_window,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
+fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
+    normalized=normalized,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
+
+# fig, ax, fig_topic_heatmap = viz.plot_heatmap(
 #     normalized=normalized,
 #     savefig=savefig,
 #     dpi=dpi,
 #     figformat=figformat,
 # )
 
-# # fig, ax, fig_topic_heatmap = viz.plot_heatmap(
-# #     normalized=normalized,
-# #     savefig=savefig,
-# #     dpi=dpi,
-# #     figformat=figformat,
-# # )
+g, fig_topic_clustermap = viz.plot_clustermap(
+    normalized=normalized,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# g, fig_topic_clustermap = viz.plot_clustermap(
-#     normalized=normalized,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_affil=by_affil,
+    ma_window=ma_window,
+    nchar_title=nchar_title,
+    ncols=ncols,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
-#     normalized=normalized,
-#     thresh=thresh,
-#     freq=freq,
-#     by_affil=by_affil,
-#     ma_window=ma_window,
-#     nchar_title=nchar_title,
-#     ncols=ncols,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_affil=by_affil,
+    ma_window=ma_window,
+    nchar_title=nchar_title,
+    ncols=ncols,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# fig, ax, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
-#     normalized=normalized,
-#     thresh=thresh,
-#     freq=freq,
-#     by_affil=by_affil,
-#     ma_window=ma_window,
-#     nchar_title=nchar_title,
-#     ncols=ncols,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
+fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+    normalized=normalized,
+    thresh=thresh,
+    freq=freq,
+    by_affil=by_affil,
+    ma_window=ma_window,
+    nchar_title=nchar_title,
+    ncols=ncols,
+    savefig=savefig,
+    dpi=dpi,
+    figformat=figformat,
+)
 
-# fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
-#     normalized=normalized,
-#     thresh=thresh,
-#     freq=freq,
-#     by_affil=by_affil,
-#     ma_window=ma_window,
-#     nchar_title=nchar_title,
-#     ncols=ncols,
-#     savefig=savefig,
-#     dpi=dpi,
-#     figformat=figformat,
-# )
-
-fig_docs_over_time_count = None
-fig_docs_over_time_percent = None
-fig_topic_barplot = None
-# fig_topic_heatmap = None
-fig_topic_clustermap = None
-fig_topic_over_time_count = None
-fig_topic_over_time_percent = None
-fig_topic_over_time_loading = None
+# # debug
+# fig_docs_over_time_count = None
+# fig_docs_over_time_percent = None
+# fig_topic_barplot = None
+# # fig_topic_heatmap = None
+# fig_topic_clustermap = None
+# fig_topic_over_time_count = None
+# fig_topic_over_time_percent = None
+# fig_topic_over_time_loading = None
 
 logger.info('Done.')
 
