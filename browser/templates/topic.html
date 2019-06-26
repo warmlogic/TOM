@@ -78,6 +78,7 @@
             <th>Affiliation</th>
             <th>Author(s)</th>
             <th>Date</th>
+            <th>Identifier</th>
             <th>Doc ID</th>
         </tr>
         </thead>
@@ -89,7 +90,8 @@
                 <td>{{ doc[2] }}</td>
                 <td>{{ doc[3] }}</td>
                 <td>{{ doc[4] }}</td>
-                <td><a href="../document/{{ doc[5] }}.html">{{ doc[5] }}</a></td>
+                <td>{{ doc[5] }}</td>
+                <td><a href="../document/{{ doc[6] }}.html">{{ doc[6] }}</a></td>
             </tr>
         {% endfor %}
         </tbody>

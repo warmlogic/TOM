@@ -379,10 +379,16 @@ def topic_details(tid):
     # ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
     documents = []
     for i, document_id in enumerate(ids):
-        documents.append((i + 1, topic_model.corpus.title(document_id).title(),
-                          ', '.join(topic_model.corpus.affiliation(document_id)).title(),
-                          ', '.join(topic_model.corpus.author(document_id)).title(),
-                          topic_model.corpus.date(document_id), document_id))
+        documents.append(
+            (i + 1,
+             topic_model.corpus.title(document_id).title(),
+             ', '.join(topic_model.corpus.affiliation(document_id)).title(),
+             ', '.join(topic_model.corpus.author(document_id)).title(),
+             topic_model.corpus.date(document_id),
+             topic_model.corpus.id(document_id),
+             document_id,
+             ),
+        )
     return render_template(
         'topic.html',
         topic_id=tid,
