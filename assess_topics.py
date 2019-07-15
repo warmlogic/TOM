@@ -150,7 +150,7 @@ viz.plot_coherence_w2v_metric(
     max_num_topics=max_num_topics,
     step=step,
     top_n_words=coherence_w2v_top_n_words,
-    coherence_w2v_size=coherence_w2v_size,
+    w2v_size=coherence_w2v_size,
     verbose=verbose,
 )
 
