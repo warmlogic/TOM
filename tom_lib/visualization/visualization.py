@@ -105,11 +105,18 @@ class Visualization:
             algorithm=algorithm,
             verbose=verbose,
         )
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         plt.clf()
-        plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), greene_stability, 'o-')
-        plt.title('Greene et al. metric')
-        plt.xlabel('Number of topics')
+        plt.plot(num_topics_infer, greene_stability, 'o-')
+        plt.xticks(num_topics_infer)
+        plt.title('Greene et al. metric (higher is better)')
+        plt.xlabel('Number of Topics')
         plt.ylabel('Stability')
+        # find and annotate the maximum point on the plot
+        ymax = max(greene_stability)
+        xpos = greene_stability.index(ymax)
+        best_k = num_topics_infer[xpos]
+        plt.annotate(f'k={best_k}', xy=(best_k, ymax), xytext=(best_k, ymax), textcoords='offset points', fontsize=16)
         file_path_fig = self.output_dir / 'greene.png'
         file_path_data = self.output_dir / 'greene.tsv'
         plt.savefig(file_path_fig)
@@ -129,11 +136,18 @@ class Visualization:
             algorithm=algorithm,
             verbose=verbose,
         )
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics + 1, step), symmetric_kl_divergence, 'o-')
-        plt.title('Arun et al. metric')
-        plt.xlabel('Number of topics')
+        plt.plot(num_topics_infer, symmetric_kl_divergence, 'o-')
+        plt.xticks(num_topics_infer)
+        plt.title('Arun et al. metric (lower is better)')
+        plt.xlabel('Number of Topics')
         plt.ylabel('Symmetric KL Divergence')
+        # find and annotate the maximum point on the plot
+        ymin = min(symmetric_kl_divergence)
+        xpos = symmetric_kl_divergence.index(ymin)
+        best_k = num_topics_infer[xpos]
+        plt.annotate(f'k={best_k}', xy=(best_k, ymin), xytext=(best_k, ymin), textcoords='offset points', fontsize=16)
         file_path_fig = self.output_dir / 'arun.png'
         file_path_data = self.output_dir / 'arun.tsv'
         plt.savefig(file_path_fig)
@@ -153,11 +167,18 @@ class Visualization:
             algorithm=algorithm,
             verbose=verbose,
         )
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         plt.clf()
-        plt.plot(range(min_num_topics, max_num_topics + 1, step), cophenetic_correlation, 'o-')
-        plt.title('Brunet et al. metric')
-        plt.xlabel('Number of topics')
+        plt.plot(num_topics_infer, cophenetic_correlation, 'o-')
+        plt.xticks(num_topics_infer)
+        plt.title('Brunet et al. metric (higher is better)')
+        plt.xlabel('Number of Topics')
         plt.ylabel('Cophenetic correlation coefficient')
+        # find and annotate the maximum point on the plot
+        ymax = max(cophenetic_correlation)
+        xpos = cophenetic_correlation.index(ymax)
+        best_k = num_topics_infer[xpos]
+        plt.annotate(f'k={best_k}', xy=(best_k, ymax), xytext=(best_k, ymax), textcoords='offset points', fontsize=16)
         file_path_fig = self.output_dir / 'brunet.png'
         file_path_data = self.output_dir / 'brunet.tsv'
         plt.savefig(file_path_fig)
@@ -192,12 +213,11 @@ class Visualization:
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         plt.clf()
         # create the line plot
-        plt.plot(num_topics_infer, coherence)
+        plt.plot(num_topics_infer, coherence, 'o-')
         plt.xticks(num_topics_infer)
+        plt.title('Coherence-Word2Vec metric (higher is better)')
         plt.xlabel('Number of Topics')
         plt.ylabel('Mean Coherence')
-        # add the points
-        plt.scatter(num_topics_infer, coherence, s=120)
         # find and annotate the maximum point on the plot
         ymax = max(coherence)
         xpos = coherence.index(ymax)
@@ -222,12 +242,14 @@ class Visualization:
             algorithm=algorithm,
             verbose=verbose,
         )
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         if (len(train_perplexities) > 0) and (len(test_perplexities) > 0):
             plt.clf()
-            plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), train_perplexities, 'o-', label='Train')
-            plt.plot(np.arange(min_num_topics, max_num_topics + 1, step), test_perplexities, 'o-', label='Test')
-            plt.title('Perplexity metric')
-            plt.xlabel('Number of topics')
+            plt.plot(num_topics_infer, train_perplexities, 'o-', label='Train')
+            plt.plot(num_topics_infer, test_perplexities, 'o-', label='Test')
+            plt.xticks(num_topics_infer)
+            plt.title('Perplexity metric (lower is better)')
+            plt.xlabel('Number of Topics')
             plt.ylabel('Perplexity')
             plt.legend(loc='best')
             file_path_fig = self.output_dir / 'perplexity.png'
