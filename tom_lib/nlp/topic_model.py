@@ -172,15 +172,18 @@ class TopicModel(object):
 
             if verbose:
                 print('    Clustering...')
-            clustering = cluster.hierarchy.linkage(average_C, method='average')
-            Z = cluster.hierarchy.dendrogram(clustering, orientation='right')
-            index = Z['leaves']
-            average_C = average_C[index, :]
-            average_C = average_C[:, index]
-            (c, d) = cluster.hierarchy.cophenet(Z=clustering, Y=spatial.distance.pdist(average_C))
+            Z = cluster.hierarchy.linkage(average_C, method='average')
+            if verbose:
+                print('    Getting list of leaves...')
+            lvs = cluster.hierarchy.leaves_list(Z)
+            average_C = average_C[lvs, :]
+            average_C = average_C[:, lvs]
+            if verbose:
+                print('    Calculating cophenetic distances...')
+            (c, d) = cluster.hierarchy.cophenet(Z=Z, Y=spatial.distance.pdist(average_C))
             # plt.clf()
-            # f, ax = plt.subplots(figsize=(11, 9))
-            # ax = sns.heatmap(average_C)
+            # fig, ax = plt.subplots(figsize=(11, 9))
+            # ax = sns.heatmap(average_C, ax=ax)
             # plt.savefig('reorderedC.png')
             cophenetic_correlation.append(c)
             if verbose:
