@@ -136,15 +136,6 @@ viz.plot_arun_metric(
     verbose=verbose,
 )
 
-logger.info('Assessing Brunet metric')
-viz.plot_brunet_metric(
-    min_num_topics=min_num_topics,
-    max_num_topics=max_num_topics,
-    step=step,
-    iterations=brunet_iterations,
-    verbose=verbose,
-)
-
 logger.info('Assessing Coherence Word2Vec metric')
 viz.plot_coherence_w2v_metric(
     min_num_topics=min_num_topics,
@@ -152,6 +143,15 @@ viz.plot_coherence_w2v_metric(
     step=step,
     top_n_words=coherence_w2v_top_n_words,
     w2v_size=coherence_w2v_size,
+    verbose=verbose,
+)
+
+logger.info('Assessing Brunet metric')
+viz.plot_brunet_metric(
+    min_num_topics=min_num_topics,
+    max_num_topics=max_num_topics,
+    step=step,
+    iterations=brunet_iterations,
     verbose=verbose,
 )
 
