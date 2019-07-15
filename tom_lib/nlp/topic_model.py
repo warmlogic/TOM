@@ -11,6 +11,10 @@ import lda
 
 from tom_lib.structure.corpus import Corpus
 
+from itertools import combinations
+from gensim.models import Word2Vec
+from multiprocessing import cpu_count
+
 
 class TopicModel(object):
     __metaclass__ = ABCMeta
@@ -27,6 +31,79 @@ class TopicModel(object):
     @abstractmethod
     def infer_topics(self, num_topics=10, **kwargs):
         pass
+
+    def coherence_w2v_metric(
+        self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
+        w2v_size=None, w2v_min_count=None, w2v_max_vocab_size=None, w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
+        beta_loss='frobenius', algorithm='variational', verbose=True,
+    ):
+        """
+        Higher is better.
+
+        Adapted from https://github.com/derekgreene/topic-model-tutorial/blob/master/3%20-%20Parameter%20Selection%20for%20NMF.ipynb
+        """
+
+        def calculate_coherence(w2v_model, top_words_topics):
+            overall_coherence = 0.0
+            for tid in range(self.nb_topics):
+                # check each pair of terms
+                pair_scores = []
+                for pair in combinations(top_words_topics[tid], 2):
+                    try:
+                        score = w2v_model.wv.similarity(pair[0], pair[1])
+                    except KeyError:
+                        # one of the words is not in w2v_model.wv.vocab
+                        score = 0
+                    pair_scores.append(score)
+                # get the mean for all pairs in this topic
+                topic_score = sum(pair_scores) / len(pair_scores)
+                overall_coherence += topic_score
+            # get the mean score across all topics
+            return overall_coherence / self.nb_topics
+
+        w2v_size = w2v_size or 100
+        w2v_min_count = w2v_min_count or self.corpus._min_absolute_frequency
+        w2v_max_vocab_size = w2v_max_vocab_size or self.corpus.max_features
+        w2v_max_final_vocab = w2v_max_final_vocab or self.corpus.max_features
+        w2v_sg = w2v_sg or 1
+        w2v_workers = w2v_workers or cpu_count() - 1
+
+        print('=' * 50)
+        print('Computing coherence Word2Vec metric (higher is better)...')
+
+        print('Step 1/2: Training Word2Vec model...')
+        w2v_model = Word2Vec(
+            self.corpus,
+            size=w2v_size,
+            min_count=w2v_min_count,
+            max_vocab_size=w2v_max_vocab_size,
+            max_final_vocab=w2v_max_final_vocab,
+            sg=w2v_sg,
+            workers=w2v_workers,
+        )
+        if verbose:
+            print(f'    Word2Vec model has {len(w2v_model.wv.vocab)} terms')
+
+        print('Step 2/2: Training topic models...')
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
+        coherence = []
+        for idx, k in enumerate(num_topics_infer):
+            if verbose:
+                print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
+            if self.model_type == 'NMF':
+                self.infer_topics(num_topics=k, beta_loss=beta_loss)
+            elif self.model_type == 'LDA':
+                self.infer_topics(num_topics=k, algorithm=algorithm)
+            else:
+                raise TypeError(f'Unsupported model type: {self.model_type}')
+
+            top_words_topics = self.top_words_topics(num_words=top_n_words)
+            coh = calculate_coherence(w2v_model, top_words_topics)
+            if verbose:
+                print(f'    Coherence: {coh:.5f}')
+            coherence.append(coh)
+
+        return coherence
 
     def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10,
                       sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
