@@ -136,7 +136,7 @@ class TopicModel(object):
             if verbose:
                 print(f'    KL list={kl_list}')
         ouput = np.array(kl_matrix)
-        return ouput.mean(axis=0)
+        return ouput.mean(axis=0).tolist()
 
     def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
                       beta_loss='frobenius', algorithm='variational', verbose=True):
