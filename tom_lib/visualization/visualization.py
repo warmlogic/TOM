@@ -162,6 +162,50 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=cophenetic_correlation, step=step, metric_type='brunet')
 
+    def plot_coherence_w2v_metric(
+        self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
+        w2v_size=None, w2v_min_count=None, w2v_max_vocab_size=None, w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
+        beta_loss='frobenius', algorithm='variational', verbose=True,
+    ):
+        coherence = self.topic_model.coherence_w2v_metric(
+            min_num_topics=min_num_topics,
+            max_num_topics=max_num_topics,
+            step=step,
+            top_n_words=top_n_words,
+            w2v_size=w2v_size,
+            w2v_min_count=w2v_min_count,
+            w2v_max_vocab_size=w2v_max_vocab_size,
+            w2v_max_final_vocab=w2v_max_final_vocab,
+            w2v_sg=w2v_sg,
+            w2v_workers=w2v_workers,
+            beta_loss=beta_loss,
+            algorithm=algorithm,
+            verbose=verbose,
+        )
+
+        num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
+        plt.clf()
+        # create the line plot
+        plt.plot(num_topics_infer, coherence)
+        plt.xticks(num_topics_infer)
+        plt.xlabel('Number of Topics')
+        plt.ylabel('Mean Coherence')
+        # add the points
+        plt.scatter(num_topics_infer, coherence, s=120)
+        # find and annotate the maximum point on the plot
+        ymax = max(coherence)
+        xpos = coherence.index(ymax)
+        best_k = num_topics_infer[xpos]
+        plt.annotate(f'k={best_k}', xy=(best_k, ymax), xytext=(best_k, ymax), textcoords='offset points', fontsize=16)
+        file_path_fig = self.output_dir / 'coherence_w2v.png'
+        file_path_data = self.output_dir / 'coherence_w2v.tsv'
+        plt.savefig(file_path_fig)
+
+        save_topic_number_metrics_data(
+            file_path_data,
+            range_=(min_num_topics, max_num_topics),
+            data=coherence, step=step, metric_type='coherence_w2v')
+
     def plot_perplexity_metric(self, min_num_topics=10, max_num_topics=20, step=5, train_size=0.7,
                                algorithm='variational', verbose=True):
         train_perplexities, test_perplexities = self.topic_model.perplexity_metric(
