@@ -66,6 +66,8 @@ greene_tao = config[infer_section].getint('greene_tao', 10)
 greene_top_n_words = config[infer_section].getint('greene_top_n_words', 10)
 greene_sample = config[infer_section].getfloat('greene_sample', 0.8)
 iterations = config[infer_section].getint('iterations', 10)
+coherence_w2v_top_n_words = config[infer_section].getint('coherence_w2v_top_n_words', 10)
+coherence_w2v_size = config[infer_section].getint('coherence_w2v_size', max_features)
 # perplexity_train_size = config[infer_section].getfloat('perplexity_train_size', 0.7)
 verbose = config[infer_section].getboolean('verbose', )
 
@@ -139,6 +141,16 @@ viz.plot_brunet_metric(
     max_num_topics=max_num_topics,
     step=step,
     iterations=iterations,
+    verbose=verbose,
+)
+
+logger.info('Assessing Coherence Word2Vec metric')
+viz.plot_coherence_w2v_metric(
+    min_num_topics=min_num_topics,
+    max_num_topics=max_num_topics,
+    step=step,
+    top_n_words=coherence_w2v_top_n_words,
+    coherence_w2v_size=coherence_w2v_size,
     verbose=verbose,
 )
 
