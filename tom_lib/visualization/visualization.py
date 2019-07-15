@@ -48,8 +48,12 @@ def split_string_nchar(string: str, nchar: int = None):
 class Visualization:
     def __init__(self, topic_model, output_dir=None):
         self.topic_model = topic_model
+
         if output_dir is None:
-            self.output_dir = Path(f'output_{self.topic_model.model_type}_{self.topic_model.nb_topics}_topics')
+            if self.topic_model.trained:
+                self.output_dir = Path(f'output_{self.topic_model.model_type}_{self.topic_model.nb_topics}_topics')
+            else:
+                self.output_dir = Path(f'output_{self.topic_model.model_type}')
         else:
             if isinstance(output_dir, str):
                 self.output_dir = Path(output_dir)
@@ -164,7 +168,9 @@ class Visualization:
 
     def plot_coherence_w2v_metric(
         self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
-        w2v_size=None, w2v_min_count=None, w2v_max_vocab_size=None, w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
+        w2v_size=None, w2v_min_count=None,
+        # w2v_max_vocab_size=None,
+        w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
         beta_loss='frobenius', algorithm='variational', verbose=True,
     ):
         coherence = self.topic_model.coherence_w2v_metric(
@@ -174,7 +180,7 @@ class Visualization:
             top_n_words=top_n_words,
             w2v_size=w2v_size,
             w2v_min_count=w2v_min_count,
-            w2v_max_vocab_size=w2v_max_vocab_size,
+            # w2v_max_vocab_size=w2v_max_vocab_size,
             w2v_max_final_vocab=w2v_max_final_vocab,
             w2v_sg=w2v_sg,
             w2v_workers=w2v_workers,
