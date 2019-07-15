@@ -8,9 +8,9 @@ setup(
     name='tom_lib',
     version=version,
     packages=find_packages(),
-    author="Adrien Guille, Pavel Soriano",
-    author_email="adrien.guille@univ-lyon2.fr",
-    description="A library for topic modeling and browsing",
+    author="Adrien Guille, Pavel Soriano, Matt Mollison",
+    author_email="matt.mollison@gmail.com",
+    description="A library for topic modeling and browsing (forked by MVM)",
     long_description=open('README.rst').read(),
     url='http://mediamining.univ-lyon2.fr/people/guille/tom.php',
     download_url=f'http://pypi.python.org/packages/source/t/tom_lib/tom_lib-{version}.tar.gz',
@@ -24,4 +24,4 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Text Processing'
     ],
-    install_requires=['scikit-learn', 'networkx', 'pandas', 'scipy', 'numpy', 'lda', 'nltk'])
+    install_requires=['scikit-learn', 'networkx', 'pandas', 'scipy', 'numpy', 'lda', 'nltk', 'gensim', 'smart_open'])
