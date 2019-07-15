@@ -4,9 +4,10 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 from tom_lib.stats import symmetric_kl, agreement_score
 from scipy import spatial, cluster
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix
 from sklearn.decomposition import NMF, LatentDirichletAllocation as LDA
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import normalize
 import lda
 
 from tom_lib.structure.corpus import Corpus
@@ -492,6 +493,27 @@ class TopicModel(object):
         doc_topic_distr = self.model.transform(
             self.corpus.vectorizer.transform([text]))[0]
         return doc_topic_distr
+
+    def similar_documents(self, exemplar_vector, num_docs: int):
+        '''
+        Given an exemplar topic loading vector, find similar documents.
+
+        exemplar_vector can be a list or a 1-D numpy array
+
+        returns a tuple of document ids and similarity scores
+        '''
+        # Ensure it's 1-D and has one value per topic
+        assert len(exemplar_vector) == self.nb_topics
+        # normalize needs it to be 2-D
+        exemplar_vector = np.array(exemplar_vector)[np.newaxis, :]
+        # Compute pairwise similarities
+        similarities = np.dot(csr_matrix(normalize(exemplar_vector, axis=1)),
+                              normalize(self.document_topic_matrix, axis=1).T).toarray()[0]
+        # Combine document indices and similarities
+        similarities = [s for s in list(zip(self.corpus.data_frame.index.tolist(), similarities))]
+        # Sort by most similar first
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        return similarities[:num_docs]
 
 
 class LatentDirichletAllocation(TopicModel):
