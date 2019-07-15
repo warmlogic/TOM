@@ -196,7 +196,9 @@ class TopicModel(object):
 
     def coherence_w2v_metric(
         self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
-        w2v_size=None, w2v_min_count=None, w2v_max_vocab_size=None, w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
+        w2v_size=None, w2v_min_count=None,
+        # w2v_max_vocab_size=None,
+        w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
         beta_loss='frobenius', algorithm='variational', verbose=True,
     ):
         """
@@ -230,7 +232,7 @@ class TopicModel(object):
 
         w2v_size = w2v_size or 100
         w2v_min_count = w2v_min_count or self.corpus._min_absolute_frequency
-        w2v_max_vocab_size = w2v_max_vocab_size or self.corpus.max_features
+        # w2v_max_vocab_size = w2v_max_vocab_size or self.corpus.max_features
         w2v_max_final_vocab = w2v_max_final_vocab or self.corpus.max_features
         w2v_sg = w2v_sg or 1
         w2v_workers = w2v_workers or cpu_count() - 1
@@ -243,7 +245,7 @@ class TopicModel(object):
             self.corpus,
             size=w2v_size,
             min_count=w2v_min_count,
-            max_vocab_size=w2v_max_vocab_size,
+            # max_vocab_size=w2v_max_vocab_size,
             max_final_vocab=w2v_max_final_vocab,
             sg=w2v_sg,
             workers=w2v_workers,
@@ -494,10 +496,12 @@ class TopicModel(object):
 
 class LatentDirichletAllocation(TopicModel):
     def __init__(self, corpus):
+        self.trained = False
         self.model_type = 'LDA'
         self.corpus = corpus
 
     def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
+        self.trained = True
         self.nb_topics = num_topics
         self.algorithm = algorithm
         lda_model = None
@@ -543,10 +547,12 @@ class LatentDirichletAllocation(TopicModel):
 
 class NonNegativeMatrixFactorization(TopicModel):
     def __init__(self, corpus):
+        self.trained = False
         self.model_type = 'NMF'
         self.corpus = corpus
 
     def infer_topics(self, num_topics=10, beta_loss='frobenius', **kwargs):
+        self.trained = True
         self.nb_topics = num_topics
         self.beta_loss = beta_loss
         if self.beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
