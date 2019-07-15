@@ -135,9 +135,12 @@ class TopicModel(object):
                 kl_list.append(symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
             if verbose:
-                print(f'    KL list={kl_list}')
-        ouput = np.array(kl_matrix)
-        return ouput.mean(axis=0).tolist()
+                print(f'    Iteration KL list={kl_list}')
+                print(f'    Iteration Average={np.mean(kl_list)}')
+        avg_kl_matrix = np.array(kl_matrix).mean(axis=0).tolist()
+        if verbose:
+            print(f'        Overall KL average={avg_kl_matrix}')
+        return avg_kl_matrix
 
     def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
                       beta_loss='frobenius', algorithm='variational', verbose=True):
