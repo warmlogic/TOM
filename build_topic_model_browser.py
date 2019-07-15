@@ -134,7 +134,7 @@ else:
     logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
 
     # Infer topics
-    logger.info('Inferring topics')
+    logger.info(f'Inferring {num_topics} topics')
     if model_type == 'NMF':
         topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
     elif model_type == 'LDA':
