@@ -101,6 +101,12 @@ class Corpus:
         vocab = vectorizer.get_feature_names()
         self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
 
+    def __iter__(self):
+        '''A generator that yields a tokenized (i.e, split on whitespace) version of each document
+        '''
+        for _, doc in self.data_frame[self._text_col].items():
+            yield doc.split()
+
     def export(self, file_path):
         self.data_frame.to_csv(path_or_buf=file_path, sep=self._sep, encoding='utf-8')
 
