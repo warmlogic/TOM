@@ -46,8 +46,8 @@
     </div>
     <div id="header">
         <h1>Details for document {{ doc_id }}</h1>
-        <p>Title: {{ title }}</p>
-        <p>Author: {{ authors }} --- Date: {{ year }} --- Affiliation: {{ affiliation }} --- Identifier: {{ id }}</p>
+        <p>Title: {{ title }} --- Author: {{ authors }}</p>
+        <p>Date: {{ year }} --- Affiliation: {{ affiliation }} --- Dataset: {{ dataset }} --- Identifier: {{ id }}</p>
     </div>
     <div id="wrap">
         <div id="left_column">
@@ -72,13 +72,15 @@
             <ul>
                 {% for doc in documents %}
                     <li>
-                        <a href="../document/{{ doc[4] }}.html">{{ doc[0] }}</a> ({{ doc[5] }})
+                        <a href="../document/{{ doc[5] }}.html">{{ doc[0] }}</a> ({{ doc[6] }})
                         <br>
                         Author: {{ doc[1] }}
                         <br>
                         Date: {{ doc[2] }}
                         <br>
                         Affiliation: {{ doc[3] }}
+                        <br>
+                        Dataset: {{ doc[4] }}
                     </li>
                 {% endfor %}
             </ul>
@@ -91,6 +93,7 @@
             <h4>Author: {{ authors }}</h4>
             <h4>Date: {{ year }}</h4>
             <h4>Affiliation: {{ affiliation }}</h4>
+            <h4>Dataset: {{ dataset }}</h4>
             <h4>Identifier: {{ id }}</h4>
             {{ full_text }}
         </div>

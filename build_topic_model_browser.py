@@ -382,6 +382,7 @@ def topic_details(tid):
         documents.append(
             (i + 1,
              topic_model.corpus.title(document_id).title(),
+             ', '.join(topic_model.corpus.dataset(document_id)).title(),
              ', '.join(topic_model.corpus.affiliation(document_id)).title(),
              ', '.join(topic_model.corpus.author(document_id)).title(),
              topic_model.corpus.date(document_id),
@@ -418,6 +419,7 @@ def document_details(did):
              ', '.join(topic_model.corpus.author(another_doc[0])).title(),
              topic_model.corpus.date(another_doc[0]),
              ', '.join(topic_model.corpus.affiliation(another_doc[0])).title(),
+             ', '.join(topic_model.corpus.dataset(another_doc[0])).title(),
              another_doc[0],
              round(another_doc[1], 3),
              ),
@@ -434,6 +436,7 @@ def document_details(did):
         year=topic_model.corpus.date(int(did)),
         short_content=topic_model.corpus.title(int(did)).title(),
         affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
+        dataset=', '.join(topic_model.corpus.dataset(int(did))).title(),
         id=topic_model.corpus.id(int(did)),
         full_text=topic_model.corpus.full_text(int(did)),
         topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
@@ -450,6 +453,7 @@ def word_details(wid):
              ', '.join(topic_model.corpus.author(document_id)).title(),
              topic_model.corpus.date(document_id),
              ', '.join(topic_model.corpus.affiliation(document_id)).title(),
+             ', '.join(topic_model.corpus.dataset(document_id)).title(),
              document_id,
              ),
         )

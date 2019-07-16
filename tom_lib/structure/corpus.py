@@ -25,6 +25,7 @@ class Corpus:
                  title_col: str=None,
                  author_col: str=None,
                  affiliation_col: str=None,
+                 dataset_col: str=None,
                  date_col: str=None,
                  id_col: str=None,
                  ):
@@ -42,6 +43,7 @@ class Corpus:
         self._title_col = title_col or 'title'
         self._author_col = author_col or 'author'
         self._affiliation_col = affiliation_col or 'affiliation'
+        self._dataset_col = dataset_col or 'dataset'
         self._date_col = date_col or 'date'
         self._id_col = id_col
 
@@ -126,6 +128,10 @@ class Corpus:
     def affiliation(self, doc_id):
         aff_str = str(self.data_frame.iloc[doc_id][self._affiliation_col])
         return aff_str.split(', ')
+
+    def dataset(self, doc_id):
+        ds_str = str(self.data_frame.iloc[doc_id][self._dataset_col])
+        return ds_str.split(', ')
 
     def id(self, doc_id):
         if self._id_col:

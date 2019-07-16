@@ -58,13 +58,15 @@
             <ul>
                 {% for doc in documents %}
                     <li>
-                        <strong><a href="../document/{{ doc[4] }}.html">{{ doc[0] }}</a></strong>
+                        <strong><a href="../document/{{ doc[5] }}.html">{{ doc[0] }}</a></strong>
                         <br>
                         Author: {{ doc[1] }}
                         <br>
                         Date: {{ doc[2] }}
                         <br>
                         Affiliation: {{ doc[3] }}
+                        <br>
+                        Dataset: {{ doc[4] }}
                     </li>
                 {% endfor %}
             </ul>
