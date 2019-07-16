@@ -24,4 +24,18 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Text Processing'
     ],
-    install_requires=['scikit-learn', 'networkx', 'pandas', 'scipy', 'numpy', 'lda', 'nltk', 'gensim', 'smart_open'])
+    install_requires=[
+        'scikit-learn',
+        'networkx',
+        'pandas',
+        'scipy',
+        'numpy',
+        'lda',
+        'nltk',
+        'gensim',
+        'smart_open',
+        'plotly',
+        'dash',
+        'dash-daq',
+    ]
+)
