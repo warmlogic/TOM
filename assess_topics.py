@@ -132,11 +132,12 @@ def main(config_infer):
     logger.info(f'Total number of topics to infer: {len(num_topics_infer)}')
     logger.info(f'Topic numbers: {list(num_topics_infer)}')
 
-    logger.info('Estimating the number of topics to choose. This could take a while...')
-
     output_dir = f'assess_{topic_model.model_type}_{source_filepath.stem}_{now_str}'
 
     viz = Visualization(topic_model, output_dir=output_dir)
+
+    logger.info('Estimating the number of topics to choose. This could take a while...')
+    logger.info(f'Will save results to: {viz.output_dir}')
 
     logger.info('Assessing Greene metric')
     viz.plot_greene_metric(

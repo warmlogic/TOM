@@ -238,6 +238,8 @@ def main(config_browser):
 
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
+    logger.info(f'Will save results to: {viz.output_dir}')
+
     fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
         freq=freq,
         by_affil=True,
