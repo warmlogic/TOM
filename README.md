@@ -148,3 +148,11 @@ print('\nTop 10 most relevant words for topic 2:',
 ![](http://mediamining.univ-lyon2.fr/people/guille/tom_resources/topic_details.jpg)
 ### Document details
 ![](http://mediamining.univ-lyon2.fr/people/guille/tom_resources/document_details.jpg)
+
+## Running the web server
+
+TODO: Add documentation based on these links
+- https://medium.com/@akshatuppal/deploying-multiple-python-flask-applications-on-ec2-instance-using-nginx-and-gunicorn-32651fb3d064
+- https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
+- https://stackoverflow.com/questions/7023052/configure-flask-dev-server-to-be-visible-across-the-network
+- https://flask.palletsprojects.com/en/1.1.x/quickstart/
