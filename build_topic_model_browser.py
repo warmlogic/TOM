@@ -441,7 +441,7 @@ def main(config_browser):
             html.A(
                 html.Button('Export to CSV'),
                 id='download-link',
-                download='rawdata.csv',
+                download='topic_loading_similarity.csv',
                 href='',
                 target='_blank',
             ),
@@ -537,10 +537,9 @@ def main(config_browser):
     def update_download_link(*args):
         vector = list(args[:-1])
         num_docs = args[-1]
-        dff = filter_data(vector, num_docs)
-        csv_string = dff.to_csv(index=False, encoding='utf-8')
-        csv_string = 'data:text/csv;charset=utf-8,%EF%BB%BF' + urllib.parse.quote(csv_string)
-        return csv_string
+        return 'data:text/csv;charset=utf-8,%EF%BB%BF' + urllib.parse.quote(
+            filter_data(vector, num_docs).to_csv(index=False, encoding='utf-8')
+        )
 
     @server.route('/')
     def index():
