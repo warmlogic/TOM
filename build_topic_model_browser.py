@@ -359,6 +359,8 @@ def main(config_browser):
         external_stylesheets=external_stylesheets,
     )
 
+    app.title = 'Topic Loading Similarity'
+
     similar_cols = [
         'title',
         'dataset',
