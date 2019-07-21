@@ -7,6 +7,9 @@ import tom_lib.utils as ut
 from flask import Flask, render_template, request, send_from_directory
 import dash
 import dash_html_components as html
+import dash_core_components as dcc
+from dash.dependencies import Input, Output
+import dash_table as dt
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
@@ -344,6 +347,85 @@ def main(config_browser):
 
     server = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
+    app = dash.Dash(
+        __name__,
+        server=server,
+        routes_pathname_prefix='/topic_loading_similarity/'
+    )
+
+    similar_cols = [
+        'title',
+        'dataset',
+        'affiliation',
+        'author',
+        'date',
+        'access_num',
+    ]
+
+    app.layout = html.Div([
+        # html.Div(id='container'),
+        html.Div([
+            html.Div([
+                html.Label(' '.join([x[0] for x in topic_model.top_words(n, 10)])),
+                html.Div(
+                    dcc.Slider(
+                        id=f'slider-topic-{n}',
+                        min=0.0,
+                        max=1.0,
+                        step=0.1,
+                        value=0.1,
+                        updatemode='drag',
+                    ),
+                    style={'width': '20%'},
+                ),
+                html.Div(id=f'slider-output-container-{n}', style={'marginTop': 10, 'marginBottom': 10}),
+            ]) for n in range(topic_model.nb_topics)],
+            className='row',
+            style={'width': '50%'},
+        ),
+        html.Div([
+            dt.DataTable(
+                id='doc-table',
+                data=[],
+                columns=[{"name": i, "id": i} for i in similar_cols],
+                style_table={'overflowX': 'scroll'},
+                style_cell={
+                    'minWidth': '0px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal'
+                },
+                css=[{
+                    'selector': '.dash-cell div.dash-cell-value',
+                    'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
+                }],
+                editable=False,
+                sort_action="native",
+                # sort_mode="multi",
+                row_selectable="multi",
+                row_deletable=False,
+                selected_rows=[],
+                page_action="native",
+                # page_current=0,
+                # page_size=10,
+            ),
+        ]),
+    ])
+
+    for n in range(topic_model.nb_topics):
+        @app.callback(
+            Output(f'slider-output-container-{n}', 'children'),
+            [Input(f'slider-topic-{n}', 'value')],
+        )
+        def update_output(slider_n_value):
+            return f'{slider_n_value}'
+
+    @app.callback(
+        Output('doc-table', 'data'),
+        [Input(f'slider-topic-{n}', 'value') for n in range(topic_model.nb_topics)],
+    )
+    def update_table(*args):
+        doc_ids = [x[0] for x in topic_model.similar_documents(list(args), num_docs=50)]
+        return topic_model.corpus.data_frame[similar_cols].loc[doc_ids].to_dict('records')
+
     @server.route('/')
     def index():
         return render_template(
@@ -367,7 +449,6 @@ def main(config_browser):
             fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
         )
 
-
     @server.route('/topic_cloud.html')
     def topic_cloud():
         return render_template(
@@ -376,7 +457,6 @@ def main(config_browser):
             doc_ids=range(topic_model.corpus.size),
             topic_cloud_filename=topic_cloud_folder / f'topic_cloud.json',
         )
-
 
     @server.route('/vocabulary.html')
     def vocabulary():
@@ -397,7 +477,6 @@ def main(config_browser):
             splitted_vocabulary=splitted_vocabulary,
             vocabulary_size=len(word_list),
         )
-
 
     @server.route('/topic/<tid>.html')
     def topic_details(tid):
@@ -431,7 +510,6 @@ def main(config_browser):
             affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
             # author_network_filename=author_network_folder / f'author_network{tid}.json',
         )
-
 
     @server.route('/document/<did>.html')
     def document_details(did):
@@ -473,7 +551,6 @@ def main(config_browser):
             doc_topic_loading_barplot=viz.plotly_doc_topic_loading(int(did), normalized=True, n_words=5, output_type='div'),
         )
 
-
     @server.route('/word/<wid>.html')
     def word_details(wid):
         documents = []
@@ -498,11 +575,9 @@ def main(config_browser):
             topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
         )
 
-
     @server.route('/robots.txt')
     def robots_txt():
         return send_from_directory(PurePath(server.root_path, 'static'), request.path[1:])
-
 
     @server.url_defaults
     def hashed_static_file(endpoint, values):
@@ -524,14 +599,6 @@ def main(config_browser):
                 fp = Path(static_folder, filename)
                 if fp.exists():
                     values['_'] = int(fp.stat().st_mtime)
-
-    app = dash.Dash(
-        __name__,
-        server=server,
-        routes_pathname_prefix='/dash/'
-    )
-
-    app.layout = html.Div("My Dash app")
 
     return app
 
