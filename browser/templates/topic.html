@@ -54,11 +54,12 @@
 </style>
 <body>
 <div id="navigation">
-    <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : '/')">
-        <option selected="selected" disabled="disabled">Overview</option>
-        <option>topic list</option>
+    <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : (this.value == 'topic loading similarity') ? '/topic_loading_similarity/' : '/')">
+        <option selected="selected" disabled="disabled">Select page</option>
+        <option>topic list and overview</option>
         <option>topic cloud</option>
         <option>vocabulary</option>
+        <option>topic loading similarity</option>
     </select>
     -
     <select onChange="window.location.href='../topic/'+this.value.split(' ')[1].slice(0, -1)+'.html'">
