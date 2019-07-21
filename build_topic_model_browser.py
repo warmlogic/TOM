@@ -14,6 +14,7 @@ from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirich
 from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
 import logging
+import urllib
 
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
@@ -347,10 +348,15 @@ def main(config_browser):
 
     server = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
+    external_stylesheets = [
+        'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    ]
+
     app = dash.Dash(
         __name__,
         server=server,
-        routes_pathname_prefix='/topic_loading_similarity/'
+        routes_pathname_prefix='/topic_loading_similarity/',
+        external_stylesheets=external_stylesheets,
     )
 
     similar_cols = [
@@ -360,13 +366,23 @@ def main(config_browser):
         'author',
         'date',
         'access_num',
+        'similarity',
     ]
 
     app.layout = html.Div([
-        # html.Div(id='container'),
+        html.Div([
+            html.Div(
+                html.P('Describe a topic loading vector to show similar documents'),
+                style={'float': 'left'},
+            ),
+            html.Div(
+                html.A('Back to topic browser', id='back-to-main', href='../'),
+                style={'float': 'right'},
+            ),
+        ]),
+        html.Div(html.P('')),
         html.Div([
             html.Div([
-                html.Label(' '.join([x[0] for x in topic_model.top_words(n, 10)])),
                 html.Div(
                     dcc.Slider(
                         id=f'slider-topic-{n}',
@@ -376,12 +392,63 @@ def main(config_browser):
                         value=0.1,
                         updatemode='drag',
                     ),
-                    style={'width': '20%'},
+                    style={
+                        'width': '20%',
+                        'display': 'inline-block',
+                    },
                 ),
-                html.Div(id=f'slider-output-container-{n}', style={'marginTop': 10, 'marginBottom': 10}),
+                html.Div(
+                    id=f'slider-output-container-{n}',
+                    style={
+                        'marginLeft': 10,
+                        'marginRight': 5,
+                        'display': 'inline-block',
+                    },
+                ),
+                html.Div(
+                    html.Label(
+                        f'Topic {n}: ' + ', '.join([x[0] for x in topic_model.top_words(n, 10)])
+                    ),
+                    style={
+                        'font-weight': 'bold',
+                        'width': '75%',
+                        'display': 'inline-block',
+                    },
+                ),
             ]) for n in range(topic_model.nb_topics)],
-            className='row',
-            style={'width': '50%'},
+            style={'width': '100%', 'display': 'inline-block'},
+        ),
+        html.Label('Number of documents'),
+        html.Div(
+            dcc.Dropdown(
+                id='num-docs-dropdown',
+                options=[
+                    {'label': '10', 'value': 10},
+                    {'label': '50', 'value': 50},
+                    {'label': '100', 'value': 100},
+                    {'label': '200', 'value': 200},
+                    {'label': 'All', 'value': topic_model.corpus.size},
+                ],
+                value=10,
+                placeholder='Select number of documents...',
+            ),
+            style={
+                'width': '10%',
+                'display': 'inline-block',
+            },
+        ),
+        html.Div(
+            html.A(
+                html.Button('Export to CSV'),
+                id='download-link',
+                download='rawdata.csv',
+                href='',
+                target='_blank',
+            ),
+            style={
+                'display': 'inline-block',
+                'float': 'right',
+            },
         ),
         html.Div([
             dt.DataTable(
@@ -390,22 +457,46 @@ def main(config_browser):
                 columns=[{"name": i, "id": i} for i in similar_cols],
                 style_table={'overflowX': 'scroll'},
                 style_cell={
-                    'minWidth': '0px', 'maxWidth': '180px',
+                    'minWidth': '0px', 'maxWidth': '250px',
                     'whiteSpace': 'normal'
+                },
+                style_cell_conditional=[
+                    {'if': {'column_id': 'title'},
+                        'width': '37%'},
+                    {'if': {'column_id': 'dataset'},
+                        'width': '6%'},
+                    {'if': {'column_id': 'affiliation'},
+                        'width': '17%'},
+                    {'if': {'column_id': 'author'},
+                        'width': '10%'},
+                    {'if': {'column_id': 'date'},
+                        'width': '14%'},
+                    {'if': {'column_id': 'access_num'},
+                        'width': '8%'},
+                    {'if': {'column_id': 'similarity'},
+                        'width': '8%'},
+                ],
+                style_data_conditional=[
+                    {
+                        'if': {'row_index': 'odd'},
+                        'backgroundColor': 'rgb(248, 248, 248)'
+                    }
+                ],
+                style_header={
+                    'backgroundColor': 'rgb(230, 230, 230)',
+                    'fontWeight': 'bold'
                 },
                 css=[{
                     'selector': '.dash-cell div.dash-cell-value',
                     'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
                 }],
                 editable=False,
-                sort_action="native",
-                # sort_mode="multi",
-                row_selectable="multi",
                 row_deletable=False,
-                selected_rows=[],
-                page_action="native",
-                # page_current=0,
-                # page_size=10,
+                sort_action='native',
+                page_action='native',
+                page_current=0,
+                page_size=100,
+                style_as_list_view=True,
             ),
         ]),
     ])
@@ -418,13 +509,38 @@ def main(config_browser):
         def update_output(slider_n_value):
             return f'{slider_n_value}'
 
+    def filter_data(vector, num_docs=None, round_decimal=None):
+        if not num_docs:
+            num_docs = 10
+        if not round_decimal:
+            round_decimal = 4
+        doc_ids_sims = topic_model.similar_documents(vector, num_docs=num_docs)
+        doc_ids = [x[0] for x in doc_ids_sims]
+        cols = [c for c in similar_cols if c in topic_model.corpus.data_frame.columns]
+        result = topic_model.corpus.data_frame[cols].loc[doc_ids]
+        result['similarity'] = [round(x[1], round_decimal) for x in doc_ids_sims]
+        return result
+
     @app.callback(
         Output('doc-table', 'data'),
-        [Input(f'slider-topic-{n}', 'value') for n in range(topic_model.nb_topics)],
+        [Input(f'slider-topic-{n}', 'value') for n in range(topic_model.nb_topics)] + [Input('num-docs-dropdown', 'value')],
     )
     def update_table(*args):
-        doc_ids = [x[0] for x in topic_model.similar_documents(list(args), num_docs=50)]
-        return topic_model.corpus.data_frame[similar_cols].loc[doc_ids].to_dict('records')
+        vector = list(args[:-1])
+        num_docs = args[-1]
+        return filter_data(vector, num_docs).to_dict('records')
+
+    @app.callback(
+        Output('download-link', 'href'),
+        [Input(f'slider-topic-{n}', 'value') for n in range(topic_model.nb_topics)] + [Input('num-docs-dropdown', 'value')],
+    )
+    def update_download_link(*args):
+        vector = list(args[:-1])
+        num_docs = args[-1]
+        dff = filter_data(vector, num_docs)
+        csv_string = dff.to_csv(index=False, encoding='utf-8')
+        csv_string = 'data:text/csv;charset=utf-8,%EF%BB%BF' + urllib.parse.quote(csv_string)
+        return csv_string
 
     @server.route('/')
     def index():
