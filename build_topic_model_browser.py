@@ -336,7 +336,7 @@ def main(config_browser):
     logger.info('Done.')
 
     # ##################################
-    # Print info and serve pages
+    # Print info
     # ##################################
 
     topic_model.print_topics(num_words=10)
@@ -347,6 +347,10 @@ def main(config_browser):
         topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
     server = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
+
+    # ##################################
+    # Set up topic loading similarity app
+    # ##################################
 
     external_stylesheets = [
         'https://codepen.io/chriddyp/pen/bWLwgP.css',
@@ -404,6 +408,7 @@ def main(config_browser):
                     style={
                         'marginLeft': 10,
                         'marginRight': 5,
+                        'font-size': 'small',
                         'display': 'inline-block',
                     },
                 ),
@@ -413,6 +418,7 @@ def main(config_browser):
                     ),
                     style={
                         'font-weight': 'bold',
+                        'font-size': 'small',
                         'width': '75%',
                         'display': 'inline-block',
                     },
@@ -420,7 +426,7 @@ def main(config_browser):
             ]) for n in range(topic_model.nb_topics)],
             style={'width': '100%', 'display': 'inline-block'},
         ),
-        html.Label('Number of documents'),
+        html.Label('Number of documents to display'),
         html.Div(
             dcc.Dropdown(
                 id='num-docs-dropdown',
@@ -432,7 +438,7 @@ def main(config_browser):
                     {'label': 'All', 'value': topic_model.corpus.size},
                 ],
                 value=10,
-                placeholder='Select number of documents...',
+                placeholder='Select...',
             ),
             style={
                 'width': '10%',
@@ -542,6 +548,10 @@ def main(config_browser):
         return 'data:text/csv;charset=utf-8,%EF%BB%BF' + urllib.parse.quote(
             filter_data(vector, num_docs).to_csv(index=False, encoding='utf-8')
         )
+
+    # ##################################
+    # Serve pages
+    # ##################################
 
     @server.route('/')
     def index():
