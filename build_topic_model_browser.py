@@ -364,15 +364,16 @@ def main(config_browser):
     )
 
     app.title = 'Topic Loading Similarity'
+    similarity_col = 'similarity'
 
     similar_cols = [
-        'title',
-        'dataset',
-        'affiliation',
-        'author',
-        'date',
-        'access_num',
-        'similarity',
+        topic_model.corpus._title_col,
+        topic_model.corpus._dataset_col,
+        topic_model.corpus._affiliation_col,
+        topic_model.corpus._author_col,
+        topic_model.corpus._date_col,
+        id_col,
+        similarity_col,
     ]
 
     app.layout = html.Div([
@@ -469,19 +470,19 @@ def main(config_browser):
                     'whiteSpace': 'normal'
                 },
                 style_cell_conditional=[
-                    {'if': {'column_id': 'title'},
+                    {'if': {'column_id': topic_model.corpus._title_col},
                         'width': '37%'},
-                    {'if': {'column_id': 'dataset'},
+                    {'if': {'column_id': topic_model.corpus._dataset_col},
                         'width': '6%'},
-                    {'if': {'column_id': 'affiliation'},
+                    {'if': {'column_id': topic_model.corpus._affiliation_col},
                         'width': '17%'},
-                    {'if': {'column_id': 'author'},
+                    {'if': {'column_id': topic_model.corpus._author_col},
                         'width': '10%'},
-                    {'if': {'column_id': 'date'},
+                    {'if': {'column_id': topic_model.corpus._date_col},
                         'width': '14%'},
-                    {'if': {'column_id': 'access_num'},
+                    {'if': {'column_id': id_col},
                         'width': '8%'},
-                    {'if': {'column_id': 'similarity'},
+                    {'if': {'column_id': similarity_col},
                         'width': '8%'},
                 ],
                 style_data_conditional=[
@@ -526,7 +527,7 @@ def main(config_browser):
         doc_ids = [x[0] for x in doc_ids_sims]
         cols = [c for c in similar_cols if c in topic_model.corpus.data_frame.columns]
         result = topic_model.corpus.data_frame[cols].loc[doc_ids]
-        result['similarity'] = [round(x[1], round_decimal) for x in doc_ids_sims]
+        result[similarity_col] = [round(x[1], round_decimal) for x in doc_ids_sims]
         return result
 
     @app.callback(
