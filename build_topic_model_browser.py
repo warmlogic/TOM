@@ -366,15 +366,16 @@ def main(config_browser):
     app.title = 'Topic Loading Similarity'
     similarity_col = 'similarity'
 
-    similar_cols = [
+    cols_sim = [
+        similarity_col,
         topic_model.corpus._title_col,
         topic_model.corpus._dataset_col,
         topic_model.corpus._affiliation_col,
         topic_model.corpus._author_col,
         topic_model.corpus._date_col,
         id_col,
-        similarity_col,
     ]
+    cols_nosim = [c for c in cols_sim if c in topic_model.corpus.data_frame.columns]
 
     app.layout = html.Div([
         html.Div([
@@ -463,27 +464,27 @@ def main(config_browser):
             dt.DataTable(
                 id='doc-table',
                 data=[],
-                columns=[{"name": i, "id": i} for i in similar_cols],
+                columns=[{"name": i, "id": i} for i in cols_sim],
                 style_table={'overflowX': 'scroll'},
                 style_cell={
                     'minWidth': '0px', 'maxWidth': '250px',
                     'whiteSpace': 'normal'
                 },
                 style_cell_conditional=[
+                    {'if': {'column_id': similarity_col},
+                        'width': '7%'},
                     {'if': {'column_id': topic_model.corpus._title_col},
-                        'width': '37%'},
+                        'width': '39%'},
                     {'if': {'column_id': topic_model.corpus._dataset_col},
                         'width': '6%'},
                     {'if': {'column_id': topic_model.corpus._affiliation_col},
-                        'width': '17%'},
-                    {'if': {'column_id': topic_model.corpus._author_col},
-                        'width': '10%'},
-                    {'if': {'column_id': topic_model.corpus._date_col},
                         'width': '14%'},
+                    {'if': {'column_id': topic_model.corpus._author_col},
+                        'width': '12%'},
+                    {'if': {'column_id': topic_model.corpus._date_col},
+                        'width': '7%'},
                     {'if': {'column_id': id_col},
-                        'width': '8%'},
-                    {'if': {'column_id': similarity_col},
-                        'width': '8%'},
+                        'width': '15%'},
                 ],
                 style_data_conditional=[
                     {
@@ -525,8 +526,7 @@ def main(config_browser):
             round_decimal = 4
         doc_ids_sims = topic_model.similar_documents(vector, num_docs=num_docs)
         doc_ids = [x[0] for x in doc_ids_sims]
-        cols = [c for c in similar_cols if c in topic_model.corpus.data_frame.columns]
-        result = topic_model.corpus.data_frame[cols].loc[doc_ids]
+        result = topic_model.corpus.data_frame.reindex(columns=cols_nosim, index=doc_ids)
         result[similarity_col] = [round(x[1], round_decimal) for x in doc_ids_sims]
         result[topic_model.corpus._date_col] = result[topic_model.corpus._date_col].dt.strftime('%Y-%m-%d')
         return result
