@@ -119,7 +119,7 @@ class Corpus:
         return self.data_frame.iloc[doc_id][self._title_col]
 
     def date(self, doc_id):
-        return self.data_frame.iloc[doc_id][self._date_col].year
+        return self.data_frame.iloc[doc_id][self._date_col]
 
     def author(self, doc_id):
         aut_str = str(self.data_frame.iloc[doc_id][self._author_col])
@@ -139,10 +139,10 @@ class Corpus:
         else:
             return str(doc_id)
 
-    def documents_by_author(self, author: str, date=None):
+    def documents_by_author(self, author: str, year=None):
         aut_doc_ids = []
-        if date:
-            potential_doc_ids = self.doc_ids(date)
+        if year:
+            potential_doc_ids = self.doc_ids_year(year)
         else:
             potential_doc_ids = self.data_frame.index.tolist()
         for doc_id in potential_doc_ids:
@@ -168,8 +168,8 @@ class Corpus:
             doc_idx = doc_idx[sorted_weight_idx]
         return doc_idx.tolist()
 
-    def doc_ids(self, date):
-        return self.data_frame.loc[self.data_frame[self._date_col].dt.year == date].index.tolist()
+    def doc_ids_year(self, year):
+        return self.data_frame.loc[self.data_frame[self._date_col].dt.year == year].index.tolist()
 
     def vector_for_document(self, doc_id=None):
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):

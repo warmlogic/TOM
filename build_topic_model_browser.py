@@ -191,7 +191,7 @@ def main(config_browser):
 
             evolution = []
             for i in range(min_year, max_year + 1):
-                evolution.append((i, topic_model.topic_frequency(topic_id, date=i)))
+                evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
             ut.save_topic_evolution(
                 evolution,
                 static_folder / frequency_folder / f'frequency{topic_id}.tsv',
@@ -528,6 +528,7 @@ def main(config_browser):
         cols = [c for c in similar_cols if c in topic_model.corpus.data_frame.columns]
         result = topic_model.corpus.data_frame[cols].loc[doc_ids]
         result[similarity_col] = [round(x[1], round_decimal) for x in doc_ids_sims]
+        result[topic_model.corpus._date_col] = result[topic_model.corpus._date_col].dt.strftime('%Y-%m-%d')
         return result
 
     @app.callback(
@@ -621,7 +622,7 @@ def main(config_browser):
                     ', '.join(topic_model.corpus.dataset(document_id)).title(),
                     ', '.join(topic_model.corpus.affiliation(document_id)).title(),
                     ', '.join(topic_model.corpus.author(document_id)).title(),
-                    topic_model.corpus.date(document_id),
+                    topic_model.corpus.date(document_id).strftime('%Y-%m-%d'),
                     topic_model.corpus.id(document_id),
                     document_id,
                 ),
@@ -653,7 +654,7 @@ def main(config_browser):
                 (
                     topic_model.corpus.title(another_doc[0]).title(),
                     ', '.join(topic_model.corpus.author(another_doc[0])).title(),
-                    topic_model.corpus.date(another_doc[0]),
+                    topic_model.corpus.date(another_doc[0]).strftime('%Y-%m-%d'),
                     ', '.join(topic_model.corpus.affiliation(another_doc[0])).title(),
                     ', '.join(topic_model.corpus.dataset(another_doc[0])).title(),
                     another_doc[0],
@@ -669,7 +670,7 @@ def main(config_browser):
             documents=documents,
             title=topic_model.corpus.title(int(did)).title(),
             authors=', '.join(topic_model.corpus.author(int(did))).title(),
-            year=topic_model.corpus.date(int(did)),
+            year=topic_model.corpus.date(int(did)).strftime('%Y-%m-%d'),
             short_content=topic_model.corpus.title(int(did)).title(),
             affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
             dataset=', '.join(topic_model.corpus.dataset(int(did))).title(),
@@ -687,7 +688,7 @@ def main(config_browser):
                 (
                     topic_model.corpus.title(document_id).title(),
                     ', '.join(topic_model.corpus.author(document_id)).title(),
-                    topic_model.corpus.date(document_id),
+                    topic_model.corpus.date(document_id).strftime('%Y-%m-%d'),
                     ', '.join(topic_model.corpus.affiliation(document_id)).title(),
                     ', '.join(topic_model.corpus.dataset(document_id)).title(),
                     document_id,

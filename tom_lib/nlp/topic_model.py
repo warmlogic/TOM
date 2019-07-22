@@ -452,14 +452,20 @@ class TopicModel(object):
         else:
             print(f"Unknown dtype '{type(doc_id)}'")
 
-    def topic_frequency(self, topic, date=None, count: bool = False):
-        return self.topics_frequency(date=date, count=count)[topic]
+    def topic_frequency(self, topic, year=None, count: bool = False):
+        '''For a given topic, returns the percent out of all documents (or count of documents)
+        for which it is the most likely topic, optionally slicing by year.
+        '''
+        return self.topics_frequency(year=year, count=count)[topic]
 
-    def topics_frequency(self, date=None, count: bool = False):
-        if date is None:
+    def topics_frequency(self, year=None, count: bool = False):
+        '''For each topic, returns the percent out of all documents (or count of documents)
+        for which it is the most likely topic, optionally slicing by year.
+        '''
+        if year is None:
             doc_ids = self.corpus.data_frame.index.tolist()
         else:
-            doc_ids = self.corpus.doc_ids(date)
+            doc_ids = self.corpus.doc_ids(year)
 
         topic_count = Counter(self.most_likely_topic_for_document(doc_ids))
         frequency = np.array([topic_count[i] if i in topic_count else 0 for i in range(self.nb_topics)])
