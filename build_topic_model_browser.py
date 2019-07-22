@@ -502,6 +502,7 @@ def main(config_browser):
                 }],
                 editable=False,
                 row_deletable=False,
+                filter_action='native',
                 sort_action='native',
                 page_action='native',
                 page_current=0,
