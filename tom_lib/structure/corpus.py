@@ -171,13 +171,25 @@ class Corpus:
     def doc_ids_year(self, year):
         return self.data_frame.loc[self.data_frame[self._date_col].dt.year == year].index.tolist()
 
-    def word_vector_for_document(self, doc_id=None):
+    def word_vector_for_document(self, doc_id=None, normalized=False):
+        '''Normalized: Divide each document's word weights by the sum of its word weights.
+                       Results in the word weights for a document summing to 1.
+        '''
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
-            return self.sklearn_vector_space.toarray()
-        if isinstance(doc_id, int):
-            return self.sklearn_vector_space[doc_id, :].toarray()[0]
+            if normalized:
+                return np.array(self.sklearn_vector_space / self.sklearn_vector_space.sum(axis=1))
+            else:
+                return self.sklearn_vector_space.toarray()
+        elif isinstance(doc_id, int) or (isinstance(doc_id, list) and (len(doc_id) == 1)):
+            if normalized:
+                return np.array(self.sklearn_vector_space[doc_id, :] / self.sklearn_vector_space[doc_id, :].sum(axis=1))[0]
+            else:
+                return self.sklearn_vector_space[doc_id, :].toarray()[0]
         elif isinstance(doc_id, list):
-            return self.sklearn_vector_space[doc_id, :].toarray()
+            if normalized:
+                return np.array(self.sklearn_vector_space[doc_id, :] / self.sklearn_vector_space[doc_id, :].sum(axis=1))
+            else:
+                return self.sklearn_vector_space[doc_id, :].toarray()
         else:
             print(f"Unknown dtype '{type(doc_id)}'")
 
