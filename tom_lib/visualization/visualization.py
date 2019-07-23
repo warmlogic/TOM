@@ -1371,7 +1371,7 @@ class Visualization:
 
     def plotly_doc_topic_loading(
         self,
-        did: int,
+        doc_id: int,
         topic_cols: List[str] = None,
         normalized: bool = True,
         n_words: int = 10,
@@ -1389,7 +1389,7 @@ class Visualization:
             norm_string = ''
 
         _df = pd.DataFrame(
-            data=[self.topic_model.topic_distribution_for_document(doc_id=did, normalized=normalized)],
+            data=[self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized)],
             columns=topic_cols_all,
         )
 
