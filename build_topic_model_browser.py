@@ -160,14 +160,14 @@ def main(config_browser):
         elif model_type == 'LDA':
             topic_model.infer_topics(num_topics=num_topics, algorithm=lda_algorithm)
 
-        topic_description = []
-        for i in range(topic_model.nb_topics):
-            description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
-            topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
-
         # Save model on disk
         logger.info(f'Saving topic model: {topic_model_filepath}')
         ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
+
+    topic_description = []
+    for i in range(topic_model.nb_topics):
+        description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
+        topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
     # Export topic cloud
     logger.info('Saving topic cloud')
@@ -340,11 +340,6 @@ def main(config_browser):
     # ##################################
 
     topic_model.print_topics(num_words=10)
-
-    topic_description = []
-    for i in range(topic_model.nb_topics):
-        description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
-        topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
 
     server = Flask(__name__, static_folder=static_folder, template_folder=template_folder)
 
