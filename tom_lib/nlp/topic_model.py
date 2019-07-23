@@ -465,7 +465,7 @@ class TopicModel(object):
         if year is None:
             doc_ids = self.corpus.data_frame.index.tolist()
         else:
-            doc_ids = self.corpus.doc_ids(year)
+            doc_ids = self.corpus.doc_ids_year(year)
 
         topic_count = Counter(self.most_likely_topic_for_document(doc_ids))
         frequency = np.array([topic_count[i] if i in topic_count else 0 for i in range(self.nb_topics)])
