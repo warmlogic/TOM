@@ -643,7 +643,7 @@ def main(config_browser):
 
     @server.route('/document/<did>.html')
     def document_details(did):
-        vector = topic_model.corpus.vector_for_document(int(did))
+        vector = topic_model.corpus.word_vector_for_document(int(did))
         word_list = []
         for a_word_id in range(len(vector)):
             word_list.append((topic_model.corpus.word_for_id(a_word_id), round(vector[a_word_id], 3), a_word_id))

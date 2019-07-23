@@ -171,7 +171,7 @@ class Corpus:
     def doc_ids_year(self, year):
         return self.data_frame.loc[self.data_frame[self._date_col].dt.year == year].index.tolist()
 
-    def vector_for_document(self, doc_id=None):
+    def word_vector_for_document(self, doc_id=None):
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
             return self.sklearn_vector_space.toarray()
         if isinstance(doc_id, int):

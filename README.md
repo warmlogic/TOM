@@ -70,7 +70,7 @@ corpus = Corpus(source_filepath='input/raw_corpus.csv',
                 min_absolute_frequency=4)
 print('corpus size:', corpus.size)
 print('vocabulary size:', len(corpus.vocabulary))
-print('Vector representation of document 0:\n', corpus.vector_for_document(0))
+print('Vector representation of document 0:\n', corpus.word_vector_for_document(0))
 ```
 
 ### Instantiate a topic model and infer topics

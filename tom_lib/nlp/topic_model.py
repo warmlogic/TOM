@@ -117,7 +117,7 @@ class TopicModel(object):
             if verbose:
                 print(f'Iteration: {j+1} of {iterations}')
             kl_list = []
-            doc_len = self.corpus.vector_for_document().sum(axis=1)  # document length
+            doc_len = self.corpus.word_vector_for_document().sum(axis=1)  # document length
             norm = np.linalg.norm(doc_len)
             for idx, i in enumerate(num_topics_infer):
                 if verbose:
