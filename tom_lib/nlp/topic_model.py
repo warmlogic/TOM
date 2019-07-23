@@ -395,59 +395,123 @@ class TopicModel(object):
         weighted_docs = [(doc_id, self.document_topic_matrix[doc_id, topic_id]) for doc_id in doc_ids]
         return weighted_docs
 
-    def word_distribution_for_topic(self, topic_id=None):
+    def word_distribution_for_topic(self, topic_id=None, normalized=False):
+        '''Normalized: Divide each topic's word weights by the sum of its word weights.
+                       Results in the word weights for a topic summing to 1.
+        '''
         if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
-            return self.topic_word_matrix.toarray()
-        if isinstance(topic_id, int):
-            return self.topic_word_matrix[topic_id, :].toarray()[0]
+            # all topics
+            if normalized:
+                return self.topic_word_matrix / self.topic_word_matrix.sum(axis=1)
+            else:
+                return self.topic_word_matrix.toarray()
+        elif isinstance(topic_id, int) or (isinstance(topic_id, list) and (len(topic_id) == 1)):
+            # one topic
+            if normalized:
+                return np.array(self.topic_word_matrix[topic_id, :] / self.topic_word_matrix[topic_id, :].sum(axis=1))[0]
+            else:
+                return self.topic_word_matrix[topic_id, :].toarray()[0]
         elif isinstance(topic_id, list):
-            return self.topic_word_matrix[topic_id, :].toarray()
+            # list of topics
+            if normalized:
+                return np.array(self.topic_word_matrix[topic_id, :] / self.topic_word_matrix[topic_id, :].sum(axis=1))
+            else:
+                return self.topic_word_matrix[topic_id, :].toarray()
         else:
             print(f"Unknown dtype '{type(topic_id)}'")
 
-    def document_distribution_for_topic(self, topic_id=None):
+    def document_distribution_for_topic(self, topic_id=None, normalized=False):
+        '''Normalized: Divide each topic's document weights by the sum of its document weights.
+                       Results in the document weights for a topic summing to 1.
+        '''
         if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
-            return self.document_topic_matrix.toarray()
-        if isinstance(topic_id, int):
-            return self.document_topic_matrix[:, topic_id].toarray().T[0]
+            # all topics
+            if normalized:
+                return self.document_topic_matrix / self.document_topic_matrix.sum(axis=0)
+            else:
+                return self.document_topic_matrix.toarray()
+        elif isinstance(topic_id, int) or (isinstance(topic_id, list) and (len(topic_id) == 1)):
+            # one topic
+            if normalized:
+                return np.array(
+                    self.document_topic_matrix[:, topic_id] / self.document_topic_matrix[:, topic_id].sum(axis=0)).T[0]
+            else:
+                return self.document_topic_matrix[:, topic_id].toarray().T[0]
         elif isinstance(topic_id, list):
-            return self.document_topic_matrix[:, topic_id].toarray().T
+            # list of topics
+            if normalized:
+                return np.array(
+                    self.document_topic_matrix[:, topic_id] / self.document_topic_matrix[:, topic_id].sum(axis=0)).T
+            else:
+                return self.document_topic_matrix[:, topic_id].toarray().T
         else:
             print(f"Unknown dtype '{type(topic_id)}'")
 
-    def topic_distribution_for_document(self, doc_id=None):
+    def topic_distribution_for_document(self, doc_id=None, normalized=False):
+        '''Normalized: Divide each document's topic loadings by the sum of its topic loadings.
+                       Results in the topic loadings for a document summing to 1.
+        '''
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
-            return self.document_topic_matrix.toarray()
-        if isinstance(doc_id, int):
-            return self.document_topic_matrix[doc_id, :].toarray()[0]
+            # all documents
+            if normalized:
+                return np.array(self.document_topic_matrix / self.document_topic_matrix.sum(axis=1))
+            else:
+                return self.document_topic_matrix.toarray()
+        elif isinstance(doc_id, int) or (isinstance(doc_id, list) and (len(doc_id) == 1)):
+            # one document
+            if normalized:
+                return np.array(self.document_topic_matrix[doc_id, :] / self.document_topic_matrix[doc_id, :].sum(axis=1))[0]
+            else:
+                return self.document_topic_matrix[doc_id, :].toarray()[0]
         elif isinstance(doc_id, list):
-            return self.document_topic_matrix[doc_id, :].toarray()
+            # list of documents
+            if normalized:
+                return np.array(self.document_topic_matrix[doc_id, :] / self.document_topic_matrix[doc_id, :].sum(axis=1))
+            else:
+                return self.document_topic_matrix[doc_id, :].toarray()
         else:
             print(f"Unknown dtype '{type(doc_id)}'")
 
-    def topic_distribution_for_word(self, word_id=None):
+    def topic_distribution_for_word(self, word_id=None, normalized=False):
+        '''Normalized: Divide each word's topic loadings by the sum of its topic loadings.
+                       Results in the topic loadings for a word summing to 1.
+        '''
         if word_id is None or (isinstance(word_id, list) and (len(word_id) == 0)):
-            return self.topic_word_matrix.toarray()
-        if isinstance(word_id, int):
-            return self.topic_word_matrix[:, word_id].toarray().T[0]
+            # all words
+            if normalized:
+                return np.array(self.topic_word_matrix / self.topic_word_matrix.sum(axis=1))
+            else:
+                return self.topic_word_matrix.toarray()
+        elif isinstance(word_id, int) or (isinstance(word_id, list) and (len(word_id) == 1)):
+            # one word
+            if normalized:
+                return np.array(
+                    self.topic_word_matrix[:, word_id] / self.topic_word_matrix[:, word_id].sum(axis=0)).T[0]
+            else:
+                return self.topic_word_matrix[:, word_id].toarray().T[0]
         elif isinstance(word_id, list):
-            return self.topic_word_matrix[:, word_id].toarray().T
+            # list of words
+            if normalized:
+                return np.array(
+                    self.topic_word_matrix[:, word_id] / self.topic_word_matrix[:, word_id].sum(axis=0)).T
+            else:
+                return self.topic_word_matrix[:, word_id].toarray().T
         else:
             print(f"Unknown dtype '{type(word_id)}'")
 
-    def topic_distribution_for_author(self, author_name: str):
-        all_weights = []
-        for document_id in self.corpus.documents_by_author(author_name):
-            all_weights.append(self.topic_distribution_for_document(document_id))
-        output = np.array(all_weights)
-        return output.mean(axis=0)
+    def topic_distribution_for_author(self, author_name: str, normalized=False):
+        return self.topic_distribution_for_document(
+            self.corpus.documents_by_author(author_name), normalized=normalized).mean(axis=0)
 
     def most_likely_topic_for_document(self, doc_id=None):
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
+            # all documents
             return np.argmax(self.document_topic_matrix.toarray(), axis=1)
-        if isinstance(doc_id, int):
+        elif isinstance(doc_id, int) or (isinstance(doc_id, list) and (len(doc_id) == 1)):
+            # one document
             return np.argmax(self.topic_distribution_for_document(doc_id), axis=0)
         elif isinstance(doc_id, list):
+            # list of documents
             return np.argmax(self.topic_distribution_for_document(doc_id), axis=1)
         else:
             print(f"Unknown dtype '{type(doc_id)}'")
@@ -498,9 +562,12 @@ class TopicModel(object):
         tuples.sort(key=lambda x: x[1], reverse=True)
         return tuples
 
-    def topic_distribution_for_new_document(self, text):
+    def topic_distribution_for_new_document(self, text, normalized=False):
         doc_topic_distr = self.model.transform(
             self.corpus.vectorizer.transform([text]))[0]
+        if normalized:
+            denom = doc_topic_distr.sum()
+            doc_topic_distr = np.divide(doc_topic_distr, denom, out=np.zeros_like(doc_topic_distr), where=denom != 0)
         return doc_topic_distr
 
     def similar_documents(self, exemplar_vector, num_docs: int):
