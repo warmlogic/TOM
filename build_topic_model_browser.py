@@ -169,57 +169,57 @@ def main(config_browser):
         logger.info(f'Saving topic model: {topic_model_filepath}')
         ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
 
-        # Export topic cloud
-        logger.info('Saving topic cloud')
-        ut.save_topic_cloud(topic_model, static_folder / topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
+    # Export topic cloud
+    logger.info('Saving topic cloud')
+    ut.save_topic_cloud(topic_model, static_folder / topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
 
-        # Export details about topics
-        logger.info('Saving topic details')
-        for topic_id in range(topic_model.nb_topics):
-            ut.save_word_distribution(
-                topic_model.top_words(topic_id, 20),
-                static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
-            )
+    # Export details about topics
+    logger.info('Saving topic details')
+    for topic_id in range(topic_model.nb_topics):
+        ut.save_word_distribution(
+            topic_model.top_words(topic_id, 20),
+            static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
+        )
 
-            ut.save_affiliation_repartition(
-                topic_model.affiliation_repartition(topic_id),
-                static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv',
-            )
+        ut.save_affiliation_repartition(
+            topic_model.affiliation_repartition(topic_id),
+            static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv',
+        )
 
-            min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
-            max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
+        min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
+        max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
 
-            evolution = []
-            for i in range(min_year, max_year + 1):
-                evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
-            ut.save_topic_evolution(
-                evolution,
-                static_folder / frequency_folder / f'frequency{topic_id}.tsv',
-            )
+        evolution = []
+        for i in range(min_year, max_year + 1):
+            evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
+        ut.save_topic_evolution(
+            evolution,
+            static_folder / frequency_folder / f'frequency{topic_id}.tsv',
+        )
 
-        # Export details about documents
-        logger.info('Saving document details')
-        for doc_id in range(topic_model.corpus.size):
-            ut.save_topic_distribution(
-                topic_model.topic_distribution_for_document(doc_id),
-                static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
-                topic_description,
-            )
+    # Export details about documents
+    logger.info('Saving document details')
+    for doc_id in range(topic_model.corpus.size):
+        ut.save_topic_distribution(
+            topic_model.topic_distribution_for_document(doc_id),
+            static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
+            topic_description,
+        )
 
-        # Export details about words
-        logger.info('Saving word details')
-        for word_id in range(len(topic_model.corpus.vocabulary)):
-            ut.save_topic_distribution(
-                topic_model.topic_distribution_for_word(word_id),
-                static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
-                topic_description,
-            )
+    # Export details about words
+    logger.info('Saving word details')
+    for word_id in range(len(topic_model.corpus.vocabulary)):
+        ut.save_topic_distribution(
+            topic_model.topic_distribution_for_word(word_id),
+            static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
+            topic_description,
+        )
 
-        # # Export per-topic author network using the most likely documents for each topic
-        # logger.info('Saving author network details')
-        # for topic_id in range(topic_model.nb_topics):
-        #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_model.documents_for_topic(topic_id)),
-        #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
+    # # Export per-topic author network using the most likely documents for each topic
+    # logger.info('Saving author network details')
+    # for topic_id in range(topic_model.nb_topics):
+    #     ut.save_json_object(topic_model.corpus.collaboration_network(topic_model.documents_for_topic(topic_id)),
+    #                         static_folder / author_network_folder / f'author_network{topic_id}.json')
 
     logger.info('Done.')
 
