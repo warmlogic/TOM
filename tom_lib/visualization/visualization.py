@@ -424,25 +424,18 @@ class Visualization:
         else:
             norm_string = ''
 
+        result = np.array(
+            (self.topic_model.topic_distribution_for_document(normalized=normalized) >= thresh).sum(axis=0)
+        )[0]
+
         if kind == 'count':
-            if normalized:
-                result = ((
-                    self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) >= thresh).sum(axis=0)
-            else:
-                result = (self.topic_model.document_topic_matrix >= thresh).sum(axis=0)
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
             ax.set_ylabel('Count of documents')
         elif kind == 'percent':
-            if normalized:
-                result = ((
-                    (self.topic_model.document_topic_matrix / self.topic_model.document_topic_matrix.sum(axis=1)) >= thresh).sum(axis=0) / self.topic_model.corpus.size)
-            else:
-                result = ((
-                    self.topic_model.document_topic_matrix >= thresh).sum(axis=0) / self.topic_model.corpus.size)
+            result = result / self.topic_model.corpus.size
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
             ax.set_ylabel('Percent of documents')
 
-        result = np.array(result)[0]
         result = result[[tc in topic_cols for tc in topic_cols_all]]
         sns.barplot(x=topic_cols, y=result, ax=ax)
         # result = pd.DataFrame(data=result, columns=topic_cols_all)[topic_cols]
@@ -495,15 +488,15 @@ class Visualization:
             topic_cols = topic_cols_all
 
         if normalized:
-            corr = np.corrcoef(
-                (self.topic_model.document_topic_matrix /
-                    self.topic_model.document_topic_matrix.sum(axis=1)).T)
             norm_string = 'normalized'
         else:
-            corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
             norm_string = ''
 
-        corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
+        corr = pd.DataFrame(
+            data=np.corrcoef(self.topic_model.topic_distribution_for_document(normalized=normalized).T),
+            columns=topic_cols_all,
+            index=topic_cols_all,
+        )
         corr = corr.loc[topic_cols, topic_cols]
 
         if mask_thresh is None:
@@ -577,15 +570,15 @@ class Visualization:
             topic_cols = topic_cols_all
 
         if normalized:
-            corr = np.corrcoef(
-                (self.topic_model.document_topic_matrix /
-                    self.topic_model.document_topic_matrix.sum(axis=1)).T)
             norm_string = 'normalized'
         else:
-            corr = np.corrcoef(self.topic_model.document_topic_matrix.todense().T)
             norm_string = ''
 
-        corr = pd.DataFrame(data=corr, columns=topic_cols_all, index=topic_cols_all)
+        corr = pd.DataFrame(
+            data=np.corrcoef(self.topic_model.topic_distribution_for_document(normalized=normalized).T),
+            columns=topic_cols_all,
+            index=topic_cols_all,
+        )
         corr = corr.loc[topic_cols, topic_cols]
 
         if mask_thresh is None:
@@ -679,21 +672,18 @@ class Visualization:
         )
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all)
             norm_string = 'normalized'
             if bins is None:
                 bins = np.arange(0, 1.05, 0.05)
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all)
             norm_string = ''
             if bins is None:
                 bins = 10
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
@@ -763,20 +753,17 @@ class Visualization:
         fig, ax = plt.subplots(figsize=figsize)
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all)
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
             norm_string = 'normalized'
             ax.set_ylabel(f'Topic Loading ({norm_string})')
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all)
             norm_string = ''
             ax.set_ylabel('Topic Loading (absolute)')
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
         ax = sns.boxplot(ax=ax, data=_df)
 
@@ -830,20 +817,17 @@ class Visualization:
         fig, ax = plt.subplots(figsize=figsize)
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all)
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
             norm_string = 'normalized'
             ax.set_ylabel(f'Average Topic Loading ({norm_string})')
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all)
             norm_string = ''
             ax.set_ylabel('Average Topic Loading (absolute)')
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
         ax = sns.barplot(ax=ax, data=_df, estimator=np.mean)
 
@@ -888,21 +872,17 @@ class Visualization:
 
         idx = topic_cols_all.index(topic_col)
 
+        addtl_cols = [self.topic_model.corpus._date_col]
+
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1))[:, idx],
-                columns=[topic_col],
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix[:, idx],
-                columns=[topic_col],
-            )
             norm_string = ''
 
-        addtl_cols = [self.topic_model.corpus._date_col]
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized)[:, idx],
+            columns=[topic_col],
+        )
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -945,21 +925,17 @@ class Visualization:
 
         idx = topic_cols_all.index(topic_col)
 
+        addtl_cols = [self.topic_model.corpus._date_col]
+
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1))[:, idx],
-                columns=[topic_col],
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix[:, idx],
-                columns=[topic_col],
-            )
             norm_string = ''
 
-        addtl_cols = [self.topic_model.corpus._date_col]
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized)[:, idx],
+            columns=[topic_col],
+        )
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1013,6 +989,8 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+
         if ncols is None:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
@@ -1038,9 +1016,11 @@ class Visualization:
             )
             norm_string = ''
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
-
-        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1150,6 +1130,8 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+
         if ncols is None:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
@@ -1162,22 +1144,15 @@ class Visualization:
         )
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all,
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all,
-            )
             norm_string = ''
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
-
-        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
 
         # join the date with boolean >= thresh
@@ -1284,6 +1259,8 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
+        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
+
         if ncols is None:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
@@ -1296,22 +1273,15 @@ class Visualization:
         )
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all,
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all,
-            )
             norm_string = ''
 
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
         _df = _df[topic_cols]
-
-        addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1414,18 +1384,14 @@ class Visualization:
             topic_cols = topic_cols_all
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix[did, :] /
-                      self.topic_model.document_topic_matrix[did, :].sum(axis=1)),
-                columns=topic_cols_all,
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix[did, :].todense(),
-                columns=topic_cols_all,
-            )
             norm_string = ''
+
+        _df = pd.DataFrame(
+            data=[self.topic_model.topic_distribution_for_document(doc_id=did, normalized=normalized)],
+            columns=topic_cols_all,
+        )
 
         x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols_all)]
 
