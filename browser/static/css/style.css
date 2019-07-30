@@ -118,6 +118,14 @@ body {
 	padding: 5px;
 }
 
+#one_column_center_wide {
+  text-align: center;
+  width:85%;
+  /* margin:0 0 0 0; */
+  float:center;
+	/* padding: 5px; */
+}
+
 .main-content {
 	max-width: 100%;
 	min-width: 100%;
