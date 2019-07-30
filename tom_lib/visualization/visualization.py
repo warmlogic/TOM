@@ -1369,6 +1369,74 @@ class Visualization:
 
         return fig, axes, filename_out
 
+    def plotly_topic_word_weight(
+        self,
+        topic_id: int,
+        normalized: bool = True,
+        n_words: int = 20,
+        output_type: str = 'div',
+    ):
+        if normalized:
+            norm_string = 'normalized'
+        else:
+            norm_string = ''
+
+        weighted_words = self.topic_model.top_words(topic_id=topic_id, num_words=n_words)
+        top_words = [w[0] for w in weighted_words]
+        word_weights = [w[1] for w in weighted_words]
+
+        ylabel = "Weight"
+        if normalized:
+            ylabel = f"{ylabel} ({norm_string})"
+
+        data = [
+            go.Bar(
+                x=top_words,
+                y=word_weights,
+                textposition='auto',
+                marker=dict(
+                    color='rgb(49, 130, 189)'
+                ),
+            )
+        ]
+
+        layout = go.Layout(
+            xaxis=go.layout.XAxis(
+                tickangle=-30,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            ),
+            yaxis=go.layout.YAxis(
+                title=ylabel,
+                autorange=True,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            ),
+            margin=go.layout.Margin(
+                t=0,
+                b=210,
+                l=240,
+                r=0,
+                pad=4,
+            ),
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+
     def plotly_doc_topic_loading(
         self,
         doc_id: int,
