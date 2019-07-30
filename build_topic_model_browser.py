@@ -631,9 +631,10 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
-            frequency_filename=frequency_folder / f'frequency{tid}.tsv',
+            frequency_filename=frequency_folder / f'frequency{int(tid)}.tsv',
             affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
             # author_network_filename=author_network_folder / f'author_network{tid}.json',
+            topic_word_weight_barplot=viz.plotly_topic_word_weight(int(tid), normalized=True, n_words=20, output_type='div'),
         )
 
     @server.route('/document/<did>.html')
