@@ -14,7 +14,7 @@
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
     <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
-    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <style>
     .axis path,
@@ -75,40 +75,51 @@
 </div>
 <div id="wrap">
     <h2>Most relevant words</h2>
-    <bar-chart></bar-chart>
-    <h2>Related documents ({{documents|length}})</h2>
-    <table id="documents" class="display" cellspacing="0" width="900px">
-        <thead>
-        <tr>
-            <th>Association Rank</th>
-            <th>Title</th>
-            <th>Dataset</th>
-            <th>Affiliation</th>
-            <th>Author(s)</th>
-            <th>Date</th>
-            <th>Identifier</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for doc in documents %}
-            <tr>
-                <td>{{ doc[0] }}</td>
-                <td>{{ doc[1] }}</td>
-                <td>{{ doc[2] }}</td>
-                <td>{{ doc[3] }}</td>
-                <td>{{ doc[4] }}</td>
-                <td>{{ doc[5] }}</td>
-                <td><a href="../document/{{ doc[7] }}.html">{{ doc[6] }}</a></td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div id="one_column_center_wide">
+        <!-- <bar-chart></bar-chart> -->
+        {{ topic_word_weight_barplot | safe }}
+    </div>
+    <div>
+        <h2>Related documents ({{documents|length}})</h2>
+        <table id="documents" class="display" cellspacing="0" width="900px">
+                <thead>
+                <tr>
+                <th>Association Rank</th>
+                <th>Title</th>
+                <th>Dataset</th>
+                <th>Affiliation</th>
+                <th>Author(s)</th>
+                <th>Date</th>
+                <th>Identifier</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for doc in documents %}
+                <tr>
+                        <td>{{ doc[0] }}</td>
+                        <td>{{ doc[1] }}</td>
+                        <td>{{ doc[2] }}</td>
+                        <td>{{ doc[3] }}</td>
+                        <td>{{ doc[4] }}</td>
+                        <td>{{ doc[5] }}</td>
+                        <td><a href="../document/{{ doc[7] }}.html">{{ doc[6] }}</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+        </table>
+    </div>
     <h2>Topic frequency</h2>
-    <line-chart></line-chart>
+    <div>
+        <line-chart></line-chart>
+    </div>
     <!-- <h2>Author network</h2>
-    <author-network></author-network> -->
+    <div>
+        <author-network></author-network>
+    </div> -->
     <h2>Number of documents per affiliation</h2>
-    <bar-chart2></bar-chart2>
+    <div>
+        <bar-chart2></bar-chart2>
+    </div>
 </div>
 </body>
 <script>
