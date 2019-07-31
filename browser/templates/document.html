@@ -4,30 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html">
     <title>Details for document {{ doc_id }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
-    <!-- <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script> -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.min.js"></script> -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<!-- <style>
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.bar {
-  fill: #3DC9FF;
-}
-
-.bar:hover {
-  fill: #34aad8;
-}
-
-.x.axis path {
-  display: none;
-}
-</style> -->
 <body>
     <div id="navigation">
         <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : (this.value == 'topic loading similarity') ? '/topic_loading_similarity/' : '/')">
@@ -100,58 +78,3 @@
         </div>
     </div>
 </body>
-<!-- <script>
-var margin = {top: 10, right: 0, bottom: 250, left: 250},
-    width = 900 - margin.left - margin.right,
-    height = 550 - margin.top - margin.bottom;
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
-var y = d3.scale.linear()
-    .range([height, 0]);
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-var svg = d3.select("bar-chart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-d3.tsv("{{ url_for('static', filename=topic_distribution_d_filename) }}", type, function(error, data) {
-  x.domain(data.map(function(d) { return d.topic; }));
-  y.domain([0, d3.max(data, function(d) { return d.weight; })]);
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-      .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-0.4em")
-            .attr("dy", "0.4em")
-            .attr("transform", "rotate(-35)" );
-  svg.selectAll(".bar")
-      .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.topic); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.weight); })
-      .attr("height", function(d) { return height - y(d.weight); })
-      svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 2)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Weight");
-});
-
-function type(d) {
-  d.weight = +d.weight;
-  return d;
-}
-</script> -->
