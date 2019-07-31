@@ -1372,6 +1372,7 @@ class Visualization:
     def plotly_topic_over_time_percent(
         self,
         topic_id: int,
+        # freq: str = 'YS',
         output_type: str = 'div',
     ):
         # doc_ids = self.topic_model.documents_for_topic(topic_id)
@@ -1381,7 +1382,7 @@ class Visualization:
         #     left_index=True, right_index=True,
         # )
         # _df.loc[doc_ids, 'topic_doc'] = 1
-        # _df = _df.set_index('date').groupby(by=[pd.Grouper(freq='YS')]).mean()
+        # _df = _df.set_index('date').groupby(by=[pd.Grouper(freq=freq)]).mean()
         # years = _df.index
         # freq = _df['topic_doc']
 
