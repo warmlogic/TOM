@@ -118,12 +118,11 @@ body {
 	padding: 5px;
 }
 
-#one_column_center_wide {
+#one_column_center {
   text-align: center;
-  width:85%;
-  /* margin:0 0 0 0; */
+  width:900px;
+  margin:0 auto;
   float:center;
-	/* padding: 5px; */
 }
 
 .main-content {
