@@ -1369,6 +1369,84 @@ class Visualization:
 
         return fig, axes, filename_out
 
+    def plotly_topic_over_time_percent(
+        self,
+        topic_id: int,
+        output_type: str = 'div',
+    ):
+        # doc_ids = self.topic_model.documents_for_topic(topic_id)
+        # _df = self.topic_model.corpus.data_frame[['date']]
+        # _df = _df.merge(
+        #     pd.DataFrame(index=self.topic_model.corpus.data_frame.index, columns=['topic_doc'], data=0),
+        #     left_index=True, right_index=True,
+        # )
+        # _df.loc[doc_ids, 'topic_doc'] = 1
+        # _df = _df.set_index('date').groupby(by=[pd.Grouper(freq='YS')]).mean()
+        # years = _df.index
+        # freq = _df['topic_doc']
+
+        min_year = self.topic_model.corpus.data_frame['date'].dt.year.min()
+        max_year = self.topic_model.corpus.data_frame['date'].dt.year.max()
+        years = list(range(min_year, max_year + 1))
+        freq = [self.topic_model.topic_frequency(topic_id, year=year, count=False) for year in years]
+
+        ylabel = 'Percent of documents per year'
+
+        data = [
+            go.Scatter(
+                x=years,
+                y=freq,
+                connectgaps=True,
+                mode='lines+markers+text',
+                fillcolor='#ff7f0e',
+            )
+        ]
+
+        layout = go.Layout(
+            xaxis=go.layout.XAxis(
+                tickangle=-30,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                showticklabels=True,
+                ticks='outside',
+                nticks=len(years),
+            ),
+            yaxis=go.layout.YAxis(
+                title=ylabel,
+                autorange=False,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                tickformat='.1%',
+                range=[0, 1],
+            ),
+            margin=go.layout.Margin(
+                t=0,
+                b=0,
+                l=0,
+                r=0,
+                pad=4,
+            ),
+            autosize=False,
+            width=800,
+            height=300,
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+
     def plotly_topic_word_weight(
         self,
         topic_id: int,
@@ -1393,10 +1471,18 @@ class Visualization:
             go.Bar(
                 x=top_words,
                 y=word_weights,
+                text=top_words,
                 textposition='auto',
                 marker=dict(
-                    color='rgb(49, 130, 189)'
+                    color='rgb(49, 130, 189)',
+                    # color='rgb(55, 83, 109)',
                 ),
+                # hoverlabel=dict(
+                #     bgcolor='black',
+                #     font=dict(
+                #         color='white',
+                #     )
+                # ),
             )
         ]
 
@@ -1405,7 +1491,7 @@ class Visualization:
                 tickangle=-30,
                 tickfont=dict(
                     size=10,
-                    color='rgb(107, 107, 107)'
+                    color='rgb(107, 107, 107)',
                 ),
             ),
             yaxis=go.layout.YAxis(
@@ -1413,16 +1499,19 @@ class Visualization:
                 autorange=True,
                 tickfont=dict(
                     size=10,
-                    color='rgb(107, 107, 107)'
+                    color='rgb(107, 107, 107)',
                 ),
             ),
             margin=go.layout.Margin(
                 t=0,
-                b=210,
-                l=240,
+                b=0,
+                l=0,
                 r=0,
                 pad=4,
             ),
+            autosize=False,
+            width=800,
+            height=300,
         )
 
         figure = go.Figure(data=data, layout=layout)
@@ -1476,7 +1565,7 @@ class Visualization:
                 text=y_text,
                 textposition='auto',
                 marker=dict(
-                    color='rgb(49, 130, 189)'
+                    color='rgb(49, 130, 189)',
                 ),
                 # opacity=0.85,
             )
@@ -1489,7 +1578,7 @@ class Visualization:
                 # autorange=True,
                 tickfont=dict(
                     size=10,
-                    color='rgb(107, 107, 107)'
+                    color='rgb(107, 107, 107)',
                 ),
             ),
             yaxis=go.layout.YAxis(
@@ -1498,16 +1587,19 @@ class Visualization:
                 autorange=True,
                 tickfont=dict(
                     size=10,
-                    color='rgb(107, 107, 107)'
+                    color='rgb(107, 107, 107)',
                 ),
             ),
             margin=go.layout.Margin(
                 t=0,
-                b=210,
-                l=240,
+                b=0,
+                l=0,
                 r=0,
                 pad=4,
             ),
+            autosize=False,
+            width=800,
+            height=500,
         )
 
         figure = go.Figure(data=data, layout=layout)
@@ -1534,3 +1626,67 @@ class Visualization:
         #         include_plotlyjs=False,
         #         # output_type='div',
         #     )
+
+    def plotly_topic_affil_count(
+        self,
+        topic_id: int,
+        output_type: str = 'div',
+    ):
+
+        doc_ids = self.topic_model.documents_for_topic(topic_id)
+        affil_count = self.topic_model.corpus.data_frame.loc[doc_ids, 'affiliation'].value_counts()
+        # affil_count = self.topic_model.corpus.data_frame.loc[doc_ids].groupby(by=['affiliation']).size()
+
+        ylabel = 'Count'
+
+        data = [
+            go.Bar(
+                x=affil_count.index,
+                y=affil_count.values,
+                text=affil_count.values,
+                textposition='auto',
+                marker=dict(
+                    color='rgb(49, 130, 189)',
+                ),
+            )
+        ]
+
+        layout = go.Layout(
+            xaxis=go.layout.XAxis(
+                tickangle=-30,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)',
+                ),
+            ),
+            yaxis=go.layout.YAxis(
+                title=ylabel,
+                autorange=True,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)',
+                ),
+            ),
+            margin=go.layout.Margin(
+                t=0,
+                b=0,
+                l=0,
+                r=0,
+                pad=4,
+            ),
+            autosize=False,
+            width=500,
+            height=300,
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
