@@ -4,11 +4,11 @@
     <meta http-equiv="Content-Type" content="text/html">
     <title>Details for {{ word }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
-    <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
-    <script src="{{ url_for('static', filename='js/d3-tip.js' )}}"></script>
-    <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
+    <script src="{{ url_for('static', filename='js/d3-tip.js' )}}"></script> -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<style>
+<!-- <style>
 .axis path,
 .axis line {
   fill: none;
@@ -27,7 +27,7 @@
 .x.axis path {
   display: none;
 }
-</style>
+</style> -->
 <body>
     <div id="navigation">
       <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : (this.value == 'topic loading similarity') ? '/topic_loading_similarity/' : '/')">
@@ -54,6 +54,10 @@
             <h2>Topic repartition</h2>
             <bar-chart></bar-chart>
         </div>
+        <div id="left_column">
+            <h2>Topic loading for <i>{{ word }}</i></h2>
+            {{ word_topic_loading_barplot | safe }}
+        </div>
         <div id="right_column">
             <h2>Related documents ({{documents|length}}; sorted)</h2>
             <ul>
@@ -74,7 +78,7 @@
         </div>
     </div>
 </body>
-<script>
+<!-- <script>
 var margin = {top: 10, right: 0, bottom: 250, left: 250},
     width = 900 - margin.left - margin.right,
     height = 550 - margin.top - margin.bottom;
@@ -135,4 +139,4 @@ function type(d) {
   d.weight = +d.weight;
   return d;
 }
-</script>
+</script> -->
