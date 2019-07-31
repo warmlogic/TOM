@@ -13,10 +13,10 @@
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/1.5.6/js/buttons.html5.min.js"></script>
-    <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script>
+    <!-- <script src="{{ url_for('static', filename='js/d3.min.js' )}}"></script> -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<style>
+<!-- <style>
     .axis path,
     .axis line {
         fill: none;
@@ -51,7 +51,7 @@
       stroke: #999;
       stroke-opacity: 2;
     }
-</style>
+</style> -->
 <body>
 <div id="navigation">
     <select onChange="window.location.href=((this.value == 'topic cloud') ? '/topic_cloud.html' : (this.value == 'vocabulary') ? '/vocabulary.html' : (this.value == 'topic loading similarity') ? '/topic_loading_similarity/' : '/')">
@@ -74,8 +74,8 @@
     <p>Overall frequency : {{ frequency }}%</p>
 </div>
 <div id="wrap">
-    <h2>Most relevant words</h2>
-    <div id="one_column_center_wide">
+    <div id="one_column_center">
+        <h2>Most relevant words</h2>
         <!-- <bar-chart></bar-chart> -->
         {{ topic_word_weight_barplot | safe }}
     </div>
@@ -108,17 +108,19 @@
                 </tbody>
         </table>
     </div>
-    <h2>Topic frequency</h2>
-    <div>
-        <line-chart></line-chart>
+    <div id="one_column_center">
+        <h2>Topic frequency</h2>
+        <!-- <line-chart></line-chart> -->
+        {{ topic_over_time_percent_line | safe }}
     </div>
-    <!-- <h2>Author network</h2>
-    <div>
+    <!-- <div id="one_column_center">
+        <h2>Author network</h2>
         <author-network></author-network>
     </div> -->
-    <h2>Number of documents per affiliation</h2>
-    <div>
-        <bar-chart2></bar-chart2>
+    <div id="one_column_center">
+        <h2>Number of documents per affiliation</h2>
+        <!-- <bar-chart2></bar-chart2> -->
+        {{ topic_doc_count_affil_barplot | safe }}
     </div>
 </div>
 </body>
@@ -139,7 +141,7 @@
         } );
     } );
 </script>
-<script>
+<!-- <script>
     // (document.body.clientWidth)*0.6
     var margin = {top: 10, right: 0, bottom: 100, left: 40},
             width = 900 - margin.left - margin.right,
@@ -251,7 +253,7 @@
                 .style("text-anchor", "end")
                 .text("Frequency");
     });
-</script>
+</script> -->
 <!-- <script>
     var width3 = 600,
             height3 = 400;
@@ -292,7 +294,7 @@
         });
     });
 </script> -->
-<script>
+<!-- <script>
     var margin4 = {top: 10, right: 0, bottom: 100, left: 40},
             width4 = 600 - margin.left - margin.right,
             height4 = 350 - margin.top - margin.bottom;
@@ -346,4 +348,4 @@
         d.count = +d.count;
         return d;
     }
-</script>
+</script> -->
