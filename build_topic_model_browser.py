@@ -173,47 +173,47 @@ def main(config_browser):
     logger.info('Saving topic cloud')
     ut.save_topic_cloud(topic_model, static_folder / topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
 
-    # Export details about topics
-    logger.info('Saving topic details')
-    for topic_id in range(topic_model.nb_topics):
-        ut.save_word_distribution(
-            topic_model.top_words(topic_id, 20),
-            static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
-        )
+    # # Export details about topics
+    # logger.info('Saving topic details')
+    # for topic_id in range(topic_model.nb_topics):
+    #     ut.save_word_distribution(
+    #         topic_model.top_words(topic_id, 20),
+    #         static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
+    #     )
 
-        ut.save_affiliation_repartition(
-            topic_model.affiliation_repartition(topic_id),
-            static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv',
-        )
+    #     ut.save_affiliation_repartition(
+    #         topic_model.affiliation_repartition(topic_id),
+    #         static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv',
+    #     )
 
-        min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
-        max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
+    #     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
+    #     max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
 
-        evolution = []
-        for i in range(min_year, max_year + 1):
-            evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
-        ut.save_topic_evolution(
-            evolution,
-            static_folder / frequency_folder / f'frequency{topic_id}.tsv',
-        )
+    #     evolution = []
+    #     for i in range(min_year, max_year + 1):
+    #         evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
+    #     ut.save_topic_evolution(
+    #         evolution,
+    #         static_folder / frequency_folder / f'frequency{topic_id}.tsv',
+    #     )
 
-    # Export details about documents
-    logger.info('Saving document details')
-    for doc_id in range(topic_model.corpus.size):
-        ut.save_topic_distribution(
-            topic_model.topic_distribution_for_document(doc_id),
-            static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
-            topic_description,
-        )
+    # # Export details about documents
+    # logger.info('Saving document details')
+    # for doc_id in range(topic_model.corpus.size):
+    #     ut.save_topic_distribution(
+    #         topic_model.topic_distribution_for_document(doc_id),
+    #         static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
+    #         topic_description,
+    #     )
 
-    # Export details about words
-    logger.info('Saving word details')
-    for word_id in range(len(topic_model.corpus.vocabulary)):
-        ut.save_topic_distribution(
-            topic_model.topic_distribution_for_word(word_id),
-            static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
-            topic_description,
-        )
+    # # Export details about words
+    # logger.info('Saving word details')
+    # for word_id in range(len(topic_model.corpus.vocabulary)):
+    #     ut.save_topic_distribution(
+    #         topic_model.topic_distribution_for_word(word_id),
+    #         static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
+    #         topic_description,
+    #     )
 
     # # Export per-topic author network using the most likely documents for each topic
     # logger.info('Saving author network details')
@@ -630,9 +630,9 @@ def main(config_browser):
             documents=documents,
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
-            word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
-            frequency_filename=frequency_folder / f'frequency{int(tid)}.tsv',
-            affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
+            # word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
+            # frequency_filename=frequency_folder / f'frequency{int(tid)}.tsv',
+            # affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
             # author_network_filename=author_network_folder / f'author_network{tid}.json',
             topic_word_weight_barplot=viz.plotly_topic_word_weight(int(tid), normalized=True, n_words=20, output_type='div'),
             topic_over_time_percent_line=viz.plotly_topic_over_time_percent(int(tid), output_type='div'),
@@ -675,7 +675,7 @@ def main(config_browser):
             dataset=', '.join(topic_model.corpus.dataset(int(did))).title(),
             id=topic_model.corpus.id(int(did)),
             full_text=topic_model.corpus.full_text(int(did)),
-            topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
+            # topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
             doc_topic_loading_barplot=viz.plotly_doc_topic_loading(
                 int(did), normalized=True, n_words=top_words_description, output_type='div'),
         )
@@ -701,7 +701,7 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             documents=documents,
-            topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
+            # topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
             word_topic_loading_barplot=viz.plotly_word_topic_loading(
                 int(wid), normalized=True, n_words=top_words_description, output_type='div'),
         )
