@@ -702,6 +702,8 @@ def main(config_browser):
             doc_ids=range(topic_model.corpus.size),
             documents=documents,
             topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
+            word_topic_loading_barplot=viz.plotly_word_topic_loading(
+                int(wid), normalized=True, n_words=top_words_description, output_type='div'),
         )
 
     @server.route('/robots.txt')
