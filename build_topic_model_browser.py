@@ -246,8 +246,9 @@ def main(config_browser):
 
     logger.info(f'Will save results to: {viz.output_dir}')
 
-    fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time_count(
+    fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time(
         freq=freq,
+        count=True,
         by_affil=True,
         ma_window=ma_window,
         savefig=savefig,
@@ -255,8 +256,10 @@ def main(config_browser):
         figformat=figformat,
     )
 
-    fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time_percent_affil(
+    fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time(
         freq=freq,
+        count=False,
+        by_affil=True,
         ma_window=ma_window,
         savefig=savefig,
         dpi=dpi,
