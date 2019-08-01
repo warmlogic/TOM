@@ -101,8 +101,8 @@ def main(config_browser):
     model_folder = tm_folder / 'model'
     topic_model_filepath = model_folder / 'model.pickle'
 
-    # # Set up sub-directories for serving files
-    # topic_cloud_folder = data_folder / 'topic_cloud'
+    # Set up sub-directories for serving files
+    topic_cloud_folder = data_folder / 'topic_cloud'
     # word_distribution_folder = data_folder / 'word_distribution'
     # frequency_folder = data_folder / 'frequency'
     # affiliation_repartition_folder = data_folder / 'affiliation_repartition'
