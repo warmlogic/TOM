@@ -1513,9 +1513,9 @@ class Visualization:
                 range=[0, 1],
             ),
             margin=go.layout.Margin(
-                t=0,
+                t=30,
                 b=0,
-                l=0,
+                l=30,
                 r=0,
                 pad=4,
             ),
@@ -1592,9 +1592,9 @@ class Visualization:
                 ),
             ),
             margin=go.layout.Margin(
-                t=0,
+                t=30,
                 b=0,
-                l=0,
+                l=30,
                 r=0,
                 pad=4,
             ),
@@ -1617,7 +1617,7 @@ class Visualization:
 
     def plotly_doc_topic_loading(
         self,
-        doc_id: int,
+        doc_id: int = None,
         topic_cols: List[str] = None,
         normalized: bool = True,
         n_words: int = 10,
@@ -1634,8 +1634,13 @@ class Visualization:
         else:
             norm_string = ''
 
+        if doc_id is None:
+            data = [self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized).mean(axis=0)]
+        else:
+            data = [self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized)]
+
         _df = pd.DataFrame(
-            data=[self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized)],
+            data=data,
             columns=topic_cols_all,
         )
 
@@ -1643,9 +1648,11 @@ class Visualization:
 
         y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
         y_text = [np.round(v, decimals=3) for v in y]
-        ylabel = "Weight"
+        ylabel = 'Topic Loading'
         if normalized:
-            ylabel = f"{ylabel} ({norm_string})"
+            ylabel = f'{ylabel} ({norm_string})'
+        if doc_id is None:
+            ylabel = f'Average {ylabel}'
 
         data = [
             go.Bar(
@@ -1680,9 +1687,9 @@ class Visualization:
                 ),
             ),
             margin=go.layout.Margin(
-                t=0,
+                t=30,
                 b=0,
-                l=0,
+                l=30,
                 r=0,
                 pad=4,
             ),
@@ -1781,9 +1788,9 @@ class Visualization:
                 ),
             ),
             margin=go.layout.Margin(
-                t=0,
+                t=30,
                 b=0,
-                l=0,
+                l=30,
                 r=0,
                 pad=4,
             ),
@@ -1859,9 +1866,9 @@ class Visualization:
                 ),
             ),
             margin=go.layout.Margin(
-                t=0,
+                t=30,
                 b=0,
-                l=0,
+                l=30,
                 r=0,
                 pad=4,
             ),
