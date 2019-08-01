@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html">
-  <title>Topic and document browser</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html">
+    <title>Topic and document browser</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div id="navigation">
@@ -47,14 +48,14 @@
         </div>
     </div>
     <div id="one_column">
-        <div class="two_images">
+        <div class="main-content">
             <p>Documents over time</p>
-            <img src={{ url_for('static', filename=fig_docs_over_time_count) }}>
-            <img src={{ url_for('static', filename=fig_docs_over_time_percent) }}>
+            {{ docs_over_time_count_line | safe }}
+            {{ docs_over_time_percent_line | safe }}
         </div>
     </div>
     <div id="one_column">
-        <div class="one_image_1000">
+        <div class="main-content">
             <p>Barplot of average topic loadings, with 95% CI error bars</p>
             <img src={{ url_for('static', filename=fig_topic_barplot) }}>
         </div>
@@ -72,19 +73,19 @@
         </div>
     </div>
     <div id="one_column">
-        <div class="one_image_1200">
+        <div class="main-content">
             <p>Topics over time: Count of documents above the threshold per year</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_count) }}>
         </div>
     </div>
     <div id="one_column">
-        <div class="one_image_1200">
+        <div class="main-content">
             <p>Topics over time: Percent of documents above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
         </div>
     </div>
     <div id="one_column">
-        <div class="one_image_1200">
+        <div class="main-content">
             <p>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>

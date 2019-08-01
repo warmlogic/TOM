@@ -101,14 +101,14 @@ def main(config_browser):
     model_folder = tm_folder / 'model'
     topic_model_filepath = model_folder / 'model.pickle'
 
-    # Set up sub-directories for serving files
-    topic_cloud_folder = data_folder / 'topic_cloud'
-    word_distribution_folder = data_folder / 'word_distribution'
-    frequency_folder = data_folder / 'frequency'
-    affiliation_repartition_folder = data_folder / 'affiliation_repartition'
-    # author_network_folder = data_folder / 'author_network'
-    topic_distribution_d_folder = data_folder / 'topic_distribution_d'
-    topic_distribution_w_folder = data_folder / 'topic_distribution_w'
+    # # Set up sub-directories for serving files
+    # topic_cloud_folder = data_folder / 'topic_cloud'
+    # word_distribution_folder = data_folder / 'word_distribution'
+    # frequency_folder = data_folder / 'frequency'
+    # affiliation_repartition_folder = data_folder / 'affiliation_repartition'
+    # # author_network_folder = data_folder / 'author_network'
+    # topic_distribution_d_folder = data_folder / 'topic_distribution_d'
+    # topic_distribution_w_folder = data_folder / 'topic_distribution_w'
     figs_folder = data_folder / 'figs'
 
     full_text_col = 'orig_text'
@@ -233,7 +233,7 @@ def main(config_browser):
 
     normalized = True
     thresh = 0.1
-    freq = '1Y'
+    freq = '1YS'
     by_affil = False
     ma_window = None
     savefig = True
@@ -245,26 +245,6 @@ def main(config_browser):
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
     logger.info(f'Will save results to: {viz.output_dir}')
-
-    fig, ax, fig_docs_over_time_count = viz.plot_docs_over_time(
-        freq=freq,
-        count=True,
-        by_affil=True,
-        ma_window=ma_window,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
-
-    fig, ax, fig_docs_over_time_percent = viz.plot_docs_over_time(
-        freq=freq,
-        count=False,
-        by_affil=True,
-        ma_window=ma_window,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
 
     fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
         normalized=normalized,
@@ -327,8 +307,6 @@ def main(config_browser):
     )
 
     # # debug
-    # fig_docs_over_time_count = None
-    # fig_docs_over_time_percent = None
     # fig_topic_barplot = None
     # # fig_topic_heatmap = None
     # fig_topic_clustermap = None
@@ -567,8 +545,8 @@ def main(config_browser):
             min_absolute_frequency=min_absolute_frequency,
             vectorization=vectorization,
             num_topics=num_topics,
-            fig_docs_over_time_count=figs_folder / fig_docs_over_time_count,
-            fig_docs_over_time_percent=figs_folder / fig_docs_over_time_percent,
+            docs_over_time_count_line=viz.plotly_docs_over_time(freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div'),
+            docs_over_time_percent_line=viz.plotly_docs_over_time(freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div'),
             fig_topic_barplot=figs_folder / fig_topic_barplot,
             # fig_topic_heatmap=figs_folder / fig_topic_heatmap,
             fig_topic_clustermap=figs_folder / fig_topic_clustermap,
