@@ -283,9 +283,10 @@ class Visualization:
         with codecs.open(file_path, 'w', encoding='utf-8') as fp:
             json.dump(json_graph, fp, indent=4, separators=(',', ': '))
 
-    def plot_docs_over_time_count(
+    def plot_docs_over_time(
         self,
         freq: str = '1Y',
+        count=True,
         by_affil=False,
         ma_window=None,
         figsize: Tuple[int, int] = (12, 8),
@@ -296,8 +297,6 @@ class Visualization:
         '''Plot count of documents per frequency window, optionally by affiliation
         '''
 
-        fig, ax = plt.subplots(figsize=figsize)
-
         if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
         else:
@@ -306,85 +305,54 @@ class Visualization:
         result_count = self.topic_model.corpus.data_frame.reset_index().set_index(
             self.topic_model.corpus._date_col).groupby(
             by=groupby).size()
+        if by_affil:
+            result_count = result_count.unstack().fillna(0)
+
+        if not count:
+            total_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+                self.topic_model.corpus._date_col).groupby(
+                by=[pd.Grouper(freq=freq)]).size()
+
+            result_count = result_count.div(total_count, axis=0)
 
         if ma_window:
             result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
 
-        if by_affil:
-            result_count.unstack().plot(ax=ax, kind='line')
-            ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+        fig, ax = plt.subplots(figsize=figsize)
+        result_count.plot(ax=ax, kind='line')
+
+        if count:
+            title_str = 'Document counts'
         else:
-            result_count.plot(ax=ax, kind='line')
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
+            title_str = 'Percent of documents'
 
-        ax.set_title('Document counts')
+        if by_affil:
+            ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+            title_str += ' per affiliation'
+        title_str += ' per year'
 
+        ax.set_title(title_str)
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
         fig.tight_layout()
 
         if savefig:
-            plot_string = 'doc_count'
+            if count:
+                plot_string = 'doc_count'
+            else:
+                plot_string = 'doc_percent'
+
             if by_affil:
                 affil_string = 'affil'
             else:
                 affil_string = 'overall'
+
             if ma_window:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
 
             filename_out = f'{plot_string}_{affil_string}{ma_string}.{figformat}'
-
-            # save image to disk
-            fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
-            plt.close('all')
-        else:
-            filename_out = None
-            plt.show()
-
-        return fig, ax, filename_out
-
-    def plot_docs_over_time_percent_affil(
-        self,
-        freq: str = '1Y',
-        ma_window=None,
-        figsize: Tuple[int, int] = (12, 8),
-        savefig: bool = False,
-        dpi: int = 72,
-        figformat: str = 'png',
-    ):
-        '''Plot percent of documents per affiliation and frequency window
-        '''
-
-        total_count = self.topic_model.corpus.data_frame.reset_index().set_index(
-            self.topic_model.corpus._date_col).groupby(
-            by=[pd.Grouper(freq=freq)]).size()
-
-        result_count = self.topic_model.corpus.data_frame.reset_index().set_index(
-            self.topic_model.corpus._date_col).groupby(
-            by=[pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]).size() / total_count
-
-        if ma_window:
-            result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
-
-        fig, ax = plt.subplots(figsize=figsize)
-
-        result_count.unstack().plot(ax=ax, kind='line')
-        ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
-
-        ax.set_title('Percent of documents per affiliation per year')
-
-        ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
-
-        fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
-        fig.tight_layout()
-
-        if savefig:
-            plot_string = 'doc_percent_affil'
-            if ma_window:
-                ma_string = f'_{ma_window}_MA'
-            else:
-                ma_string = ''
-            filename_out = f'{plot_string}{ma_string}.{figformat}'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
@@ -1369,34 +1337,154 @@ class Visualization:
 
         return fig, axes, filename_out
 
+    def plotly_docs_over_time(
+        self,
+        freq: str = '1Y',
+        count=True,
+        by_affil=False,
+        ma_window=None,
+        output_type: str = 'div',
+    ):
+
+        if by_affil:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
+        result_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+            self.topic_model.corpus._date_col).groupby(
+            by=groupby).size()
+        if by_affil:
+            result_count = result_count.unstack().fillna(0)
+
+        if not count:
+            total_count = self.topic_model.corpus.data_frame.reset_index().set_index(
+                self.topic_model.corpus._date_col).groupby(
+                by=[pd.Grouper(freq=freq)]).size()
+
+            result_count = result_count.div(total_count, axis=0)
+
+        if ma_window:
+            result_count = result_count.rolling(window=ma_window, min_periods=1, center=True).mean()
+
+        xlabel = 'Date'
+        if count:
+            title_str = 'Document counts'
+            ylabel = 'Count'
+            autorange = True
+            tickformat = None
+            yrange = None
+        else:
+            title_str = 'Percent of documents'
+            ylabel = 'Percent'
+            autorange = False
+            tickformat = '.1%'
+            yrange = [0, 1]
+
+        if by_affil:
+            title_str += ' per affiliation'
+        title_str += ' per year'
+
+        if by_affil:
+            affils = self.topic_model.corpus.data_frame[self.topic_model.corpus._affiliation_col].unique()
+            data = []
+            for affil in affils:
+                data.append(
+                    go.Scatter(
+                        x=result_count.index,
+                        y=result_count[affil],
+                        mode='lines+markers',
+                        name=affil,
+                    ),
+                )
+        else:
+            data = [
+                go.Scatter(
+                    x=result_count.index,
+                    y=result_count.values,
+                    mode='lines+markers',
+                ),
+            ]
+
+        layout = go.Layout(
+            title=title_str,
+            xaxis=go.layout.XAxis(
+                title=xlabel,
+                tickangle=-30,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                showticklabels=True,
+                ticks='outside',
+                nticks=len(result_count.index),
+            ),
+            yaxis=go.layout.YAxis(
+                title=ylabel,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                autorange=autorange,
+                tickformat=tickformat,
+                range=yrange,
+            ),
+            margin=go.layout.Margin(
+                t=30,
+                b=0,
+                l=30,
+                r=0,
+                pad=4,
+            ),
+            autosize=True,
+            width=800,
+            height=300,
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+
     def plotly_topic_over_time_percent(
         self,
         topic_id: int,
         # freq: str = 'YS',
+        count=None,
         output_type: str = 'div',
     ):
+        count = count or False
+
         # doc_ids = self.topic_model.documents_for_topic(topic_id)
+        # new_col = 'topic_doc'
         # _df = self.topic_model.corpus.data_frame[['date']]
         # _df = _df.merge(
-        #     pd.DataFrame(index=self.topic_model.corpus.data_frame.index, columns=['topic_doc'], data=0),
+        #     pd.DataFrame(index=self.topic_model.corpus.data_frame.index, columns=[new_col], data=0),
         #     left_index=True, right_index=True,
         # )
-        # _df.loc[doc_ids, 'topic_doc'] = 1
+        # _df.loc[doc_ids, new_col] = 1
         # _df = _df.set_index('date').groupby(by=[pd.Grouper(freq=freq)]).mean()
         # years = _df.index
-        # freq = _df['topic_doc']
+        # frequency = _df[new_col]
 
         min_year = self.topic_model.corpus.data_frame['date'].dt.year.min()
         max_year = self.topic_model.corpus.data_frame['date'].dt.year.max()
         years = list(range(min_year, max_year + 1))
-        freq = [self.topic_model.topic_frequency(topic_id, year=year, count=False) for year in years]
+        frequency = [self.topic_model.topic_frequency(topic_id, year=year, count=count) for year in years]
 
         ylabel = 'Percent of documents per year'
 
         data = [
             go.Scatter(
                 x=years,
-                y=freq,
+                y=frequency,
                 connectgaps=True,
                 mode='lines+markers+text',
                 fillcolor='#ff7f0e',
@@ -1734,10 +1822,11 @@ class Visualization:
         topic_id: int,
         output_type: str = 'div',
     ):
-
         doc_ids = self.topic_model.documents_for_topic(topic_id)
-        affil_count = self.topic_model.corpus.data_frame.loc[doc_ids, 'affiliation'].value_counts()
-        # affil_count = self.topic_model.corpus.data_frame.loc[doc_ids].groupby(by=['affiliation']).size()
+        affil_count = self.topic_model.corpus.data_frame.loc[
+            doc_ids, self.topic_model.corpus._affiliation_col].value_counts()
+        # affil_count = self.topic_model.corpus.data_frame.loc[doc_ids].groupby(
+        #     by=[self.topic_model.corpus._affiliation_col]).size()
 
         ylabel = 'Count'
 
