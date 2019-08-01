@@ -56,8 +56,8 @@
     </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Barplot of average topic loadings, with 95% CI error bars</p>
-            <img src={{ url_for('static', filename=fig_topic_barplot) }}>
+            <p>Barplot of average topic loadings</p>
+            {{ topic_loading_barplot | safe }}
         </div>
     </div>
     <!-- <div id="one_column">

@@ -547,7 +547,7 @@ def main(config_browser):
             num_topics=num_topics,
             docs_over_time_count_line=viz.plotly_docs_over_time(freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div'),
             docs_over_time_percent_line=viz.plotly_docs_over_time(freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div'),
-            fig_topic_barplot=figs_folder / fig_topic_barplot,
+            topic_loading_barplot=viz.plotly_doc_topic_loading(normalized=normalized, output_type='div'),
             # fig_topic_heatmap=figs_folder / fig_topic_heatmap,
             fig_topic_clustermap=figs_folder / fig_topic_clustermap,
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
