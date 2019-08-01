@@ -285,7 +285,7 @@ class Visualization:
 
     def plot_docs_over_time(
         self,
-        freq: str = '1Y',
+        freq: str = '1YS',
         count=True,
         by_affil=False,
         ma_window=None,
@@ -830,7 +830,7 @@ class Visualization:
         topic_col: str,
         normalized: bool = True,
         thresh: float = 0.1,
-        freq: str = '1Y',
+        freq: str = '1YS',
         n_words: int = 10,
     ):
 
@@ -883,7 +883,7 @@ class Visualization:
         topic_col: str,
         normalized: bool = True,
         thresh: float = 0.1,
-        freq: str = '1Y',
+        freq: str = '1YS',
         n_words: int = 10,
     ):
 
@@ -939,7 +939,7 @@ class Visualization:
         topic_cols: List[str] = None,
         normalized: bool = True,
         thresh: float = 0.1,
-        freq: str = '1Y',
+        freq: str = '1YS',
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
@@ -1078,7 +1078,7 @@ class Visualization:
         topic_cols: List[str] = None,
         normalized: bool = True,
         thresh: float = 0.1,
-        freq: str = '1Y',
+        freq: str = '1YS',
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
@@ -1208,7 +1208,7 @@ class Visualization:
         topic_cols: List[str] = None,
         normalized: bool = True,
         thresh: float = 0.1,
-        freq: str = '1Y',
+        freq: str = '1YS',
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
@@ -1339,7 +1339,7 @@ class Visualization:
 
     def plotly_docs_over_time(
         self,
-        freq: str = '1Y',
+        freq: str = '1YS',
         count=True,
         by_affil=False,
         ma_window=None,
