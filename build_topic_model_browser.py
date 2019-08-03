@@ -611,13 +611,10 @@ def main(config_browser):
             documents=documents,
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
-            # word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
-            # frequency_filename=frequency_folder / f'frequency{int(tid)}.tsv',
-            # affiliation_count_filename=affiliation_count_folder / f'affiliation_count{tid}.tsv',
-            # author_network_filename=author_network_folder / f'author_network{tid}.json',
             topic_word_weight_barplot=viz.plotly_topic_word_weight(int(tid), normalized=True, n_words=20, output_type='div'),
             topic_over_time_percent_line=viz.plotly_topic_over_time_percent(int(tid), output_type='div'),
-            topic_doc_count_affil_barplot=viz.plotly_topic_affil_count(int(tid), output_type='div'),
+            topic_affiliation_count_barplot=viz.plotly_topic_affiliation_count(int(tid), output_type='div'),
+            # author_network_filename=author_network_folder / f'author_network{tid}.json',
         )
 
     @server.route('/document/<did>.html')
