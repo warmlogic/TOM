@@ -103,12 +103,7 @@ def main(config_browser):
 
     # Set up sub-directories for serving files
     topic_cloud_folder = data_folder / 'topic_cloud'
-    # word_distribution_folder = data_folder / 'word_distribution'
-    # frequency_folder = data_folder / 'frequency'
-    # affiliation_count_folder = data_folder / 'affiliation_count'
     # # author_network_folder = data_folder / 'author_network'
-    # topic_distribution_d_folder = data_folder / 'topic_distribution_d'
-    # topic_distribution_w_folder = data_folder / 'topic_distribution_w'
     figs_folder = data_folder / 'figs'
 
     full_text_col = 'orig_text'
@@ -173,48 +168,6 @@ def main(config_browser):
     logger.info('Saving topic cloud')
     ut.save_topic_cloud(topic_model, static_folder / topic_cloud_folder / 'topic_cloud.json', top_words=top_words_cloud)
 
-    # # Export details about topics
-    # logger.info('Saving topic details')
-    # for topic_id in range(topic_model.nb_topics):
-    #     ut.save_word_distribution(
-    #         topic_model.top_words(topic_id, 20),
-    #         static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
-    #     )
-
-    #     ut.save_affiliation_count(
-    #         topic_model.affiliation_count(topic_id),
-    #         static_folder / affiliation_count_folder / f'affiliation_count{topic_id}.tsv',
-    #     )
-
-    #     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
-    #     max_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.max()
-
-    #     evolution = []
-    #     for i in range(min_year, max_year + 1):
-    #         evolution.append((i, topic_model.topic_frequency(topic_id, year=i)))
-    #     ut.save_topic_evolution(
-    #         evolution,
-    #         static_folder / frequency_folder / f'frequency{topic_id}.tsv',
-    #     )
-
-    # # Export details about documents
-    # logger.info('Saving document details')
-    # for doc_id in range(topic_model.corpus.size):
-    #     ut.save_topic_distribution(
-    #         topic_model.topic_distribution_for_document(doc_id),
-    #         static_folder / topic_distribution_d_folder / f'topic_distribution_d{doc_id}.tsv',
-    #         topic_description,
-    #     )
-
-    # # Export details about words
-    # logger.info('Saving word details')
-    # for word_id in range(len(topic_model.corpus.vocabulary)):
-    #     ut.save_topic_distribution(
-    #         topic_model.topic_distribution_for_word(word_id),
-    #         static_folder / topic_distribution_w_folder / f'topic_distribution_w{word_id}.tsv',
-    #         topic_description,
-    #     )
-
     # # Export per-topic author network using the most likely documents for each topic
     # logger.info('Saving author network details')
     # for topic_id in range(topic_model.nb_topics):
@@ -245,20 +198,6 @@ def main(config_browser):
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
     logger.info(f'Will save results to: {viz.output_dir}')
-
-    # fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
-    #     normalized=normalized,
-    #     savefig=savefig,
-    #     dpi=dpi,
-    #     figformat=figformat,
-    # )
-
-    # fig, ax, fig_topic_heatmap = viz.plot_heatmap(
-    #     normalized=normalized,
-    #     savefig=savefig,
-    #     dpi=dpi,
-    #     figformat=figformat,
-    # )
 
     g, fig_topic_clustermap = viz.plot_clustermap(
         normalized=normalized,
@@ -307,7 +246,6 @@ def main(config_browser):
     )
 
     # # debug
-    # fig_topic_barplot = None
     # # fig_topic_heatmap = None
     # fig_topic_clustermap = None
     # fig_topic_over_time_count = None
@@ -653,7 +591,6 @@ def main(config_browser):
             dataset=', '.join(topic_model.corpus.dataset(int(did))).title(),
             id=topic_model.corpus.id(int(did)),
             full_text=topic_model.corpus.full_text(int(did)),
-            # topic_distribution_d_filename=topic_distribution_d_folder / f'topic_distribution_d{did}.tsv',
             doc_topic_loading_barplot=viz.plotly_doc_topic_loading(
                 int(did), normalized=True, n_words=top_words_description, output_type='div'),
         )
@@ -679,7 +616,6 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             documents=documents,
-            # topic_distribution_w_filename=topic_distribution_w_folder / f'topic_distribution_w{wid}.tsv',
             word_topic_loading_barplot=viz.plotly_word_topic_loading(
                 int(wid), normalized=True, n_words=top_words_description, output_type='div'),
         )
