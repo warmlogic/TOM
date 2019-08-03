@@ -540,29 +540,39 @@ class TopicModel(object):
         return frequency
 
     def documents_for_topic(self, topic_id: int):
+        '''For a given topic, returns the document ids for which it is the most likely topic.
+        Returned data structure is a list.
+        '''
         return self.corpus.data_frame.index[self.most_likely_topic_for_document() == topic_id].tolist()
 
     def documents_per_topic(self):
+        '''For each topic, returns the document ids for which each is the most likely topic.
+        Returned data structure is a dictionary of lists, indexed by topic.
+        '''
         return {i: self.documents_for_topic(i) for i in range(self.nb_topics)}
 
     def affiliation_repartition(self, topic_id: int):
+        '''For a given topic, returns the count of affiliations for the documents
+        for which it is the most likely topic.
+        Returned data structure is a list of tuples sorted by affiliation count..
+        '''
         counts = {}
         doc_ids = self.documents_for_topic(topic_id)
         for i in doc_ids:
+            # get the unique affiliation(s) for this document
             affiliations = set(self.corpus.affiliation(i))
             for affiliation in affiliations:
-                if counts.get(affiliation) is not None:
-                    count = counts[affiliation] + 1
-                    counts[affiliation] = count
+                if affiliation in counts:
+                    counts[affiliation] += 1
                 else:
                     counts[affiliation] = 1
-        tuples = []
-        for affiliation, count in counts.items():
-            tuples.append((affiliation, count))
+        tuples = [(affiliation, count) for affiliation, count in counts.items()]
         tuples.sort(key=lambda x: x[1], reverse=True)
         return tuples
 
     def topic_distribution_for_new_document(self, text, normalized=False):
+        '''Predict the topic loading of a new document.
+        '''
         doc_topic_distr = self.model.transform(
             self.corpus.vectorizer.transform([text]))[0]
         if normalized:
