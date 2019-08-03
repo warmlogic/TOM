@@ -246,12 +246,12 @@ def main(config_browser):
 
     logger.info(f'Will save results to: {viz.output_dir}')
 
-    fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
-        normalized=normalized,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
+    # fig, ax, fig_topic_barplot = viz.plot_topic_loading_barplot(
+    #     normalized=normalized,
+    #     savefig=savefig,
+    #     dpi=dpi,
+    #     figformat=figformat,
+    # )
 
     # fig, ax, fig_topic_heatmap = viz.plot_heatmap(
     #     normalized=normalized,
