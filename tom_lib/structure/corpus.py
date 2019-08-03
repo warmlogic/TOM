@@ -104,7 +104,8 @@ class Corpus:
         self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
 
     def __iter__(self):
-        '''A generator that yields a tokenized (i.e, split on whitespace) version of each document
+        '''A generator that yields a tokenized (i.e., split on whitespace) version of each document.
+        Currently used for the topic_model.coherence_w2v_metric.
         '''
         for _, doc in self.data_frame[self._text_col].items():
             yield doc.split()
