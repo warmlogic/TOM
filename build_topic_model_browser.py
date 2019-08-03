@@ -105,7 +105,7 @@ def main(config_browser):
     topic_cloud_folder = data_folder / 'topic_cloud'
     # word_distribution_folder = data_folder / 'word_distribution'
     # frequency_folder = data_folder / 'frequency'
-    # affiliation_repartition_folder = data_folder / 'affiliation_repartition'
+    # affiliation_count_folder = data_folder / 'affiliation_count'
     # # author_network_folder = data_folder / 'author_network'
     # topic_distribution_d_folder = data_folder / 'topic_distribution_d'
     # topic_distribution_w_folder = data_folder / 'topic_distribution_w'
@@ -181,9 +181,9 @@ def main(config_browser):
     #         static_folder / word_distribution_folder / f'word_distribution{topic_id}.tsv',
     #     )
 
-    #     ut.save_affiliation_repartition(
-    #         topic_model.affiliation_repartition(topic_id),
-    #         static_folder / affiliation_repartition_folder / f'affiliation_repartition{topic_id}.tsv',
+    #     ut.save_affiliation_count(
+    #         topic_model.affiliation_count(topic_id),
+    #         static_folder / affiliation_count_folder / f'affiliation_count{topic_id}.tsv',
     #     )
 
     #     min_year = topic_model.corpus.data_frame[topic_model.corpus._date_col].dt.year.min()
@@ -613,7 +613,7 @@ def main(config_browser):
             doc_ids=range(topic_model.corpus.size),
             # word_distribution_filename=word_distribution_folder / f'word_distribution{tid}.tsv',
             # frequency_filename=frequency_folder / f'frequency{int(tid)}.tsv',
-            # affiliation_repartition_filename=affiliation_repartition_folder / f'affiliation_repartition{tid}.tsv',
+            # affiliation_count_filename=affiliation_count_folder / f'affiliation_count{tid}.tsv',
             # author_network_filename=author_network_folder / f'author_network{tid}.json',
             topic_word_weight_barplot=viz.plotly_topic_word_weight(int(tid), normalized=True, n_words=20, output_type='div'),
             topic_over_time_percent_line=viz.plotly_topic_over_time_percent(int(tid), output_type='div'),

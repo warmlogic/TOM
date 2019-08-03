@@ -55,12 +55,12 @@ def save_topic_evolution(evolution, file_path):
             f.write(f'{date}\t{frequency}\n')
 
 
-def save_affiliation_repartition(affiliation_repartition, file_path):
+def save_affiliation_count(affiliation_count, file_path):
     if not file_path.parent.exists():
         file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as f:
         f.write('affiliation\tcount\n')
-        for (affiliation, count) in affiliation_repartition:
+        for (affiliation, count) in affiliation_count:
             f.write(f'{affiliation}\t{count}\n')
 
 

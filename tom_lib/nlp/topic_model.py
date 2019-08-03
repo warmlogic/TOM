@@ -551,7 +551,7 @@ class TopicModel(object):
         '''
         return {i: self.documents_for_topic(i) for i in range(self.nb_topics)}
 
-    def affiliation_repartition(self, topic_id: int):
+    def affiliation_count(self, topic_id: int):
         '''For a given topic, returns the count of affiliations for the documents
         for which it is the most likely topic.
         Returned data structure is a list of tuples sorted by affiliation count..
