@@ -104,9 +104,9 @@ class Corpus:
         self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
 
     def __iter__(self):
-        '''A generator that yields a tokenized (i.e., split on whitespace) version of each document.
+        """A generator that yields a tokenized (i.e., split on whitespace) version of each document.
         Currently used for the topic_model.coherence_w2v_metric.
-        '''
+        """
         for _, doc in self.data_frame[self._text_col].items():
             yield doc.split()
 
@@ -173,9 +173,9 @@ class Corpus:
         return self.data_frame.loc[self.data_frame[self._date_col].dt.year == year].index.tolist()
 
     def word_vector_for_document(self, doc_id=None, normalized=False):
-        '''Normalized: Divide each document's word weights by the sum of its word weights.
+        """Normalized: Divide each document's word weights by the sum of its word weights.
                        Results in the word weights for a document summing to 1.
-        '''
+        """
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
             if normalized:
                 return np.array(self.sklearn_vector_space / self.sklearn_vector_space.sum(axis=1))
@@ -214,10 +214,10 @@ class Corpus:
         return similarities[:num_docs]
 
     def find_similar_document_pairs(self, threshold: float):
-        '''find all the similar document pairs above a threshold.
+        """find all the similar document pairs above a threshold.
         for a tf vectorized corpus, try threshold=0.83
         for a tfidf vectorized corpus, try threshold=0.88
-        '''
+        """
         # compute pairwise similarities
         similarities = np.dot(normalize(self.sklearn_vector_space, axis=1),
                               normalize(self.sklearn_vector_space, axis=1).T)

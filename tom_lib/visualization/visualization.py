@@ -23,8 +23,8 @@ mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY 
 
 
 def split_string_sep(string: str, sep: str = None):
-    '''Split a string on spaces and put together with newlines
-    '''
+    """Split a string on spaces and put together with newlines
+    """
     if sep is None:
         sep = ' '
     string_new = sep.join(string.split(sep=sep)[:2])
@@ -38,8 +38,8 @@ def split_string_sep(string: str, sep: str = None):
 
 
 def split_string_nchar(string: str, nchar: int = None):
-    '''Split a string into a given number of chunks based on number of characters
-    '''
+    """Split a string into a given number of chunks based on number of characters
+    """
     if nchar is None:
         nchar = 25
     return '\n'.join([string[(i * nchar):(i + 1) * nchar] for i in range(int(np.ceil(len(string) / nchar)))])
@@ -294,8 +294,8 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot count of documents per frequency window, optionally by affiliation
-        '''
+        """Plot count of documents per frequency window, optionally by affiliation
+        """
 
         if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
@@ -375,9 +375,9 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot the number of documents associated with each topic, above some threshold
+        """Plot the number of documents associated with each topic, above some threshold
         kind = 'count' or 'percent'
-        '''
+        """
 
         fig, ax = plt.subplots(figsize=figsize)
 
@@ -447,8 +447,8 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot a heatmap of topic-topic Pearson correlation coefficient values
-        '''
+        """Plot a heatmap of topic-topic Pearson correlation coefficient values
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -528,9 +528,9 @@ class Visualization:
         metric: str = None,
         method: str = None,
     ):
-        '''Plot a hierarchical clustermap of topic-topic Pearson correlation coefficient values
+        """Plot a hierarchical clustermap of topic-topic Pearson correlation coefficient values
         (computed with np.corrcoef). Plot is made with Seaborn's clustermap.
-        '''
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -620,8 +620,8 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot histogram of document loading distributions per topic
-        '''
+        """Plot histogram of document loading distributions per topic
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -708,10 +708,10 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Marginal distributions of topic loadings
+        """Marginal distributions of topic loadings
 
         Plot Boxplot of document loading distributions per topic
-        '''
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -772,10 +772,10 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Marginal distributions of topic loadings
+        """Marginal distributions of topic loadings
 
         Plot Barplot of document loading distributions per topic
-        '''
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -949,8 +949,8 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot count of documents >= a given threshold per frequency window
-        '''
+        """Plot count of documents >= a given threshold per frequency window
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -1079,10 +1079,10 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''Plot the percent of documents above the threshold that are above the threshold for each topic, per year.
+        """Plot the percent of documents above the threshold that are above the threshold for each topic, per year.
         Each year across topics adds up to 100%.
         One document can contribute to multiple topics.
-        '''
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -1209,9 +1209,9 @@ class Visualization:
         dpi: int = 72,
         figformat: str = 'png',
     ):
-        '''For each topic (separately), of the documents above the threshold,
+        """For each topic (separately), of the documents above the threshold,
         plot the average topic loading for that year.
-        '''
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))

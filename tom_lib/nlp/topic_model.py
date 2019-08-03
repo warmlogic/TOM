@@ -372,9 +372,9 @@ class TopicModel(object):
                 print(self.corpus.full_text(doc_id))
 
     def top_topic_docs(self, topics=-1, top_n: int = 10, weights: bool = False):
-        '''Inspired by Textacy:
+        """Inspired by Textacy:
         http://textacy.readthedocs.io/en/latest/_modules/textacy/tm/topic_model.html#TopicModel.top_topic_docs
-        '''
+        """
         if topics == -1:
             topics = range(self.nb_topics)
         elif isinstance(topics, int):
@@ -396,9 +396,9 @@ class TopicModel(object):
         return weighted_docs
 
     def word_distribution_for_topic(self, topic_id=None, normalized=False):
-        '''Normalized: Divide each topic's word weights by the sum of its word weights.
+        """Normalized: Divide each topic's word weights by the sum of its word weights.
                        Results in the word weights for a topic summing to 1.
-        '''
+        """
         if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
             # all topics
             if normalized:
@@ -421,9 +421,9 @@ class TopicModel(object):
             print(f"Unknown dtype '{type(topic_id)}'")
 
     def document_distribution_for_topic(self, topic_id=None, normalized=False):
-        '''Normalized: Divide each topic's document weights by the sum of its document weights.
+        """Normalized: Divide each topic's document weights by the sum of its document weights.
                        Results in the document weights for a topic summing to 1.
-        '''
+        """
         if topic_id is None or (isinstance(topic_id, list) and (len(topic_id) == 0)):
             # all topics
             if normalized:
@@ -448,9 +448,9 @@ class TopicModel(object):
             print(f"Unknown dtype '{type(topic_id)}'")
 
     def topic_distribution_for_document(self, doc_id=None, normalized=False):
-        '''Normalized: Divide each document's topic loadings by the sum of its topic loadings.
+        """Normalized: Divide each document's topic loadings by the sum of its topic loadings.
                        Results in the topic loadings for a document summing to 1.
-        '''
+        """
         if doc_id is None or (isinstance(doc_id, list) and (len(doc_id) == 0)):
             # all documents
             if normalized:
@@ -473,9 +473,9 @@ class TopicModel(object):
             print(f"Unknown dtype '{type(doc_id)}'")
 
     def topic_distribution_for_word(self, word_id=None, normalized=False):
-        '''Normalized: Divide each word's topic loadings by the sum of its topic loadings.
+        """Normalized: Divide each word's topic loadings by the sum of its topic loadings.
                        Results in the topic loadings for a word summing to 1.
-        '''
+        """
         if word_id is None or (isinstance(word_id, list) and (len(word_id) == 0)):
             # all words
             if normalized:
@@ -517,15 +517,15 @@ class TopicModel(object):
             print(f"Unknown dtype '{type(doc_id)}'")
 
     def topic_frequency(self, topic, year=None, count: bool = False):
-        '''For a given topic, returns the percent out of all documents (or count of documents)
+        """For a given topic, returns the percent out of all documents (or count of documents)
         for which it is the most likely topic, optionally slicing by year.
-        '''
+        """
         return self.topics_frequency(year=year, count=count)[topic]
 
     def topics_frequency(self, year=None, count: bool = False):
-        '''For each topic, returns the percent out of all documents (or count of documents)
+        """For each topic, returns the percent out of all documents (or count of documents)
         for which it is the most likely topic, optionally slicing by year.
-        '''
+        """
         if year is None:
             doc_ids = self.corpus.data_frame.index.tolist()
         else:
@@ -540,22 +540,22 @@ class TopicModel(object):
         return frequency
 
     def documents_for_topic(self, topic_id: int):
-        '''For a given topic, returns the document ids for which it is the most likely topic.
+        """For a given topic, returns the document ids for which it is the most likely topic.
         Returned data structure is a list.
-        '''
+        """
         return self.corpus.data_frame.index[self.most_likely_topic_for_document() == topic_id].tolist()
 
     def documents_per_topic(self):
-        '''For each topic, returns the document ids for which each is the most likely topic.
+        """For each topic, returns the document ids for which each is the most likely topic.
         Returned data structure is a dictionary of lists, indexed by topic.
-        '''
+        """
         return {i: self.documents_for_topic(i) for i in range(self.nb_topics)}
 
     def affiliation_count(self, topic_id: int):
-        '''For a given topic, returns the count of affiliations for the documents
+        """For a given topic, returns the count of affiliations for the documents
         for which it is the most likely topic.
         Returned data structure is a list of tuples sorted by affiliation count..
-        '''
+        """
         counts = {}
         doc_ids = self.documents_for_topic(topic_id)
         for i in doc_ids:
@@ -571,8 +571,8 @@ class TopicModel(object):
         return tuples
 
     def topic_distribution_for_new_document(self, text, normalized=False):
-        '''Predict the topic loading of a new document.
-        '''
+        """Predict the topic loading of a new document.
+        """
         doc_topic_distr = self.model.transform(
             self.corpus.vectorizer.transform([text]))[0]
         if normalized:
@@ -581,13 +581,13 @@ class TopicModel(object):
         return doc_topic_distr
 
     def similar_documents(self, exemplar_vector, num_docs: int):
-        '''
+        """
         Given an exemplar topic loading vector, find similar documents.
 
         exemplar_vector can be a list or a 1-D numpy array
 
         returns a tuple of document ids and similarity scores
-        '''
+        """
         # Ensure it's 1-D and has one value per topic
         assert len(exemplar_vector) == self.nb_topics
         # normalize needs it to be 2-D

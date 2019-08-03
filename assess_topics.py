@@ -19,18 +19,18 @@ logger = logging.getLogger(__name__)
 
 
 def get_parser():
-    '''
+    """
     Creates a new argument parser
-    '''
+    """
     parser = argparse.ArgumentParser(prog='assess_topics')
     parser.add_argument('--config_filepath', '-c', type=str, nargs='?', default='config.ini')
     return parser
 
 
 def get_config(config_filepath):
-    '''
+    """
     Read the specified config file
-    '''
+    """
     config = configparser.ConfigParser(allow_no_value=True)
     try:
         config.read(config_filepath)
