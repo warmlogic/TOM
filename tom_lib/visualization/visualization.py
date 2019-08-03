@@ -971,17 +971,8 @@ class Visualization:
         )
 
         if normalized:
-            _df = pd.DataFrame(
-                data=(self.topic_model.document_topic_matrix /
-                      self.topic_model.document_topic_matrix.sum(axis=1)),
-                columns=topic_cols_all,
-            )
             norm_string = 'normalized'
         else:
-            _df = pd.DataFrame(
-                data=self.topic_model.document_topic_matrix.todense(),
-                columns=topic_cols_all,
-            )
             norm_string = ''
 
         _df = pd.DataFrame(
@@ -1456,11 +1447,12 @@ class Visualization:
     def plotly_topic_over_time_percent(
         self,
         topic_id: int,
-        # freq: str = 'YS',
-        count=None,
+        # freq: str = '1YS',
+        count=True,
+        # by_affil=False,
+        # ma_window=None,
         output_type: str = 'div',
     ):
-        count = count or False
 
         # doc_ids = self.topic_model.documents_for_topic(topic_id)
         # new_col = 'topic_doc'
@@ -1824,24 +1816,22 @@ class Visualization:
         #         # output_type='div',
         #     )
 
-    def plotly_topic_affil_count(
+    def plotly_topic_affiliation_count(
         self,
         topic_id: int,
         output_type: str = 'div',
     ):
-        doc_ids = self.topic_model.documents_for_topic(topic_id)
-        affil_count = self.topic_model.corpus.data_frame.loc[
-            doc_ids, self.topic_model.corpus._affiliation_col].value_counts()
-        # affil_count = self.topic_model.corpus.data_frame.loc[doc_ids].groupby(
-        #     by=[self.topic_model.corpus._affiliation_col]).size()
+        affiliation_count = self.topic_model.affiliation_count(topic_id)
+        affiliations = [x[0] for x in affiliation_count]
+        counts = [x[1] for x in affiliation_count]
 
-        ylabel = 'Count'
+        ylabel = 'Document Count'
 
         data = [
             go.Bar(
-                x=affil_count.index,
-                y=affil_count.values,
-                text=affil_count.values,
+                x=affiliations,
+                y=counts,
+                text=counts,
                 textposition='auto',
                 marker=dict(
                     color='rgb(49, 130, 189)',
