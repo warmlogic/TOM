@@ -656,10 +656,10 @@ if __name__ == '__main__':
 
     config_section = 'webserver'
     port = config[config_section].getint('port', 5000)
+    debug = config[config_section].getboolean('debug', False)
 
     app = main(config[config_section])
 
     # Access the browser at http://localhost:5000/
-    # app.run_server(debug=True, host='localhost', port=port)
-    # app.run_server(debug=True, host='0.0.0.0', port=port)
-    app.run_server(debug=False, host='0.0.0.0', port=port)
+    # app.run_server(debug=debug, host='localhost', port=port)
+    app.run_server(debug=debug, host='0.0.0.0', port=port)
