@@ -1336,7 +1336,10 @@ class Visualization:
         ma_window=None,
         output_type: str = 'div',
     ):
-
+        """Line plot of the count of documents per frequency window.
+        Optionally by affiliation.
+        Optionally as a percent (adds to 100% for a given frequency window).
+        """
         if by_affil:
             groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
         else:
@@ -1453,6 +1456,9 @@ class Visualization:
         # ma_window=None,
         output_type: str = 'div',
     ):
+        """Line plot of the count of documents per year.
+        Optionally as a percent (adds to 100% across all topics for a given year).
+        """
 
         # doc_ids = self.topic_model.documents_for_topic(topic_id)
         # new_col = 'topic_doc'
@@ -1535,6 +1541,8 @@ class Visualization:
         n_words: int = 20,
         output_type: str = 'div',
     ):
+        """Bar plot of the top word weights for a given topic.
+        """
         if normalized:
             norm_string = 'normalized'
         else:
@@ -1615,6 +1623,8 @@ class Visualization:
         n_words: int = 10,
         output_type: str = 'div',
     ):
+        """Bar plot of the topic loadings for a given document.
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -1723,6 +1733,8 @@ class Visualization:
         n_words: int = 10,
         output_type: str = 'div',
     ):
+        """Bar plot of the topic loadings for a given word.
+        """
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
             topic_cols_all.append(' '.join(top_words))
@@ -1821,6 +1833,9 @@ class Visualization:
         topic_id: int,
         output_type: str = 'div',
     ):
+        """Bar plot of the counts of affiliations of the documents
+        for which a given topic is the most likely topic.
+        """
         affiliation_count = self.topic_model.affiliation_count(topic_id)
         affiliations = [x[0] for x in affiliation_count]
         counts = [x[1] for x in affiliation_count]
