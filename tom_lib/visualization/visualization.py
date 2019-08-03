@@ -1444,7 +1444,7 @@ class Visualization:
         else:
             return figure
 
-    def plotly_topic_over_time_percent(
+    def plotly_topic_over_time(
         self,
         topic_id: int,
         # freq: str = '1YS',

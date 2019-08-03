@@ -550,7 +550,7 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             topic_word_weight_barplot=viz.plotly_topic_word_weight(int(tid), normalized=True, n_words=20, output_type='div'),
-            topic_over_time_percent_line=viz.plotly_topic_over_time_percent(int(tid), output_type='div'),
+            topic_over_time_percent_line=viz.plotly_topic_over_time(int(tid), count=False, output_type='div'),
             topic_affiliation_count_barplot=viz.plotly_topic_affiliation_count(int(tid), output_type='div'),
             # author_network_filename=author_network_folder / f'author_network{tid}.json',
         )
