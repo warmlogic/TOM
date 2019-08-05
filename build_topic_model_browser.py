@@ -246,11 +246,11 @@ def main(config_browser):
     )
 
     # # debug
-    # # fig_topic_heatmap = None
-    # fig_topic_clustermap = None
-    # fig_topic_over_time_count = None
-    # fig_topic_over_time_percent = None
-    # fig_topic_over_time_loading = None
+    # # fig_topic_heatmap = ''
+    # fig_topic_clustermap = ''
+    # fig_topic_over_time_count = ''
+    # fig_topic_over_time_percent = ''
+    # fig_topic_over_time_loading = ''
 
     logger.info('Done.')
 
