@@ -342,15 +342,16 @@ class TopicModel(object):
         for topic_id, frequency, frequency_count, top_words in topic_list:
             print(f"topic {topic_id:2d}\t{frequency:.4f}\t{int(frequency_count):d}\t{' '.join(top_words)}")
 
-    def top_words(self, topic_id: int, num_words: int = 10):
-        word_ids = np.argsort(self.word_distribution_for_topic(topic_id))[:-num_words - 1:-1]
-        weighted_words = [(self.corpus.word_for_id(word_id), self.topic_word_matrix[topic_id, word_id]) for word_id in word_ids]
+    def top_words(self, topic_id: int, normalized: bool = True, num_words: int = 10):
+        weights = self.word_distribution_for_topic(topic_id=topic_id, normalized=normalized)
+        word_ids = np.argsort(weights)[:-num_words - 1:-1]
+        weighted_words = [(self.corpus.word_for_id(word_id), weights[word_id]) for word_id in word_ids]
         return weighted_words
 
     def top_words_topics(self, num_words: int = 10):
         top_words_topics = []
-        for i in range(self.nb_topics):
-            top_words = [weighted_word[0] for weighted_word in self.top_words(i, num_words)]
+        for tid in range(self.nb_topics):
+            top_words = [weighted_word[0] for weighted_word in self.top_words(topic_id=tid, num_words=num_words)]
             top_words_topics.append(top_words)
         return top_words_topics
 
