@@ -1781,13 +1781,13 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=n_words * 30,
+                b=n_words * 32,
                 l=30,
                 r=0,
                 pad=4,
             ),
             autosize=True,
-            width=1000,
+            width=1200,
             height=600,
         )
 
