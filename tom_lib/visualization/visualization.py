@@ -322,15 +322,15 @@ class Visualization:
         result_count.plot(ax=ax, kind='line')
 
         if count:
-            title_str = 'Document counts'
+            title_str = 'Document Counts'
         else:
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.0%}'))
-            title_str = 'Percent of documents'
+            title_str = 'Percent of Documents'
 
         if by_affil:
             ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
-            title_str += ' per affiliation'
-        title_str += ' per year'
+            title_str += ' Per Affiliation'
+        title_str += ' Per Year'
 
         ax.set_title(title_str)
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
@@ -398,11 +398,11 @@ class Visualization:
 
         if kind == 'count':
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:,.0f}'))
-            ax.set_ylabel('Count of documents')
+            ax.set_ylabel('Count of Documents')
         elif kind == 'percent':
             result = result / self.topic_model.corpus.size
             ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{y:.1%}'))
-            ax.set_ylabel('Percent of documents')
+            ax.set_ylabel('Percent of Documents')
 
         result = result[[tc in topic_cols for tc in topic_cols_all]]
         sns.barplot(x=topic_cols, y=result, ax=ax)
@@ -1363,21 +1363,21 @@ class Visualization:
 
         xlabel = 'Date'
         if count:
-            title_str = 'Document counts'
+            title_str = 'Document Counts'
             ylabel = 'Count'
             autorange = True
             tickformat = None
             yrange = None
         else:
-            title_str = 'Percent of documents'
+            title_str = 'Percent of Documents'
             ylabel = 'Percent'
             autorange = False
             tickformat = '.1%'
             yrange = [0, 1]
 
         if by_affil:
-            title_str += ' per affiliation'
-        title_str += ' per year'
+            title_str += ' per Affiliation'
+        title_str += ' per Year'
 
         if by_affil:
             affils = self.topic_model.corpus.data_frame[self.topic_model.corpus._affiliation_col].unique()
@@ -1420,6 +1420,7 @@ class Visualization:
                     color='rgb(107, 107, 107)'
                 ),
                 autorange=autorange,
+                automargin=True,
                 tickformat=tickformat,
                 range=yrange,
             ),
@@ -1477,7 +1478,7 @@ class Visualization:
         years = list(range(min_year, max_year + 1))
         frequency = [self.topic_model.topic_frequency(topic_id, year=year, count=count) for year in years]
 
-        ylabel = 'Percent of documents per year'
+        ylabel = 'Percent of Documents Per Year'
 
         data = [
             go.Scatter(
@@ -1503,6 +1504,7 @@ class Visualization:
             yaxis=go.layout.YAxis(
                 title=ylabel,
                 autorange=False,
+                automargin=True,
                 tickfont=dict(
                     size=10,
                     color='rgb(107, 107, 107)'
@@ -1543,18 +1545,13 @@ class Visualization:
     ):
         """Bar plot of the top word weights for a given topic.
         """
-        if normalized:
-            norm_string = 'normalized'
-        else:
-            norm_string = ''
-
-        weighted_words = self.topic_model.top_words(topic_id=topic_id, num_words=n_words)
+        weighted_words = self.topic_model.top_words(topic_id=topic_id, normalized=normalized, num_words=n_words)
         top_words = [w[0] for w in weighted_words]
         word_weights = [w[1] for w in weighted_words]
 
-        ylabel = "Weight"
+        ylabel = 'Word Weight'
         if normalized:
-            ylabel = f"{ylabel} ({norm_string})"
+            ylabel = f"{ylabel} (normalized)"
 
         data = [
             go.Bar(
@@ -1577,6 +1574,7 @@ class Visualization:
 
         layout = go.Layout(
             xaxis=go.layout.XAxis(
+                automargin=True,
                 tickangle=-30,
                 tickfont=dict(
                     size=10,
@@ -1585,6 +1583,7 @@ class Visualization:
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
+                automargin=True,
                 autorange=True,
                 tickfont=dict(
                     size=10,
@@ -1631,15 +1630,15 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
-        if normalized:
-            norm_string = 'normalized'
-        else:
-            norm_string = ''
-
         if doc_id is None:
             data = [self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized).mean(axis=0)]
+            ylabel = 'Average Topic Loading'
         else:
             data = [self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized)]
+            ylabel = 'Document Topic Loading'
+
+        if normalized:
+            ylabel = f'{ylabel} (normalized)'
 
         _df = pd.DataFrame(
             data=data,
@@ -1650,12 +1649,6 @@ class Visualization:
 
         y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
         y_text = [np.round(v, decimals=3) for v in y]
-        ylabel = 'Topic Loading'
-        if normalized:
-            ylabel = f'{ylabel} ({norm_string})'
-        if doc_id is None:
-            ylabel = f'Average {ylabel}'
-
         data = [
             go.Bar(
                 x=x,
@@ -1690,13 +1683,13 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=n_words * 30,
+                b=n_words * 32,
                 l=30,
                 r=0,
                 pad=4,
             ),
             autosize=True,
-            width=1000,
+            width=1200,
             height=600,
         )
 
@@ -1741,11 +1734,6 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
-        if normalized:
-            norm_string = 'normalized'
-        else:
-            norm_string = ''
-
         _df = pd.DataFrame(
             data=[self.topic_model.topic_distribution_for_word(word_id=word_id, normalized=normalized)],
             columns=topic_cols_all,
@@ -1755,9 +1743,9 @@ class Visualization:
 
         y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
         y_text = [np.round(v, decimals=3) for v in y]
-        ylabel = "Weight"
+        ylabel = 'Word Topic Loading'
         if normalized:
-            ylabel = f"{ylabel} ({norm_string})"
+            ylabel = f"{ylabel} (normalized)"
 
         data = [
             go.Bar(
@@ -1864,6 +1852,7 @@ class Visualization:
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
+                automargin=True,
                 autorange=True,
                 tickfont=dict(
                     size=10,
