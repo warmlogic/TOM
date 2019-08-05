@@ -27,12 +27,14 @@
         <h1>Details for <i>{{ word }}</i></h1>
         <p>Word number: {{ word_id }}</p>
     </div>
-    <div id="wrap">
-        <div id="left_column">
+    <div id="one_column">
+        <div class="main-content">
             <h2>Topic loading for <i>{{ word }}</i></h2>
             {{ word_topic_loading_barplot | safe }}
         </div>
-        <div id="right_column">
+    </div>
+    <div id="wrap">
+        <div id="left_column">
             <h2>Related documents ({{documents|length}}; sorted)</h2>
             <ul>
                 {% for doc in documents %}

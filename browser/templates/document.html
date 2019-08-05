@@ -28,20 +28,10 @@
         <p>Title: {{ title }} --- Author: {{ authors }}</p>
         <p>Date: {{ year }} --- Affiliation: {{ affiliation }} --- Dataset: {{ dataset }} --- Identifier: {{ id }}</p>
     </div>
-    <div id="wrap">
-        <div id="left_column">
+    <div id="one_column">
+        <div class="main-content">
             <h2>Topic loading for document {{ doc_id }}</h2>
             {{ doc_topic_loading_barplot | safe }}
-        </div>
-        <div id="right_column">
-            <h2>Vector representation</h2>
-            <ul>
-                {% for weighted_word in words %}
-                    {% if weighted_word[1] > 0 %}
-                        <li><strong><a href="../word/{{ weighted_word[2] }}.html">{{ weighted_word[0] }}</a></strong> ({{ weighted_word[1] }})</li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
         </div>
     </div>
     <div id="wrap">
@@ -60,6 +50,16 @@
                         <br>
                         Dataset: {{ doc[4] }}
                     </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="right_column">
+            <h2>Vector representation</h2>
+            <ul>
+                {% for weighted_word in words %}
+                    {% if weighted_word[1] > 0 %}
+                        <li><strong><a href="../word/{{ weighted_word[2] }}.html">{{ weighted_word[0] }}</a></strong> ({{ weighted_word[1] }})</li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
