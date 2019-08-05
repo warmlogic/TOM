@@ -52,6 +52,7 @@
             <p>Documents over time by affiliation (Count per year)</p>
             {{ docs_over_time_count_line | safe }}
         </div>
+    <div id="one_column">
         <div class="main-content">
             <p>Documents over time by affiliation (Percent per year)</p>
             {{ docs_over_time_percent_line | safe }}
@@ -70,7 +71,7 @@
         </div>
     </div> -->
     <div id="one_column">
-            <div class="one_image_1400">
+        <div class="one_image_1400">
             <p>Hierarchically-clustered topic-topic correlation values (Pearson correlation coefficient)</p>
             <img src={{ url_for('static', filename=fig_topic_clustermap) }}>
         </div>
