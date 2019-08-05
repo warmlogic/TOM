@@ -1672,7 +1672,7 @@ class Visualization:
         layout = go.Layout(
             xaxis=go.layout.XAxis(
                 tickangle=-30,
-                # automargin=True,
+                automargin=True,
                 # autorange=True,
                 tickfont=dict(
                     size=10,
@@ -1681,7 +1681,7 @@ class Visualization:
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
-                # automargin=True,
+                automargin=True,
                 autorange=True,
                 tickfont=dict(
                     size=10,
@@ -1690,14 +1690,14 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=0,
+                b=n_words * 30,
                 l=30,
                 r=0,
                 pad=4,
             ),
-            autosize=False,
-            width=800,
-            height=500,
+            autosize=True,
+            width=1000,
+            height=600,
         )
 
         figure = go.Figure(data=data, layout=layout)
@@ -1775,7 +1775,7 @@ class Visualization:
         layout = go.Layout(
             xaxis=go.layout.XAxis(
                 tickangle=-30,
-                # automargin=True,
+                automargin=True,
                 # autorange=True,
                 tickfont=dict(
                     size=10,
@@ -1784,7 +1784,7 @@ class Visualization:
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
-                # automargin=True,
+                automargin=True,
                 autorange=True,
                 tickfont=dict(
                     size=10,
@@ -1793,14 +1793,14 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=0,
+                b=n_words * 30,
                 l=30,
                 r=0,
                 pad=4,
             ),
-            autosize=False,
-            width=800,
-            height=500,
+            autosize=True,
+            width=1000,
+            height=600,
         )
 
         figure = go.Figure(data=data, layout=layout)
@@ -1877,7 +1877,7 @@ class Visualization:
                 r=0,
                 pad=4,
             ),
-            autosize=False,
+            autosize=True,
             width=500,
             height=300,
         )
