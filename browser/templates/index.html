@@ -49,8 +49,11 @@
     </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Documents over time</p>
+            <p>Documents over time by affiliation (Count per year)</p>
             {{ docs_over_time_count_line | safe }}
+        </div>
+        <div class="main-content">
+            <p>Documents over time by affiliation (Percent per year)</p>
             {{ docs_over_time_percent_line | safe }}
         </div>
     </div>
@@ -73,19 +76,19 @@
         </div>
     </div>
     <div id="one_column">
-        <div class="main-content">
+        <div class="one_image_1200">
             <p>Topics over time: Count of documents above the threshold per year</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_count) }}>
         </div>
     </div>
     <div id="one_column">
-        <div class="main-content">
+        <div class="one_image_1200">
             <p>Topics over time: Percent of documents above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
         </div>
     </div>
     <div id="one_column">
-        <div class="main-content">
+        <div class="one_image_1200">
             <p>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>
