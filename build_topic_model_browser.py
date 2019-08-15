@@ -311,7 +311,7 @@ def main(config_browser):
                         min=0.0,
                         max=1.0,
                         step=0.1,
-                        value=0.1,
+                        value=0.5,
                         updatemode='drag',
                     ),
                     style={
@@ -421,7 +421,7 @@ def main(config_browser):
                 page_action='native',
                 page_current=0,
                 page_size=100,
-                style_as_list_view=True,
+                style_as_list_view=False,
             ),
         ]),
     ])
