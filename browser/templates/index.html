@@ -65,15 +65,15 @@
         </div>
     </div>
     <!-- <div id="one_column">
-        <div class="one_image_1400">
-            <p>Heatmap of topic-topic correlation values (Pearson correlation coefficient)</p>
-            <img src={{ url_for('static', filename=fig_topic_heatmap) }}>
+        <div class="main-content">
+            <p>Heatmap of topic-topic correlation values</p>
+            {{ topic_heatmap | safe }}
         </div>
     </div> -->
     <div id="one_column">
-        <div class="one_image_1400">
-            <p>Hierarchically-clustered topic-topic correlation values (Pearson correlation coefficient)</p>
-            <img src={{ url_for('static', filename=fig_topic_clustermap) }}>
+        <div class="main-content">
+            <p>Hierarchically-clustered topic-topic correlation values</p>
+            {{ topic_clustermap | safe }}
         </div>
     </div>
     <div id="one_column">
@@ -88,10 +88,10 @@
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
         </div>
     </div>
-    <div id="one_column">
+    <!-- <div id="one_column">
         <div class="one_image_1200">
             <p>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>
-    </div>
+    </div> -->
 </body>
