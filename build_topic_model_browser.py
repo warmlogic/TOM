@@ -199,13 +199,6 @@ def main(config_browser):
 
     logger.info(f'Will save results to: {viz.output_dir}')
 
-    g, fig_topic_clustermap = viz.plot_clustermap(
-        normalized=normalized,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
-
     fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
         normalized=normalized,
         thresh=thresh,
@@ -232,22 +225,20 @@ def main(config_browser):
         figformat=figformat,
     )
 
-    fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
-        normalized=normalized,
-        thresh=thresh,
-        freq=freq,
-        by_affil=by_affil,
-        ma_window=ma_window,
-        nchar_title=nchar_title,
-        ncols=ncols,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
+    # fig, ax, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+    #     normalized=normalized,
+    #     thresh=thresh,
+    #     freq=freq,
+    #     by_affil=by_affil,
+    #     ma_window=ma_window,
+    #     nchar_title=nchar_title,
+    #     ncols=ncols,
+    #     savefig=savefig,
+    #     dpi=dpi,
+    #     figformat=figformat,
+    # )
 
     # # debug
-    # # fig_topic_heatmap = ''
-    # fig_topic_clustermap = ''
     # fig_topic_over_time_count = ''
     # fig_topic_over_time_percent = ''
     # fig_topic_over_time_loading = ''
@@ -486,11 +477,11 @@ def main(config_browser):
             docs_over_time_count_line=viz.plotly_docs_over_time(freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div'),
             docs_over_time_percent_line=viz.plotly_docs_over_time(freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div'),
             topic_loading_barplot=viz.plotly_doc_topic_loading(normalized=normalized, output_type='div'),
-            # fig_topic_heatmap=figs_folder / fig_topic_heatmap,
-            fig_topic_clustermap=figs_folder / fig_topic_clustermap,
+            topic_heatmap=viz.plotly_heatmap(normalized=normalized, output_type='div'),
+            topic_clustermap=viz.plotly_clustermap(normalized=normalized, output_type='div'),
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
             fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
-            fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
+            # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
         )
 
     @server.route('/topic_cloud.html')
