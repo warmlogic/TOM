@@ -2065,8 +2065,8 @@ class Visualization:
 
         figure.update_layout(
             {
-                'width': 1200,
-                'height': 900,
+                'width': 1400,
+                'height': 1100,
                 'showlegend': False,
                 'hovermode': 'closest',
                 # 'title': title_str,
@@ -2120,7 +2120,7 @@ class Visualization:
 
         figure.update_layout(
             yaxis2={
-                'domain': [0.825, 0.975],
+                'domain': [0.85, 1.0],
                 'mirror': False,
                 'showgrid': False,
                 'showline': False,
