@@ -13,6 +13,7 @@ import seaborn as sns
 
 import plotly
 import plotly.graph_objs as go
+import plotly.figure_factory as ff
 
 from tom_lib.utils import save_topic_number_metrics_data
 
@@ -1872,6 +1873,261 @@ class Visualization:
         )
 
         figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+
+    def plotly_heatmap(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        n_words: int = 10,
+        output_type: str = 'div',
+        zmax: float = None,
+        zmin: float = None,
+        colorscale: str = None,
+    ):
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        # title_str = 'Correlation'
+
+        if colorscale is None:
+            colorscale = 'RdBu'
+
+        if zmax is None or zmin is None:
+            zauto = True
+        else:
+            zauto = False
+
+        corr = pd.DataFrame(
+            data=np.corrcoef(self.topic_model.topic_distribution_for_document(normalized=normalized).T),
+            columns=topic_cols_all,
+            index=topic_cols_all,
+        )
+        corr = corr.loc[topic_cols, topic_cols]
+
+        data = go.Heatmap(
+            z=corr.values,
+            x=corr.columns,
+            y=corr.index,
+            colorscale=colorscale,
+            reversescale=True,
+            zmax=zmax,
+            zmin=zmin,
+            zmid=0,
+            zauto=zauto,
+            colorbar={
+                'title': {
+                    'text': 'Pearson Correlation Coefficient',
+                    'side': 'right',
+                },
+            }
+        )
+
+        layout = go.Layout(
+            # title=title_str,
+            xaxis=go.layout.XAxis(
+                tickangle=-30,
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            ),
+            yaxis=go.layout.YAxis(
+                tickfont=dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                autorange='reversed',
+            ),
+            # margin=go.layout.Margin(
+            #     t=30,
+            #     b=0,
+            #     l=30,
+            #     r=0,
+            #     pad=4,
+            # ),
+            # autosize=True,
+            width=1200,
+            height=1000,
+            showlegend=False,
+            hovermode='closest',
+        )
+
+        figure = go.Figure(data=data, layout=layout)
+
+        if output_type == 'div':
+            return plotly.offline.plot(
+                figure,
+                show_link=False,
+                include_plotlyjs=False,
+                output_type=output_type,
+            )
+        else:
+            return figure
+
+    def plotly_clustermap(
+        self,
+        topic_cols: List[str] = None,
+        normalized: bool = True,
+        n_words: int = 10,
+        output_type: str = 'div',
+        zmax: float = None,
+        zmin: float = None,
+        colorscale: str = None,
+    ):
+        topic_cols_all = []
+        for top_words in self.topic_model.top_words_topics(n_words):
+            topic_cols_all.append(' '.join(top_words))
+        if not topic_cols:
+            topic_cols = topic_cols_all
+
+        # title_str = 'Correlation'
+
+        if colorscale is None:
+            colorscale = 'RdBu'
+
+        if zmax is None or zmin is None:
+            zauto = True
+        else:
+            zauto = False
+
+        corr = pd.DataFrame(
+            data=np.corrcoef(self.topic_model.topic_distribution_for_document(normalized=normalized).T),
+            columns=topic_cols_all,
+            index=topic_cols_all,
+        )
+        corr = corr.loc[topic_cols, topic_cols]
+
+        z = corr.values
+        x = corr.columns
+        y = corr.index
+
+        # Initialize figure by creating upper dendrogram
+        figure = ff.create_dendrogram(z, orientation='bottom', labels=x)
+        for i in range(len(figure['data'])):
+            figure['data'][i]['yaxis'] = 'y2'
+
+        # Create Side Dendrogram
+        dendro_side = ff.create_dendrogram(z, orientation='right')
+        for i in range(len(dendro_side['data'])):
+            dendro_side['data'][i]['xaxis'] = 'x2'
+
+        # Add Side Dendrogram Data to Figure
+        for data in dendro_side['data']:
+            figure.add_trace(data)
+
+        # Create Heatmap
+        dendro_leaves = dendro_side['layout']['yaxis']['ticktext']
+        dendro_leaves = list(map(int, dendro_leaves))
+
+        x = x[dendro_leaves]
+        y = y[dendro_leaves]
+
+        z = z[dendro_leaves, :]
+        z = z[:, dendro_leaves]
+
+        data = go.Heatmap(
+            z=z,
+            x=x,
+            y=y,
+            colorscale=colorscale,
+            reversescale=True,
+            zmax=zmax,
+            zmin=zmin,
+            zmid=0,
+            zauto=zauto,
+            colorbar={
+                'x': -0.15,
+                'title': {
+                    'text': 'Pearson Correlation Coefficient',
+                    'side': 'right',
+                },
+            },
+        )
+
+        data['x'] = figure['layout']['xaxis']['tickvals']
+        data['y'] = dendro_side['layout']['yaxis']['tickvals']
+
+        # Add Heatmap Data to Figure
+        figure.add_trace(data)
+
+        figure.update_layout(
+            {
+                'width': 1200,
+                'height': 900,
+                'showlegend': False,
+                'hovermode': 'closest',
+                # 'title': title_str,
+            },
+        )
+
+        figure.update_layout(
+            xaxis={
+                'domain': [0.15, 1.0],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'ticks': '',
+                'tickangle': 30,
+                'tickfont': dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+            })
+
+        figure.update_layout(
+            xaxis2={
+                'domain': [0, 0.15],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'showticklabels': False,
+                'ticks': '',
+            })
+
+        figure.update_layout(
+            yaxis={
+                'domain': [0, 0.85],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'ticks': '',
+                'tickmode': 'array',
+                'tickvals': dendro_side['layout']['yaxis']['tickvals'],
+                'ticktext': y,
+                'tickfont': dict(
+                    size=10,
+                    color='rgb(107, 107, 107)'
+                ),
+                'side': 'right',
+                'autorange': 'reversed',
+            })
+
+        figure.update_layout(
+            yaxis2={
+                'domain': [0.825, 0.975],
+                'mirror': False,
+                'showgrid': False,
+                'showline': False,
+                'zeroline': False,
+                'showticklabels': False,
+                'ticks': '',
+            })
 
         if output_type == 'div':
             return plotly.offline.plot(
