@@ -177,7 +177,7 @@ def main(config_browser):
     logger.info('Done.')
 
     # ##################################
-    # Make plots
+    # Make plots for the main index page
     # ##################################
 
     logger.info('Creating plots...')
@@ -198,6 +198,12 @@ def main(config_browser):
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
     logger.info(f'Will save results to: {viz.output_dir}')
+
+    docs_over_time_count_line = viz.plotly_docs_over_time(freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div')
+    docs_over_time_percent_line = viz.plotly_docs_over_time(freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div')
+    topic_loading_barplot = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div')
+    topic_heatmap = viz.plotly_heatmap(normalized=normalized, output_type='div')
+    topic_clustermap = viz.plotly_clustermap(normalized=normalized, output_type='div')
 
     fig, ax, fig_topic_over_time_count = viz.plot_topic_over_time_count(
         normalized=normalized,
@@ -474,11 +480,11 @@ def main(config_browser):
             min_absolute_frequency=min_absolute_frequency,
             vectorization=vectorization,
             num_topics=num_topics,
-            docs_over_time_count_line=viz.plotly_docs_over_time(freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div'),
-            docs_over_time_percent_line=viz.plotly_docs_over_time(freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div'),
-            topic_loading_barplot=viz.plotly_doc_topic_loading(normalized=normalized, output_type='div'),
-            topic_heatmap=viz.plotly_heatmap(normalized=normalized, output_type='div'),
-            topic_clustermap=viz.plotly_clustermap(normalized=normalized, output_type='div'),
+            docs_over_time_count_line=docs_over_time_count_line,
+            docs_over_time_percent_line=docs_over_time_percent_line,
+            topic_loading_barplot=topic_loading_barplot,
+            topic_heatmap=topic_heatmap,
+            topic_clustermap=topic_clustermap,
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
             fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
             # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
