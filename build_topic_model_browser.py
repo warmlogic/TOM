@@ -558,8 +558,7 @@ def main(config_browser):
         word_list = []
         for a_word_id in range(len(vector)):
             word_list.append((topic_model.corpus.word_for_id(a_word_id), round(vector[a_word_id], 3), a_word_id))
-        word_list.sort(key=lambda x: x[1])
-        word_list.reverse()
+        word_list = sorted(word_list, key=lambda x: x[1], reverse=True)
         documents = []
         for another_doc in topic_model.corpus.similar_documents(int(did), 5):
             documents.append(
