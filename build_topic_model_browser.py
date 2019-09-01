@@ -291,7 +291,7 @@ def main(config_browser):
     app.layout = html.Div([
         html.Div([
             html.Div(
-                html.P('Describe a topic loading vector to show similar documents'),
+                html.P('Drag the sliders to describe a topic loading vector. The most similar documents are displayed below.'),
                 style={'float': 'left'},
             ),
             html.Div(
@@ -308,7 +308,7 @@ def main(config_browser):
                         min=0.0,
                         max=1.0,
                         step=0.1,
-                        value=0.5,
+                        value=0.0,  # starting value
                         updatemode='drag',
                     ),
                     style={
@@ -429,7 +429,7 @@ def main(config_browser):
             [Input(f'slider-topic-{n}', 'value')],
         )
         def update_output(slider_n_value):
-            return f'{slider_n_value}'
+            return f'{slider_n_value:.1f}'
 
     def filter_data(vector, num_docs=None, round_decimal=None):
         if not num_docs:
