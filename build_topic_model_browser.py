@@ -616,9 +616,15 @@ def main(config_browser):
                 int(wid), normalized=True, n_words=top_words_description, output_type='div'),
         )
 
+    @app.server.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(
+            static_folder / 'images', request.path[1:],
+            mimetype='image/vnd.microsoft.icon')
+
     @server.route('/robots.txt')
     def robots_txt():
-        return send_from_directory(PurePath(server.root_path, 'static'), request.path[1:])
+        return send_from_directory(static_folder, request.path[1:])
 
     @server.url_defaults
     def hashed_static_file(endpoint, values):
