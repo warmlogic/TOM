@@ -288,8 +288,8 @@ class Visualization:
         self,
         freq: str = '1YS',
         count=True,
-        by_affil=False,
-        ma_window=None,
+        by_affil: bool = False,
+        ma_window: int = None,
         figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
         dpi: int = 72,
@@ -617,6 +617,7 @@ class Visualization:
         ncols: int = None,
         n_words: int = 10,
         nchar_title: int = None,
+        figsize_scale: int = None,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
@@ -632,10 +633,16 @@ class Visualization:
 
         if ncols is None:
             ncols = 5
+        if ncols > len(topic_cols):
+            ncols = len(topic_cols)
+
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize_scale is None:
+            figsize_scale = 3
+
         if figsize is None:
-            figsize = (ncols * 3, nrows * 3)
+            figsize = (ncols * figsize_scale, nrows * figsize_scale)
 
         fig, axes = plt.subplots(
             figsize=figsize,
@@ -948,8 +955,9 @@ class Visualization:
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
-        ma_window=None,
-        by_affil=False,
+        ma_window: int = None,
+        by_affil: bool = False,
+        figsize_scale: int = None,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
@@ -967,10 +975,16 @@ class Visualization:
 
         if ncols is None:
             ncols = 5
+        if ncols > len(topic_cols):
+            ncols = len(topic_cols)
+
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize_scale is None:
+            figsize_scale = 3
+
         if figsize is None:
-            figsize = (ncols * 3, nrows * 3)
+            figsize = (ncols * figsize_scale, nrows * figsize_scale)
 
         fig, axes = plt.subplots(
             figsize=figsize,
@@ -1036,7 +1050,8 @@ class Visualization:
         # for placing the affiliation legend
         if by_affil:
             handles, labels = ax.get_legend_handles_labels()
-            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+            bbox_y = 1.0 + ((1.3**(-nrows)) * 0.25)
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, bbox_y), loc='upper center')
 
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
         fig.tight_layout()
@@ -1082,8 +1097,9 @@ class Visualization:
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
-        ma_window=None,
-        by_affil=False,
+        ma_window: int = None,
+        by_affil: bool = False,
+        figsize_scale: int = None,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
@@ -1103,10 +1119,16 @@ class Visualization:
 
         if ncols is None:
             ncols = 5
+        if ncols > len(topic_cols):
+            ncols = len(topic_cols)
+
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize_scale is None:
+            figsize_scale = 3
+
         if figsize is None:
-            figsize = (ncols * 3, nrows * 3)
+            figsize = (ncols * figsize_scale, nrows * figsize_scale)
 
         fig, axes = plt.subplots(
             figsize=figsize,
@@ -1172,7 +1194,8 @@ class Visualization:
         # for placing the affiliation legend
         if by_affil:
             handles, labels = ax.get_legend_handles_labels()
-            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+            bbox_y = 1.0 + ((1.3**(-nrows)) * 0.25)
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, bbox_y), loc='upper center')
 
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
         fig.tight_layout()
@@ -1216,8 +1239,9 @@ class Visualization:
         n_words: int = 10,
         nchar_title: int = None,
         ncols: int = None,
-        ma_window=None,
-        by_affil=False,
+        ma_window: int = None,
+        by_affil: bool = False,
+        figsize_scale: int = None,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
@@ -1236,10 +1260,16 @@ class Visualization:
 
         if ncols is None:
             ncols = 5
+        if ncols > len(topic_cols):
+            ncols = len(topic_cols)
+
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize_scale is None:
+            figsize_scale = 3
+
         if figsize is None:
-            figsize = (ncols * 3, nrows * 3)
+            figsize = (ncols * figsize_scale, nrows * figsize_scale)
 
         fig, axes = plt.subplots(
             figsize=figsize,
@@ -1308,7 +1338,8 @@ class Visualization:
         # for placing the affiliation legend
         if by_affil:
             handles, labels = ax.get_legend_handles_labels()
-            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.1), loc='upper center')
+            bbox_y = 1.0 + ((1.3**(-nrows)) * 0.25)
+            lgd = fig.legend(handles, labels, bbox_to_anchor=(0.5, bbox_y), loc='upper center')
 
         fig.autofmt_xdate(bottom=0.2, rotation=30, ha='center')
         fig.tight_layout()
@@ -1349,8 +1380,8 @@ class Visualization:
         self,
         freq: str = '1YS',
         count=True,
-        by_affil=False,
-        ma_window=None,
+        by_affil: bool = False,
+        ma_window: int = None,
         output_type: str = 'div',
         savedata: bool = False,
     ):
@@ -1479,8 +1510,8 @@ class Visualization:
         topic_id: int,
         # freq: str = '1YS',
         count=True,
-        # by_affil=False,
-        # ma_window=None,
+        # by_affil: bool = False,
+        # ma_window: int = None,
         output_type: str = 'div',
         savedata: bool = False,
     ):
