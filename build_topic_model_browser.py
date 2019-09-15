@@ -36,8 +36,8 @@ def get_config(config_filepath):
     config = configparser.ConfigParser(allow_no_value=True)
     try:
         config.read(config_filepath)
-    except OSError as e:
-        logger.error(f'Config file {config_filepath} not found. Did you set it up?')
+    except OSError:
+        logger.exception(f'Config file {config_filepath} not found. Did you set it up?')
     return config
 
 
@@ -490,6 +490,7 @@ def main(config_browser):
             # topic_heatmap=topic_heatmap,
             topic_clustermap=topic_clustermap,
             topic_clustermap_filepath=topic_clustermap_filepath,
+            topic_heatmap_filepath=topic_heatmap_filepath,
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
             fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
             # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
@@ -501,7 +502,7 @@ def main(config_browser):
             'topic_cloud.html',
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
-            topic_cloud_filename=topic_cloud_folder / f'topic_cloud.json',
+            topic_cloud_filename=topic_cloud_folder / 'topic_cloud.json',
         )
 
     @server.route('/vocabulary.html')
