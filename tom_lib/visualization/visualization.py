@@ -1352,6 +1352,7 @@ class Visualization:
         by_affil=False,
         ma_window=None,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Line plot of the count of documents per frequency window.
         Optionally by affiliation.
@@ -1395,6 +1396,14 @@ class Visualization:
         if by_affil:
             title_str += ' per Affiliation'
         title_str += ' per Year'
+
+        if savedata:
+            save_data_string = title_str.lower().replace(' ', '_')
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            result_count.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         if by_affil:
             affils = self.topic_model.corpus.data_frame[self.topic_model.corpus._affiliation_col].unique()
@@ -1461,9 +1470,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
 
     def plotly_topic_over_time(
         self,
@@ -1473,6 +1482,7 @@ class Visualization:
         # by_affil=False,
         # ma_window=None,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Line plot of the count of documents per year.
         Optionally as a percent (adds to 100% across all topics for a given year).
@@ -1495,7 +1505,33 @@ class Visualization:
         years = list(range(min_year, max_year + 1))
         frequency = [self.topic_model.topic_frequency(topic_id, year=year, count=count) for year in years]
 
-        ylabel = 'Percent of Documents Per Year'
+        xlabel = 'Year'
+        if count:
+            title_str = 'Document Counts'
+            ylabel = 'Count'
+            autorange = True
+            tickformat = None
+            yrange = None
+        else:
+            title_str = 'Percent of Documents'
+            ylabel = 'Percent'
+            autorange = False
+            tickformat = '.1%'
+            yrange = [0, 1]
+
+        # if by_affil:
+        #     title_str += ' per Affiliation'
+
+        title_str += ' per Year'
+
+        if savedata:
+            _df = pd.DataFrame(data=frequency, columns=[ylabel.lower()], index=years)
+            save_data_string = title_str.lower().replace(' ', '_')
+            filename_out = f'{save_data_string}_t{topic_id}.csv'
+            # save data to disk
+            _df.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         data = [
             go.Scatter(
@@ -1509,6 +1545,7 @@ class Visualization:
 
         layout = go.Layout(
             xaxis=go.layout.XAxis(
+                title=xlabel,
                 tickangle=-30,
                 tickfont=dict(
                     size=10,
@@ -1520,14 +1557,14 @@ class Visualization:
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
-                autorange=False,
+                autorange=autorange,
                 automargin=True,
                 tickfont=dict(
                     size=10,
                     color='rgb(107, 107, 107)'
                 ),
-                tickformat='.1%',
-                range=[0, 1],
+                tickformat=tickformat,
+                range=yrange,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -1549,9 +1586,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
 
     def plotly_topic_word_weight(
         self,
@@ -1559,6 +1596,7 @@ class Visualization:
         normalized: bool = True,
         n_words: int = 20,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Bar plot of the top word weights for a given topic.
         """
@@ -1567,8 +1605,19 @@ class Visualization:
         word_weights = [w[1] for w in weighted_words]
 
         ylabel = 'Word Weight'
+        save_data_string = ylabel.lower().replace(' ', '_')
+
         if normalized:
             ylabel = f"{ylabel} (normalized)"
+            save_data_string = f'{save_data_string}_norm'
+
+        if savedata:
+            _df = pd.DataFrame(data=word_weights, columns=top_words)
+            filename_out = f'{save_data_string}_t{topic_id}.csv'
+            # save data to disk
+            _df.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         data = [
             go.Bar(
@@ -1627,9 +1676,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
 
     def plotly_doc_topic_loading(
         self,
@@ -1638,6 +1687,7 @@ class Visualization:
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Bar plot of the topic loadings for a given document.
         """
@@ -1654,15 +1704,24 @@ class Visualization:
             data = [self.topic_model.topic_distribution_for_document(doc_id=doc_id, normalized=normalized)]
             ylabel = 'Document Topic Loading'
 
+        save_data_string = ylabel.lower().replace(' ', '_')
         if normalized:
             ylabel = f'{ylabel} (normalized)'
+            save_data_string = f'{save_data_string}_norm'
 
         _df = pd.DataFrame(
             data=data,
             columns=topic_cols_all,
-        )
+        )[topic_cols]
 
-        x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols_all)]
+        if savedata:
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            _df.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
+
+        x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols)]
 
         y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
         y_text = [np.round(v, decimals=3) for v in y]
@@ -1721,9 +1780,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
         # else:
         #     from plotly.offline import init_notebook_mode
         #     init_notebook_mode(connected=True)
@@ -1742,6 +1801,7 @@ class Visualization:
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Bar plot of the topic loadings for a given word.
         """
@@ -1754,15 +1814,25 @@ class Visualization:
         _df = pd.DataFrame(
             data=[self.topic_model.topic_distribution_for_word(word_id=word_id, normalized=normalized)],
             columns=topic_cols_all,
-        )
+        )[topic_cols]
 
-        x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols_all)]
+        x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols)]
 
         y = [np.round(v, decimals=5) for v in _df[topic_cols].values.tolist()[0]]
         y_text = [np.round(v, decimals=3) for v in y]
         ylabel = 'Word Topic Loading'
+
+        save_data_string = ylabel.lower().replace(' ', '_')
         if normalized:
-            ylabel = f"{ylabel} (normalized)"
+            ylabel = f'{ylabel} (normalized)'
+            save_data_string = f'{save_data_string}_norm'
+
+        if savedata:
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            _df.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         data = [
             go.Bar(
@@ -1819,9 +1889,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
         # else:
         #     from plotly.offline import init_notebook_mode
         #     init_notebook_mode(connected=True)
@@ -1837,6 +1907,7 @@ class Visualization:
         self,
         topic_id: int,
         output_type: str = 'div',
+        savedata: bool = False,
     ):
         """Bar plot of the counts of affiliations of the documents
         for which a given topic is the most likely topic.
@@ -1846,6 +1917,15 @@ class Visualization:
         counts = [x[1] for x in affiliation_count]
 
         ylabel = 'Document Count'
+
+        if savedata:
+            _df = pd.DataFrame(data=counts, columns=affiliations)
+            save_data_string = 'affiliation_document_count'
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            _df.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         data = [
             go.Bar(
@@ -1896,9 +1976,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
 
     def plotly_heatmap(
         self,
@@ -1909,6 +1989,7 @@ class Visualization:
         zmax: float = None,
         zmin: float = None,
         colorscale: str = None,
+        savedata: bool = False,
     ):
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
@@ -1932,6 +2013,17 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        save_data_string = 'topic_topic_corr_heatmap'
+        if normalized:
+            save_data_string = f'{save_data_string}_norm'
+
+        if savedata:
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            corr.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         data = go.Heatmap(
             z=corr.values,
@@ -1989,9 +2081,9 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
 
     def plotly_clustermap(
         self,
@@ -2002,6 +2094,7 @@ class Visualization:
         zmax: float = None,
         zmin: float = None,
         colorscale: str = None,
+        savedata: bool = False,
     ):
         topic_cols_all = []
         for top_words in self.topic_model.top_words_topics(n_words):
@@ -2025,6 +2118,17 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        save_data_string = 'topic_topic_corr_clustermap'
+        if normalized:
+            save_data_string = f'{save_data_string}_norm'
+
+        if savedata:
+            filename_out = f'{save_data_string}.csv'
+            # save data to disk
+            corr.to_csv(self.output_dir / filename_out)
+        else:
+            filename_out = None
 
         z = corr.values
         x = corr.columns
@@ -2151,6 +2255,6 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            )
+            ), filename_out
         else:
-            return figure
+            return figure, filename_out
