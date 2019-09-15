@@ -31,7 +31,7 @@ def save_word_distribution(distribution, file_path):
             f.write(f'{weighted_word[0]}\t{weighted_word[1]}\n')
 
 
-def save_topic_distribution(distribution, file_path, topic_description: List=None):
+def save_topic_distribution(distribution, file_path, topic_description: List = None):
     if not file_path.parent.exists():
         file_path.parent.mkdir(parents=True, exist_ok=True)
     if topic_description:
