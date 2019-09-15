@@ -73,12 +73,13 @@ class Corpus:
                 self.data_frame = self.data_frame.drop(col, axis=1)
         # fill in null values
         self.data_frame = self.data_frame.fillna('')
-        # get shape of df (previous code used count, which won't work if there are columns other than index 0 that have nans)
+        # get the number of documents in the corpus
         self.size = self.data_frame.shape[0]
 
-        # print(f'Number of unique words: {len(set(np.hstack(self.data_frame[self._text_col].str.split().values))):,}')
+        self.raw_text_n_unique_words = len(set(np.hstack(self.data_frame[self._text_col].str.split().values)))
+        # print(f'Number of unique words in raw corpus: {self.raw_text_n_unique_words:,}')
         # if self.max_features:
-        #     print(f'Reducing vocabulary to: {self.max_features:,}')
+        #     print(f'Reducing vocabulary to maximum size: {self.max_features:,}')
 
         stop_words = []
         if self._language:
@@ -100,8 +101,11 @@ class Corpus:
         self.vectorizer = vectorizer
         self.sklearn_vector_space = vectorizer.fit_transform(self.data_frame[self._text_col].tolist())
         self.gensim_vector_space = None
-        vocab = vectorizer.get_feature_names()
-        self.vocabulary = dict([(i, s) for i, s in enumerate(vocab)])
+        self.vocabulary = dict([(i, s) for i, s in enumerate(vectorizer.get_feature_names())])
+        self.vocabulary_size = len(self.vocabulary)
+
+        # if self.max_features:
+        #     print(f'Number of unique words in reduced vocabularly: {self.vocabulary_size:, }')
 
     def __iter__(self):
         """A generator that yields a tokenized (i.e., split on whitespace) version of each document.
@@ -169,7 +173,7 @@ class Corpus:
             doc_idx = doc_idx[sorted_weight_idx]
         return doc_idx.tolist()
 
-    def doc_ids_year(self, year):
+    def doc_ids_year(self, year: int):
         return self.data_frame.loc[self.data_frame[self._date_col].dt.year == year].index.tolist()
 
     def word_vector_for_document(self, doc_id=None, normalized=False):
@@ -197,7 +201,7 @@ class Corpus:
     def word_for_id(self, word_id: int):
         return self.vocabulary.get(word_id)
 
-    def id_for_word(self, word):
+    def id_for_word(self, word: str):
         for i, s in self.vocabulary.items():
             if s == word:
                 return i
