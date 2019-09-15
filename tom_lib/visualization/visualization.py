@@ -1606,14 +1606,15 @@ class Visualization:
 
         ylabel = 'Word Weight'
         save_data_string = ylabel.lower().replace(' ', '_')
+        save_data_string = f'{save_data_string}_t{topic_id}'
 
         if normalized:
             ylabel = f"{ylabel} (normalized)"
             save_data_string = f'{save_data_string}_norm'
 
         if savedata:
-            _df = pd.DataFrame(data=word_weights, columns=top_words)
-            filename_out = f'{save_data_string}_t{topic_id}.csv'
+            _df = pd.DataFrame(data=[word_weights], columns=top_words)
+            filename_out = f'{save_data_string}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -1705,6 +1706,8 @@ class Visualization:
             ylabel = 'Document Topic Loading'
 
         save_data_string = ylabel.lower().replace(' ', '_')
+        if doc_id is not None:
+            save_data_string = f'{save_data_string}_d{doc_id}'
         if normalized:
             ylabel = f'{ylabel} (normalized)'
             save_data_string = f'{save_data_string}_norm'
@@ -1823,6 +1826,7 @@ class Visualization:
         ylabel = 'Word Topic Loading'
 
         save_data_string = ylabel.lower().replace(' ', '_')
+        save_data_string = f'{save_data_string}_w{word_id}'
         if normalized:
             ylabel = f'{ylabel} (normalized)'
             save_data_string = f'{save_data_string}_norm'
@@ -1919,9 +1923,9 @@ class Visualization:
         ylabel = 'Document Count'
 
         if savedata:
-            _df = pd.DataFrame(data=counts, columns=affiliations)
+            _df = pd.DataFrame(data=[counts], columns=affiliations)
             save_data_string = 'affiliation_document_count'
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{save_data_string}_t{topic_id}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -2119,17 +2123,6 @@ class Visualization:
         )
         corr = corr.loc[topic_cols, topic_cols]
 
-        save_data_string = 'topic_topic_corr_clustermap'
-        if normalized:
-            save_data_string = f'{save_data_string}_norm'
-
-        if savedata:
-            filename_out = f'{save_data_string}.csv'
-            # save data to disk
-            corr.to_csv(self.output_dir / filename_out)
-        else:
-            filename_out = None
-
         z = corr.values
         x = corr.columns
         y = corr.index
@@ -2152,11 +2145,30 @@ class Visualization:
         dendro_leaves = dendro_side['layout']['yaxis']['ticktext']
         dendro_leaves = list(map(int, dendro_leaves))
 
+        # Reorder columns and rows
         x = x[dendro_leaves]
         y = y[dendro_leaves]
 
         z = z[dendro_leaves, :]
         z = z[:, dendro_leaves]
+
+        if savedata:
+            save_data_string_cm = 'topic_topic_corr_clustermap'
+            save_data_string_hm = 'topic_topic_corr_heatmap'
+            if normalized:
+                save_data_string_cm = f'{save_data_string_cm}_norm'
+                save_data_string_hm = f'{save_data_string_hm}_norm'
+            filename_out_cm = f'{save_data_string_cm}.csv'
+            filename_out_hm = f'{save_data_string_hm}.csv'
+
+            # save data to disk - clustermap
+            _df = pd.DataFrame(data=z, columns=x, index=y)
+            _df.to_csv(self.output_dir / filename_out_cm)
+            # save data to disk - heatmap
+            corr.to_csv(self.output_dir / filename_out_hm)
+        else:
+            filename_out_cm = None
+            filename_out_hm = None
 
         data = go.Heatmap(
             z=z,
@@ -2255,6 +2267,6 @@ class Visualization:
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
-            ), filename_out
+            ), filename_out_cm, filename_out_hm
         else:
-            return figure, filename_out
+            return figure, filename_out_cm, filename_out_hm
