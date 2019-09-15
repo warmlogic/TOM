@@ -617,6 +617,7 @@ class Visualization:
         ncols: int = None,
         n_words: int = 10,
         nchar_title: int = None,
+        figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -633,8 +634,11 @@ class Visualization:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize is None:
+            figsize = (ncols * 3, nrows * 3)
+
         fig, axes = plt.subplots(
-            figsize=(ncols * 3, nrows * 3),
+            figsize=figsize,
             nrows=nrows, ncols=ncols,
             sharey=True,
             sharex=True,
@@ -702,9 +706,9 @@ class Visualization:
         self,
         topic_cols: List[str] = None,
         normalized: bool = True,
-        figsize: Tuple[int, int] = (12, 8),
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
+        figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -766,9 +770,9 @@ class Visualization:
         self,
         topic_cols: List[str] = None,
         normalized: bool = True,
-        figsize: Tuple[int, int] = (12, 8),
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
+        figsize: Tuple[int, int] = (12, 8),
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -946,6 +950,7 @@ class Visualization:
         ncols: int = None,
         ma_window=None,
         by_affil=False,
+        figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -964,8 +969,11 @@ class Visualization:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize is None:
+            figsize = (ncols * 3, nrows * 3)
+
         fig, axes = plt.subplots(
-            figsize=(ncols * 3, nrows * 3),
+            figsize=figsize,
             nrows=nrows, ncols=ncols,
             sharey=True,
             sharex=True,
@@ -1076,6 +1084,7 @@ class Visualization:
         ncols: int = None,
         ma_window=None,
         by_affil=False,
+        figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -1096,8 +1105,11 @@ class Visualization:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize is None:
+            figsize = (ncols * 3, nrows * 3)
+
         fig, axes = plt.subplots(
-            figsize=(ncols * 3, nrows * 3),
+            figsize=figsize,
             nrows=nrows, ncols=ncols,
             sharey=True,
             sharex=True,
@@ -1206,6 +1218,7 @@ class Visualization:
         ncols: int = None,
         ma_window=None,
         by_affil=False,
+        figsize: Tuple[int, int] = None,
         savefig: bool = False,
         dpi: int = 72,
         figformat: str = 'png',
@@ -1225,8 +1238,11 @@ class Visualization:
             ncols = 5
         nrows = int(np.ceil(len(topic_cols) / ncols))
 
+        if figsize is None:
+            figsize = (ncols * 3, nrows * 3)
+
         fig, axes = plt.subplots(
-            figsize=(ncols * 3, nrows * 3),
+            figsize=figsize,
             nrows=nrows, ncols=ncols,
             sharey=True,
             sharex=True,
