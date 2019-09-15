@@ -49,30 +49,46 @@
     </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Documents over time by affiliation (Count per year)</p>
+            <p>
+                Documents over time by affiliation: Count per year
+                (<a href={{ url_for('static', filename=docs_over_time_count_filepath) }}>raw data</a>)
+            </p>
             {{ docs_over_time_count_line | safe }}
         </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Documents over time by affiliation (Percent per year)</p>
+            <p>
+                Documents over time by affiliation: Percent per year
+                (<a href={{ url_for('static', filename=docs_over_time_percent_filepath) }}>raw data</a>)
+            </p>
             {{ docs_over_time_percent_line | safe }}
         </div>
     </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Barplot of average topic loadings</p>
+            <p>
+                Barplot of average topic loadings
+                (<a href={{ url_for('static', filename=topic_loading_filepath) }}>raw data</a>)
+            </p>
             {{ topic_loading_barplot | safe }}
         </div>
     </div>
-    <!-- <div id="one_column">
-        <div class="main-content">
-            <p>Heatmap of topic-topic correlation values</p>
+    <div id="one_column">
+        <!-- <div class="main-content">
+            <p>
+                Heatmap of topic-topic correlation values
+                (<a href={{ url_for('static', filename=topic_heatmap_filepath) }}>Heatmap raw data</a>)
+            </p>
             {{ topic_heatmap | safe }}
-        </div>
-    </div> -->
+        </div> -->
+    </div>
     <div id="one_column">
         <div class="main-content">
-            <p>Hierarchically-clustered topic-topic correlation values</p>
+            <p>
+                Hierarchically-clustered topic-topic correlation values
+                (<a href={{ url_for('static', filename=topic_clustermap_filepath) }}>clustermap raw data</a>,
+                <a href={{ url_for('static', filename=topic_heatmap_filepath) }}>heatmap raw data</a>)
+            </p>
             {{ topic_clustermap | safe }}
         </div>
     </div>
