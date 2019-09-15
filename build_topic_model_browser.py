@@ -187,7 +187,6 @@ def main(config_browser):
     normalized = True
     thresh = 0.1
     freq = '1YS'
-    by_affil = False
     ma_window = None
     savefig = True
     ncols = 7
@@ -212,7 +211,7 @@ def main(config_browser):
         normalized=normalized,
         thresh=thresh,
         freq=freq,
-        by_affil=by_affil,
+        by_affil=False,
         ma_window=ma_window,
         nchar_title=nchar_title,
         ncols=ncols,
@@ -225,7 +224,7 @@ def main(config_browser):
         normalized=normalized,
         thresh=thresh,
         freq=freq,
-        by_affil=by_affil,
+        by_affil=False,
         ma_window=ma_window,
         nchar_title=nchar_title,
         ncols=ncols,
@@ -238,7 +237,46 @@ def main(config_browser):
     #     normalized=normalized,
     #     thresh=thresh,
     #     freq=freq,
-    #     by_affil=by_affil,
+    #     by_affil=False,
+    #     ma_window=ma_window,
+    #     nchar_title=nchar_title,
+    #     ncols=ncols,
+    #     savefig=savefig,
+    #     dpi=dpi,
+    #     figformat=figformat,
+    # )
+
+    _, _, fig_topic_over_time_count_affil = viz.plot_topic_over_time_count(
+        normalized=normalized,
+        thresh=thresh,
+        freq=freq,
+        by_affil=True,
+        ma_window=ma_window,
+        nchar_title=nchar_title,
+        ncols=ncols,
+        savefig=savefig,
+        dpi=dpi,
+        figformat=figformat,
+    )
+
+    _, _, fig_topic_over_time_percent_affil = viz.plot_topic_over_time_percent(
+        normalized=normalized,
+        thresh=thresh,
+        freq=freq,
+        by_affil=True,
+        ma_window=ma_window,
+        nchar_title=nchar_title,
+        ncols=ncols,
+        savefig=savefig,
+        dpi=dpi,
+        figformat=figformat,
+    )
+
+    # _, _, fig_topic_over_time_loading_affil = viz.plot_topic_over_time_loading(
+    #     normalized=normalized,
+    #     thresh=thresh,
+    #     freq=freq,
+    #     by_affil=True,
     #     ma_window=ma_window,
     #     nchar_title=nchar_title,
     #     ncols=ncols,
@@ -251,6 +289,9 @@ def main(config_browser):
     # fig_topic_over_time_count = ''
     # fig_topic_over_time_percent = ''
     # fig_topic_over_time_loading = ''
+    # fig_topic_over_time_count_affil = ''
+    # fig_topic_over_time_percent_affil = ''
+    # fig_topic_over_time_loading_affil = ''
 
     logger.info('Done.')
 
@@ -496,6 +537,9 @@ def main(config_browser):
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
             fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
             # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
+            fig_topic_over_time_count_affil=figs_folder / fig_topic_over_time_count_affil,
+            fig_topic_over_time_percent_affil=figs_folder / fig_topic_over_time_percent_affil,
+            # fig_topic_over_time_loading_affil=figs_folder / fig_topic_over_time_loading_affil,
         )
 
     @server.route('/topic_cloud.html')
