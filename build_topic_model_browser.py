@@ -1,6 +1,7 @@
 # coding: utf-8
 import argparse
 import configparser
+from math import ceil
 from pathlib import Path
 import os
 import tom_lib.utils as ut
@@ -159,10 +160,15 @@ def main(config_browser):
         logger.info(f'Saving topic model: {topic_model_filepath}')
         ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
 
+    # Get the top words for each topic
     topic_description = []
     for i in range(topic_model.nb_topics):
         description = [weighted_word[0] for weighted_word in topic_model.top_words(i, top_words_description)]
         topic_description.append(f"Topic {i:2d}: {', '.join(description)}")
+
+    # Get the vocabularly split into sublists
+    words_per_col = int(ceil(topic_model.corpus.vocabulary_size / 5))
+    split_vocabulary = [sublist for sublist in ut.chunks([(k, v) for k, v in topic_model.corpus.vocabulary.items()], words_per_col)]
 
     # Export topic cloud
     logger.info('Saving topic cloud')
@@ -553,30 +559,19 @@ def main(config_browser):
 
     @server.route('/vocabulary.html')
     def vocabulary():
-        word_list = []
-        for i in range(len(topic_model.corpus.vocabulary)):
-            word_list.append((i, topic_model.corpus.word_for_id(i)))
-        splitted_vocabulary = []
-        words_per_column = int(len(topic_model.corpus.vocabulary) / 5)
-        for j in range(5):
-            sub_vocabulary = []
-            for l in range(j * words_per_column, (j + 1) * words_per_column):
-                sub_vocabulary.append(word_list[l])
-            splitted_vocabulary.append(sub_vocabulary)
         return render_template(
             'vocabulary.html',
             topic_ids=topic_description,
-            doc_ids=range(topic_model.corpus.size),
-            splitted_vocabulary=splitted_vocabulary,
-            vocabulary_size=len(word_list),
+            split_vocabulary=split_vocabulary,
+            vocabulary_size=topic_model.corpus.vocabulary_size,
         )
 
     @server.route('/topic/<tid>.html')
-    def topic_details(tid):
+    def topic_details(tid: int):
         # get the most likely documents per topic
-        ids = topic_model.documents_for_topic(int(tid))
+        ids = topic_model.documents_for_topic(tid)
         # # get the top 100 documents per topic
-        # ids = list(topic_model.top_topic_docs(topics=int(tid), top_n=100))[0][1]
+        # ids = list(topic_model.top_topic_docs(topics=tid, top_n=100))[0][1]
         documents = []
         for i, document_id in enumerate(ids):
             documents.append(
@@ -593,16 +588,16 @@ def main(config_browser):
             )
 
         topic_word_weight_barplot, _ = viz.plotly_topic_word_weight(
-            int(tid), normalized=True, n_words=20, output_type='div', savedata=False)
+            tid, normalized=True, n_words=20, output_type='div', savedata=False)
         topic_over_time_percent_line, _ = viz.plotly_topic_over_time(
-            int(tid), count=False, output_type='div', savedata=False)
+            tid, count=False, output_type='div', savedata=False)
         topic_affiliation_count_barplot, _ = viz.plotly_topic_affiliation_count(
-            int(tid), output_type='div', savedata=False)
+            tid, output_type='div', savedata=False)
 
         return render_template(
             'topic.html',
             topic_id=tid,
-            frequency=round(topic_model.topic_frequency(int(tid)) * 100, 2),
+            frequency=round(topic_model.topic_frequency(tid) * 100, 2),
             documents=documents,
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
@@ -613,14 +608,14 @@ def main(config_browser):
         )
 
     @server.route('/document/<did>.html')
-    def document_details(did):
-        vector = topic_model.corpus.word_vector_for_document(int(did))
+    def document_details(did: int):
+        vector = topic_model.corpus.word_vector_for_document(did)
         word_list = []
         for a_word_id in range(len(vector)):
             word_list.append((topic_model.corpus.word_for_id(a_word_id), round(vector[a_word_id], 3), a_word_id))
         word_list = sorted(word_list, key=lambda x: x[1], reverse=True)
         documents = []
-        for another_doc in topic_model.corpus.similar_documents(int(did), 5):
+        for another_doc in topic_model.corpus.similar_documents(did, 5):
             documents.append(
                 (
                     topic_model.corpus.title(another_doc[0]).title(),
@@ -634,7 +629,7 @@ def main(config_browser):
             )
 
         doc_topic_loading_barplot, _ = viz.plotly_doc_topic_loading(
-            int(did), normalized=True, n_words=top_words_description, output_type='div', savedata=False)
+            did, normalized=True, n_words=top_words_description, output_type='div', savedata=False)
 
         return render_template(
             'document.html',
@@ -643,21 +638,21 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             documents=documents,
-            title=topic_model.corpus.title(int(did)).title(),
-            authors=', '.join(topic_model.corpus.author(int(did))).title(),
-            year=topic_model.corpus.date(int(did)).strftime('%Y-%m-%d'),
-            short_content=topic_model.corpus.title(int(did)).title(),
-            affiliation=', '.join(topic_model.corpus.affiliation(int(did))).title(),
-            dataset=', '.join(topic_model.corpus.dataset(int(did))).title(),
-            id=topic_model.corpus.id(int(did)),
-            full_text=topic_model.corpus.full_text(int(did)),
+            title=topic_model.corpus.title(did).title(),
+            authors=', '.join(topic_model.corpus.author(did)).title(),
+            year=topic_model.corpus.date(did).strftime('%Y-%m-%d'),
+            short_content=topic_model.corpus.title(did).title(),
+            affiliation=', '.join(topic_model.corpus.affiliation(did)).title(),
+            dataset=', '.join(topic_model.corpus.dataset(did)).title(),
+            id=topic_model.corpus.id(did),
+            full_text=topic_model.corpus.full_text(did),
             doc_topic_loading_barplot=doc_topic_loading_barplot,
         )
 
     @server.route('/word/<wid>.html')
-    def word_details(wid):
+    def word_details(wid: int):
         documents = []
-        for document_id in topic_model.corpus.docs_for_word(int(wid), sort=True):
+        for document_id in topic_model.corpus.docs_for_word(wid, sort=True):
             documents.append(
                 (
                     topic_model.corpus.title(document_id).title(),
@@ -670,12 +665,12 @@ def main(config_browser):
             )
 
         word_topic_loading_barplot, _ = viz.plotly_word_topic_loading(
-            int(wid), normalized=True, n_words=top_words_description, output_type='div', savedata=False)
+            wid, normalized=True, n_words=top_words_description, output_type='div', savedata=False)
 
         return render_template(
             'word.html',
             word_id=wid,
-            word=topic_model.corpus.word_for_id(int(wid)),
+            word=topic_model.corpus.word_for_id(wid),
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             documents=documents,
