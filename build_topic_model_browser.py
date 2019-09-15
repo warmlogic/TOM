@@ -194,18 +194,17 @@ def main(config_browser):
     nchar_title = 30
     dpi = 72
     figformat = 'png'
-    savedata = False
 
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
     logger.info(f'Will save results to: {viz.output_dir}')
 
-    docs_over_time_count_line, _ = viz.plotly_docs_over_time(
-        freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div', savedata=savedata)
-    docs_over_time_percent_line, _ = viz.plotly_docs_over_time(
-        freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div', savedata=savedata)
-    topic_loading_barplot, _ = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div', savedata=savedata)
-    # topic_heatmap, _ = viz.plotly_heatmap(normalized=normalized, output_type='div', savedata=savedata)
+    docs_over_time_count_line, docs_over_time_count_filepath = viz.plotly_docs_over_time(
+        freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
+    docs_over_time_percent_line, docs_over_time_percent_filepath = viz.plotly_docs_over_time(
+        freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
+    topic_loading_barplot, topic_loading_filepath = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div', savedata=True)
+    # topic_heatmap, topic_heatmap_filepath = viz.plotly_heatmap(normalized=normalized, output_type='div', savedata=True)
     topic_clustermap, topic_clustermap_filepath, topic_heatmap_filepath = viz.plotly_clustermap(
         normalized=normalized, output_type='div', savedata=True)
 
@@ -485,12 +484,15 @@ def main(config_browser):
             vectorization=vectorization,
             num_topics=num_topics,
             docs_over_time_count_line=docs_over_time_count_line,
+            docs_over_time_count_filepath=figs_folder / docs_over_time_count_filepath,
             docs_over_time_percent_line=docs_over_time_percent_line,
+            docs_over_time_percent_filepath=figs_folder / docs_over_time_percent_filepath,
             topic_loading_barplot=topic_loading_barplot,
+            topic_loading_filepath=figs_folder / topic_loading_filepath,
             # topic_heatmap=topic_heatmap,
             topic_clustermap=topic_clustermap,
-            topic_clustermap_filepath=topic_clustermap_filepath,
-            topic_heatmap_filepath=topic_heatmap_filepath,
+            topic_clustermap_filepath=figs_folder / topic_clustermap_filepath,
+            topic_heatmap_filepath=figs_folder / topic_heatmap_filepath,
             fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
             fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
             # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
@@ -547,11 +549,11 @@ def main(config_browser):
             )
 
         topic_word_weight_barplot, _ = viz.plotly_topic_word_weight(
-            int(tid), normalized=True, n_words=20, output_type='div', savedata=savedata)
+            int(tid), normalized=True, n_words=20, output_type='div', savedata=False)
         topic_over_time_percent_line, _ = viz.plotly_topic_over_time(
-            int(tid), count=False, output_type='div', savedata=savedata)
+            int(tid), count=False, output_type='div', savedata=False)
         topic_affiliation_count_barplot, _ = viz.plotly_topic_affiliation_count(
-            int(tid), output_type='div', savedata=savedata)
+            int(tid), output_type='div', savedata=False)
 
         return render_template(
             'topic.html',
@@ -588,7 +590,7 @@ def main(config_browser):
             )
 
         doc_topic_loading_barplot, _ = viz.plotly_doc_topic_loading(
-            int(did), normalized=True, n_words=top_words_description, output_type='div', savedata=savedata)
+            int(did), normalized=True, n_words=top_words_description, output_type='div', savedata=False)
 
         return render_template(
             'document.html',
@@ -624,7 +626,7 @@ def main(config_browser):
             )
 
         word_topic_loading_barplot, _ = viz.plotly_word_topic_loading(
-            int(wid), normalized=True, n_words=top_words_description, output_type='div', savedata=savedata)
+            int(wid), normalized=True, n_words=top_words_description, output_type='div', savedata=False)
 
         return render_template(
             'word.html',
