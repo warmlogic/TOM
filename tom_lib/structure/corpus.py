@@ -113,28 +113,28 @@ class Corpus:
     def export(self, file_path):
         self.data_frame.to_csv(path_or_buf=file_path, sep=self._sep, encoding='utf-8')
 
-    def full_text(self, doc_id):
+    def full_text(self, doc_id: int):
         return self.data_frame.iloc[doc_id][self._full_text_col]
 
-    def title(self, doc_id):
+    def title(self, doc_id: int):
         return self.data_frame.iloc[doc_id][self._title_col]
 
-    def date(self, doc_id):
+    def date(self, doc_id: int):
         return self.data_frame.iloc[doc_id][self._date_col]
 
-    def author(self, doc_id):
+    def author(self, doc_id: int):
         aut_str = str(self.data_frame.iloc[doc_id][self._author_col])
         return aut_str.split(', ')
 
-    def affiliation(self, doc_id):
+    def affiliation(self, doc_id: int):
         aff_str = str(self.data_frame.iloc[doc_id][self._affiliation_col])
         return aff_str.split(', ')
 
-    def dataset(self, doc_id):
+    def dataset(self, doc_id: int):
         ds_str = str(self.data_frame.iloc[doc_id][self._dataset_col])
         return ds_str.split(', ')
 
-    def id(self, doc_id):
+    def id(self, doc_id: int):
         if self._id_col:
             return str(self.data_frame.iloc[doc_id][self._id_col])
         else:
