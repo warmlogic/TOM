@@ -1,10 +1,9 @@
 # coding: utf-8
 import argparse
 import configparser
-from pathlib import Path
+from math import ceil
 import os
-import pandas as pd
-import numpy as np
+from pathlib import Path
 import tom_lib.utils as ut
 from flask import Flask, render_template, request, send_from_directory
 import dash
@@ -54,6 +53,8 @@ def main(config_browser):
     corpus_name = config_browser.get('corpus_name', '')
     if not corpus_name:
         corpus_name = 'corpus'
+    # remove spaces
+    corpus_name = '_'.join(corpus_name.split())
 
     source_filepath = data_dir / docs_filename
     # Ensure data exists
@@ -136,6 +137,7 @@ def main(config_browser):
         logger.info(f'Loading documents: {source_filepath}')
         corpus = Corpus(
             source_filepath=source_filepath,
+            name=corpus_name,
             language=language,
             vectorization=vectorization,
             n_gram=n_gram,
@@ -184,21 +186,11 @@ def main(config_browser):
     # Save the top words to CSV
     num_top_words_save = 20
     logger.info(f'Saving top {num_top_words_save} words CSV and XLSX')
-    df_top_words = pd.DataFrame(
-        data=np.array(topic_model.top_words_topics(num_words=num_top_words_save)).T,
-        index=range(1, num_top_words_save + 1),
-        columns=[f'Topic {i}' for i in range(topic_model.nb_topics)],
-    )
-    df_top_words.index.name = 'word rank'
-    filename = f'{corpus_name}_{topic_model.nb_topics}_topics_top_{num_top_words_save}_words'
-    top_words_csv = data_folder / f'{filename}.csv'
-    top_words_xlsx = data_folder / f'{filename}.xlsx'
-    df_top_words.to_csv(static_folder / top_words_csv)
-    with pd.ExcelWriter(static_folder / top_words_xlsx) as writer:
-        df_top_words.to_excel(writer, index=True)
+    top_words_filename = f'{topic_model.corpus.name}_{topic_model.nb_topics}_topics_top_{num_top_words_save}_words'
+    ut.save_top_words(num_top_words_save, topic_model, static_folder / data_folder / top_words_filename)
 
     # Get the vocabularly and split into sublists
-    words_per_col = int(np.ceil(topic_model.corpus.vocabulary_size / 5))
+    words_per_col = int(ceil(topic_model.corpus.vocabulary_size / 5))
     split_vocabulary = [sublist for sublist in ut.chunks([(k, v) for k, v in topic_model.corpus.vocabulary.items()], words_per_col)]
 
     # Export topic cloud
@@ -464,7 +456,7 @@ def main(config_browser):
             html.A(
                 html.Button('Export to CSV'),
                 id='download-link',
-                download='topic_loading_similarity.csv',
+                download=f'{corpus_name}_topic_loading_similarity.csv',
                 href='',
                 target='_blank',
             ),
@@ -584,8 +576,8 @@ def main(config_browser):
             vectorization=vectorization,
             num_topics=num_topics,
             random_state=topic_model.random_state,
-            top_words_csv=top_words_csv,
-            top_words_xlsx=top_words_xlsx,
+            top_words_csv=data_folder / f'{top_words_filename}.csv',
+            top_words_xlsx=data_folder / f'{top_words_filename}.xlsx',
             docs_over_time_count_line=docs_over_time_count_line,
             docs_over_time_count_filepath=figs_folder / docs_over_time_count_filepath,
             docs_over_time_percent_line=docs_over_time_percent_line,
