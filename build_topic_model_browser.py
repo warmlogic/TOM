@@ -210,9 +210,9 @@ def main(config_browser):
         freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
     topic_loading_barplot, topic_loading_filepath = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div', savedata=True)
     # topic_heatmap, topic_heatmap_filepath = viz.plotly_heatmap(
-    #     normalized=normalized, annotate=True, annot_decimals=1, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=False)
+    #     normalized=normalized, annotate=True, annot_decimals=2, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=False)
     topic_clustermap, topic_clustermap_filepath, topic_heatmap_filepath = viz.plotly_clustermap(
-        normalized=normalized, annotate=True, annot_decimals=1, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=True)
+        normalized=normalized, annotate=True, annot_decimals=2, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=True)
 
     _, _, fig_topic_over_time_count = viz.plot_topic_over_time_count(
         normalized=normalized,
