@@ -2,55 +2,69 @@
   font-family: 'Open Sans', sans-serif;
   font-style: normal;
   font-weight: 400;
-  src: local('Open Sans'), local('OpenSans');
+  src: local('Open Sans Regular'), local('OpenSans-Regular');
 }
-  @font-face {
+
+@font-face {
   font-family: 'Open Sans', sans-serif;
   font-style: normal;
   font-weight: 700;
-  src: local('Open Sans Bold'), local('OpenSans Bold');
+  src: local('Open Sans Bold'), local('OpenSans-Bold');
 }
 
 h1{
-  font: 20px 'Open Sans Bold';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
   color:#fff;
   line-height: 44px;
   margin: 0;
 }
 
 h2{
-  font: 17px 'Open Sans Bold';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
   color:#000;
 }
 
 h3{
-  font: 14px 'Open Sans Bold';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
   color:#000;
 }
 
 section {
-  font-family: 'Open Sans Bold';
-  font-size:20px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
   line-height:44px;
   color:#333333;
 }
 
 select{
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
   height: 20px;
   line-height: 40px;
-  font: 11px 'Open Sans';
   margin: auto;
 }
 
 button{
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
   height: 20px;
   line-height: 40px;
-  font: 11px 'Open Sans';
   margin: auto;
 }
 
 body {
-  font: 11px 'Open Sans';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
   width: 100%;
   margin: auto;
   text-align: center;
@@ -167,7 +181,9 @@ body {
 }
 
 a.class1{
-  font: 12px 'Open Sans Bold';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
 }
 a.class1:link {color: #444; text-decoration:none;}
 a.class1:visited {color: #444;}
@@ -175,7 +191,9 @@ a.class1:hover {color: #55acee;}
 
 
 a.class2{
-  font: 11px 'Open Sans';
+  font-family: 'Open Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
 }
 a.class2:link {color: #888; text-decoration:none;}
 a.class2:visited {color: #888;}
