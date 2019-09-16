@@ -45,6 +45,8 @@
                 <li>Vectorization: {{ vectorization }}</li>
                 <li>Number of topics: {{ num_topics }}</li>
                 <li>Random state: {{ random_state }}</li>
+                <li><a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=top_words_csv) }}>Top 20 words CSV</a></li>
+                <li><a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=top_words_xlsx) }}>Top 20 words XLSX</a></li>
             </ul>
         </div>
     </div>
