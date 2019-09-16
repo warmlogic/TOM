@@ -12,6 +12,7 @@ from sklearn.preprocessing import normalize
 class Corpus:
     def __init__(self,
                  source_filepath,
+                 name: str = 'corpus',
                  sep: str = '\t',
                  language: str = 'english',
                  n_gram: int = 1,
@@ -30,6 +31,7 @@ class Corpus:
                  id_col: str = None,
                  ):
 
+        self.name = name
         self._sep = sep
         self._language = language
         self._n_gram = n_gram
