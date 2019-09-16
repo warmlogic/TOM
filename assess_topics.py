@@ -60,6 +60,7 @@ def main(config_infer):
     language = config_infer.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
     model_type = config_infer.get('model_type', 'NMF')
+    random_state = config_infer.getint('random_state', None)
     nmf_beta_loss = config_infer.get('nmf_beta_loss', 'frobenius')
     lda_algorithm = config_infer.get('lda_algorithm', 'variational')
     # ignore words which relative frequency is > than max_relative_frequency
@@ -108,16 +109,17 @@ def main(config_infer):
 
     # Load and prepare a corpus
     logger.info(f'Loading documents: {source_filepath}')
-    corpus = Corpus(source_filepath=source_filepath,
-                    language=language,
-                    vectorization=vectorization,
-                    n_gram=n_gram,
-                    max_relative_frequency=max_relative_frequency,
-                    min_absolute_frequency=min_absolute_frequency,
-                    max_features=max_features,
-                    sample=sample,
-                    full_text_col='orig_text',
-                    )
+    corpus = Corpus(
+        source_filepath=source_filepath,
+        language=language,
+        vectorization=vectorization,
+        n_gram=n_gram,
+        max_relative_frequency=max_relative_frequency,
+        min_absolute_frequency=min_absolute_frequency,
+        max_features=max_features,
+        sample=sample,
+        full_text_col='orig_text',
+    )
     logger.info(f'Corpus size: {corpus.size:,}')
     logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')
 
@@ -147,6 +149,7 @@ def main(config_infer):
         tao=greene_tao,
         top_n_words=greene_top_n_words,
         sample=greene_sample,
+        random_state=random_state,
         verbose=verbose,
     )
 
@@ -156,6 +159,7 @@ def main(config_infer):
         max_num_topics=max_num_topics,
         step=step,
         iterations=arun_iterations,
+        random_state=random_state,
         verbose=verbose,
     )
 
@@ -166,6 +170,7 @@ def main(config_infer):
         step=step,
         top_n_words=coherence_w2v_top_n_words,
         w2v_size=coherence_w2v_size,
+        random_state=random_state,
         verbose=verbose,
     )
 
@@ -175,6 +180,7 @@ def main(config_infer):
         max_num_topics=max_num_topics,
         step=step,
         iterations=brunet_iterations,
+        random_state=random_state,
         verbose=verbose,
     )
 
@@ -184,6 +190,7 @@ def main(config_infer):
     #     max_num_topics=max_num_topics,
     #     step=step,
     #     train_size=perplexity_train_size,
+    #     random_state=random_state,
     #     verbose=verbose,
     # )
 
