@@ -8,7 +8,7 @@ from scipy.sparse import coo_matrix, csr_matrix
 from sklearn.decomposition import NMF, LatentDirichletAllocation as LDA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
-import lda
+import lda  # https://github.com/ariddell/lda/
 
 from tom_lib.structure.corpus import Corpus
 
@@ -28,13 +28,25 @@ class TopicModel(object):
         self._sample = corpus._sample
         self.model = None
         self.model_type = None
+        self.random_state = None
 
     @abstractmethod
     def infer_topics(self, num_topics=10, **kwargs):
         pass
 
-    def greene_metric(self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10, tao=10,
-                      sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
+    def greene_metric(
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        top_n_words=10,
+        tao=10,
+        sample=0.8,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         """
         Higher is better.
 
@@ -61,9 +73,17 @@ class TopicModel(object):
             if verbose:
                 print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
             if self.model_type == 'NMF':
-                self.infer_topics(num_topics=k, beta_loss=beta_loss)
+                self.infer_topics(
+                    num_topics=k,
+                    beta_loss=beta_loss,
+                    random_state=random_state,
+                )
             elif self.model_type == 'LDA':
-                self.infer_topics(num_topics=k, algorithm=algorithm)
+                self.infer_topics(
+                    num_topics=k,
+                    algorithm=algorithm,
+                    random_state=random_state,
+                )
             else:
                 raise TypeError(f'Unsupported model type: {self.model_type}')
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
@@ -82,9 +102,17 @@ class TopicModel(object):
                 )
                 tao_model = type(self)(tao_corpus)
                 if self.model_type == 'NMF':
-                    tao_model.infer_topics(num_topics=k, beta_loss=beta_loss)
+                    tao_model.infer_topics(
+                        num_topics=k,
+                        beta_loss=beta_loss,
+                        random_state=random_state,
+                    )
                 elif self.model_type == 'LDA':
-                    tao_model.infer_topics(num_topics=k, algorithm=algorithm)
+                    tao_model.infer_topics(
+                        num_topics=k,
+                        algorithm=algorithm,
+                        random_state=random_state,
+                    )
                 else:
                     raise TypeError(f'Unsupported model type: {self.model_type}')
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
@@ -94,8 +122,17 @@ class TopicModel(object):
                 print(f'    Stability={stability[-1]:.4f}')
         return stability
 
-    def arun_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
-                    beta_loss='frobenius', algorithm='variational', verbose=True):
+    def arun_metric(
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        iterations=10,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         """
         Lower is better.
 
@@ -123,9 +160,17 @@ class TopicModel(object):
                 if verbose:
                     print(f'    Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 if self.model_type == 'NMF':
-                    self.infer_topics(num_topics=i, beta_loss=beta_loss)
+                    self.infer_topics(
+                        num_topics=i,
+                        beta_loss=beta_loss,
+                        random_state=random_state,
+                    )
                 elif self.model_type == 'LDA':
-                    self.infer_topics(num_topics=i, algorithm=algorithm)
+                    self.infer_topics(
+                        num_topics=i,
+                        algorithm=algorithm,
+                        random_state=random_state,
+                    )
                 else:
                     raise TypeError(f'Unsupported model type: {self.model_type}')
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
@@ -142,8 +187,17 @@ class TopicModel(object):
             print(f'            Overall KL average={avg_kl_matrix}')
         return avg_kl_matrix
 
-    def brunet_metric(self, min_num_topics=10, step=5, max_num_topics=50, iterations=10,
-                      beta_loss='frobenius', algorithm='variational', verbose=True):
+    def brunet_metric(
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        iterations=10,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         """
         Higher is better.
 
@@ -170,9 +224,17 @@ class TopicModel(object):
                 if verbose:
                     print(f'    Iteration: {j+1} of {iterations}')
                 if self.model_type == 'NMF':
-                    self.infer_topics(num_topics=i, beta_loss=beta_loss)
+                    self.infer_topics(
+                        num_topics=i,
+                        beta_loss=beta_loss,
+                        random_state=random_state,
+                    )
                 elif self.model_type == 'LDA':
-                    self.infer_topics(num_topics=i, algorithm=algorithm)
+                    self.infer_topics(
+                        num_topics=i,
+                        algorithm=algorithm,
+                        random_state=random_state,
+                    )
                 else:
                     raise TypeError(f'Unsupported model type: {self.model_type}')
                 mlt = self.most_likely_topic_for_document()
@@ -199,11 +261,21 @@ class TopicModel(object):
         return cophenetic_correlation
 
     def coherence_w2v_metric(
-        self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
-        w2v_size=None, w2v_min_count=None,
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        top_n_words=10,
+        w2v_size=None,
+        w2v_min_count=None,
         # w2v_max_vocab_size=None,
-        w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
-        beta_loss='frobenius', algorithm='variational', verbose=True,
+        w2v_max_final_vocab=None,
+        w2v_sg=None,
+        w2v_workers=None,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
     ):
         """
         Higher is better.
@@ -264,9 +336,17 @@ class TopicModel(object):
             if verbose:
                 print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
             if self.model_type == 'NMF':
-                self.infer_topics(num_topics=k, beta_loss=beta_loss)
+                self.infer_topics(
+                    num_topics=k,
+                    beta_loss=beta_loss,
+                    random_state=random_state,
+                )
             elif self.model_type == 'LDA':
-                self.infer_topics(num_topics=k, algorithm=algorithm)
+                self.infer_topics(
+                    num_topics=k,
+                    algorithm=algorithm,
+                    random_state=random_state,
+                )
             else:
                 raise TypeError(f'Unsupported model type: {self.model_type}')
 
@@ -279,8 +359,15 @@ class TopicModel(object):
         return coherence
 
     def perplexity_metric(
-        self, min_num_topics=10, step=5, max_num_topics=50,
-            train_size=0.7, algorithm='variational', verbose=True):
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        train_size=0.7,
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         """
         Measures perplexity for LDA as computed by scikit-learn.
 
@@ -317,7 +404,11 @@ class TopicModel(object):
             for idx, i in enumerate(num_topics_infer):
                 if verbose:
                     print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
-                lda_model.infer_topics(i, algorithm=algorithm)
+                lda_model.infer_topics(
+                    num_topics=i,
+                    algorithm=algorithm,
+                    random_state=random_state,
+                )
                 train_perplexities.append(lda_model.model.perplexity(
                     corpus_train.sklearn_vector_space))
                 test_perplexities.append(lda_model.model.perplexity(tf_test))
@@ -613,29 +704,57 @@ class LatentDirichletAllocation(TopicModel):
         self.model_type = 'LDA'
         self.corpus = corpus
 
-    def infer_topics(self, num_topics=10, algorithm='variational', **kwargs):
+    def infer_topics(
+        self,
+        num_topics: int = None,
+        algorithm: str = None,
+        n_iter: int = None,
+        alpha: float = None,
+        eta: float = None,
+        n_jobs: int = None,
+        random_state=None,
+        **kwargs,
+    ):
         self.trained = True
-        self.nb_topics = num_topics
-        self.algorithm = algorithm
-        lda_model = None
-        topic_document = None
+        self.nb_topics = num_topics or 10
+        self.algorithm = algorithm or 'variational'  # default sklearn
+        self.n_iter = n_iter or 2000  # only for lda library
+        self.n_jobs = n_jobs or -1  # only for sklearn
+        self.random_state = random_state
+
+        self.alpha = alpha or 1 / num_topics
+        self.eta = eta or 1 / num_topics
+
         if self.algorithm == 'variational':
-            lda_model = LDA(n_components=num_topics, learning_method='batch')
-            topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
+            # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html
+            self.model = LDA(
+                n_components=num_topics,
+                doc_topic_prior=self.alpha,
+                topic_word_prior=self.eta,
+                learning_method='batch',
+                n_jobs=self.n_jobs,
+                random_state=self.random_state,
+            )
         elif self.algorithm == 'gibbs':
-            lda_model = lda.LDA(n_topics=num_topics, n_iter=500)
-            topic_document = lda_model.fit_transform(self.corpus.sklearn_vector_space)
+            # https://github.com/ariddell/lda/
+            self.model = lda.LDA(
+                n_topics=num_topics,
+                n_iter=self.n_iter,
+                alpha=self.alpha,
+                eta=self.eta,
+                random_state=self.random_state,
+            )
         else:
             raise ValueError(f"algorithm must be either 'variational' or 'gibbs', got {self.algorithm}")
-        # store the model for future use
-        self.model = lda_model
+        topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)
+
         self.topic_word_matrix = []
         self.document_topic_matrix = []
         vocabulary_size = len(self.corpus.vocabulary)
         row = []
         col = []
         data = []
-        for topic_idx, topic in enumerate(lda_model.components_):
+        for topic_idx, topic in enumerate(self.model.components_):
             for i in range(vocabulary_size):
                 row.append(topic_idx)
                 col.append(i)
@@ -664,29 +783,59 @@ class NonNegativeMatrixFactorization(TopicModel):
         self.model_type = 'NMF'
         self.corpus = corpus
 
-    def infer_topics(self, num_topics=10, beta_loss='frobenius', **kwargs):
+    def infer_topics(
+        self,
+        num_topics: int = None,
+        init: str = None,
+        solver: str = None,
+        beta_loss: str = None,
+        max_iter: int = None,
+        alpha: float = None,
+        l1_ratio: float = None,
+        shuffle: bool = None,
+        random_state=None,
+        **kwargs,
+    ):
         self.trained = True
-        self.nb_topics = num_topics
-        self.beta_loss = beta_loss
-        if self.beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
-            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {self.beta_loss}")
-        nmf_model = NMF(n_components=num_topics, beta_loss=self.beta_loss)
-        topic_document = nmf_model.fit_transform(self.corpus.sklearn_vector_space)
-        # store the model for future use
-        self.model = nmf_model
+        self.nb_topics = num_topics or 10
+        self.init = init
+        self.solver = solver or 'cd'
+        self.beta_loss = beta_loss or 'frobenius'  # Used in 'mu' solver
+        self.max_iter = max_iter or 200
+        self.alpha = alpha or 0.0  # 0 = no regularization; used in the 'cd' solver
+        self.l1_ratio = l1_ratio or 0.0  # 0 = L2, 1 = L1; used in the 'cd' solver
+        self.shuffle = shuffle or False  # randomize the order of coordinates in the 'cd' solver
+        self.random_state = random_state
+
+        if (solver == 'mu') and (beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
+            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {beta_loss}")
+
+        # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html
+        self.model = NMF(
+            n_components=num_topics,
+            init=self.init,
+            solver=self.solver,
+            beta_loss=self.beta_loss,
+            max_iter=self.max_iter,
+            alpha=self.alpha,
+            l1_ratio=self.l1_ratio,
+            shuffle=self.shuffle,
+            random_state=self.random_state,
+        )
+        topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)
+
         self.topic_word_matrix = []
         self.document_topic_matrix = []
-        vocabulary_size = len(self.corpus.vocabulary)
         row = []
         col = []
         data = []
-        for topic_idx, topic in enumerate(nmf_model.components_):
-            for i in range(vocabulary_size):
+        for topic_idx, topic in enumerate(self.model.components_):
+            for i in range(self.corpus.vocabulary_size):
                 row.append(topic_idx)
                 col.append(i)
                 data.append(topic[i])
         self.topic_word_matrix = coo_matrix((data, (row, col)),
-                                            shape=(self.nb_topics, vocabulary_size)).tocsr()
+                                            shape=(self.nb_topics, self.corpus.vocabulary_size)).tocsr()
         row = []
         col = []
         data = []
