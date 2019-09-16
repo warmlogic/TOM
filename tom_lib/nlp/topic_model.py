@@ -750,17 +750,16 @@ class LatentDirichletAllocation(TopicModel):
 
         self.topic_word_matrix = []
         self.document_topic_matrix = []
-        vocabulary_size = len(self.corpus.vocabulary)
         row = []
         col = []
         data = []
         for topic_idx, topic in enumerate(self.model.components_):
-            for i in range(vocabulary_size):
+            for i in range(self.corpus.vocabulary_size):
                 row.append(topic_idx)
                 col.append(i)
                 data.append(topic[i])
         self.topic_word_matrix = coo_matrix((data, (row, col)),
-                                            shape=(self.nb_topics, vocabulary_size)).tocsr()
+                                            shape=(self.nb_topics, self.corpus.vocabulary_size)).tocsr()
         row = []
         col = []
         data = []
