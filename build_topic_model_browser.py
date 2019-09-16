@@ -590,7 +590,8 @@ def main(config_browser):
         )
 
     @server.route('/topic/<tid>.html')
-    def topic_details(tid: int):
+    def topic_details(tid: str):
+        tid = int(tid)
         # get the most likely documents per topic
         ids = topic_model.documents_for_topic(tid)
         # # get the top 100 documents per topic
@@ -631,7 +632,8 @@ def main(config_browser):
         )
 
     @server.route('/document/<did>.html')
-    def document_details(did: int):
+    def document_details(did: str):
+        did = int(did)
         vector = topic_model.corpus.word_vector_for_document(did)
         word_list = []
         for a_word_id in range(len(vector)):
@@ -673,7 +675,8 @@ def main(config_browser):
         )
 
     @server.route('/word/<wid>.html')
-    def word_details(wid: int):
+    def word_details(wid: str):
+        wid = int(wid)
         documents = []
         for document_id in topic_model.corpus.docs_for_word(wid, sort=True):
             documents.append(
