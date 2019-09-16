@@ -143,9 +143,9 @@ def main(config_browser):
                         )
         # Initialize topic model
         if model_type == 'NMF':
-            topic_model = NonNegativeMatrixFactorization(corpus=corpus, random_state=random_state)
+            topic_model = NonNegativeMatrixFactorization(corpus=corpus)
         elif model_type == 'LDA':
-            topic_model = LatentDirichletAllocation(corpus=corpus, random_state=random_state)
+            topic_model = LatentDirichletAllocation(corpus=corpus)
 
         logger.info(f'Corpus size: {topic_model.corpus.size:,}')
         logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
@@ -153,9 +153,17 @@ def main(config_browser):
         # Infer topics
         logger.info(f'Inferring {num_topics} topics')
         if model_type == 'NMF':
-            topic_model.infer_topics(num_topics=num_topics, beta_loss=nmf_beta_loss)
+            topic_model.infer_topics(
+                num_topics=num_topics,
+                beta_loss=nmf_beta_loss,
+                random_state=random_state,
+            )
         elif model_type == 'LDA':
-            topic_model.infer_topics(num_topics=num_topics, algorithm=lda_algorithm)
+            topic_model.infer_topics(
+                num_topics=num_topics,
+                algorithm=lda_algorithm,
+                random_state=random_state,
+            )
 
         # Save model on disk
         logger.info(f'Saving topic model: {topic_model_filepath}')
