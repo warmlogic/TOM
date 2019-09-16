@@ -94,8 +94,19 @@ class Visualization:
         plt.xlabel('word')
         plt.savefig(file_path)
 
-    def plot_greene_metric(self, min_num_topics=10, max_num_topics=20, tao=10, step=5, top_n_words=10,
-                           sample=0.8, beta_loss='frobenius', algorithm='variational', verbose=True):
+    def plot_greene_metric(
+        self,
+        min_num_topics=10,
+        max_num_topics=20,
+        tao=10,
+        step=5,
+        top_n_words=10,
+        sample=0.8,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         greene_stability = self.topic_model.greene_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
@@ -105,6 +116,7 @@ class Visualization:
             sample=sample,
             beta_loss=beta_loss,
             algorithm=algorithm,
+            random_state=random_state,
             verbose=verbose,
         )
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
@@ -127,8 +139,17 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=greene_stability, step=step, metric_type='greene')
 
-    def plot_arun_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10,
-                         beta_loss='frobenius', algorithm='variational', verbose=True):
+    def plot_arun_metric(
+        self,
+        min_num_topics=10,
+        max_num_topics=50,
+        step=5,
+        iterations=10,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         symmetric_kl_divergence = self.topic_model.arun_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
@@ -136,6 +157,7 @@ class Visualization:
             iterations=iterations,
             beta_loss=beta_loss,
             algorithm=algorithm,
+            random_state=random_state,
             verbose=verbose,
         )
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
@@ -158,8 +180,17 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=symmetric_kl_divergence, step=step, metric_type='arun')
 
-    def plot_brunet_metric(self, min_num_topics=10, max_num_topics=50, step=5, iterations=10,
-                           beta_loss='frobenius', algorithm='variational', verbose=True):
+    def plot_brunet_metric(
+        self,
+        min_num_topics=10,
+        max_num_topics=50,
+        step=5,
+        iterations=10,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         cophenetic_correlation = self.topic_model.brunet_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
@@ -167,6 +198,7 @@ class Visualization:
             iterations=iterations,
             beta_loss=beta_loss,
             algorithm=algorithm,
+            random_state=random_state,
             verbose=verbose,
         )
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
@@ -190,11 +222,21 @@ class Visualization:
             data=cophenetic_correlation, step=step, metric_type='brunet')
 
     def plot_coherence_w2v_metric(
-        self, min_num_topics=10, step=5, max_num_topics=50, top_n_words=10,
-        w2v_size=None, w2v_min_count=None,
+        self,
+        min_num_topics=10,
+        step=5,
+        max_num_topics=50,
+        top_n_words=10,
+        w2v_size=None,
+        w2v_min_count=None,
         # w2v_max_vocab_size=None,
-        w2v_max_final_vocab=None, w2v_sg=None, w2v_workers=None,
-        beta_loss='frobenius', algorithm='variational', verbose=True,
+        w2v_max_final_vocab=None,
+        w2v_sg=None,
+        w2v_workers=None,
+        beta_loss='frobenius',
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
     ):
         coherence = self.topic_model.coherence_w2v_metric(
             min_num_topics=min_num_topics,
@@ -209,6 +251,7 @@ class Visualization:
             w2v_workers=w2v_workers,
             beta_loss=beta_loss,
             algorithm=algorithm,
+            random_state=random_state,
             verbose=verbose,
         )
 
@@ -234,14 +277,23 @@ class Visualization:
             range_=(min_num_topics, max_num_topics),
             data=coherence, step=step, metric_type='coherence_w2v')
 
-    def plot_perplexity_metric(self, min_num_topics=10, max_num_topics=20, step=5, train_size=0.7,
-                               algorithm='variational', verbose=True):
+    def plot_perplexity_metric(
+        self,
+        min_num_topics=10,
+        max_num_topics=20,
+        step=5,
+        train_size=0.7,
+        algorithm='variational',
+        random_state=None,
+        verbose=True,
+    ):
         train_perplexities, test_perplexities = self.topic_model.perplexity_metric(
             min_num_topics=min_num_topics,
             max_num_topics=max_num_topics,
             step=step,
             train_size=train_size,
             algorithm=algorithm,
+            random_state=random_state,
             verbose=verbose,
         )
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
