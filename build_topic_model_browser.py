@@ -74,6 +74,7 @@ def main(config_browser):
     top_words_description = config_browser.getint('top_words_description', 10)
     top_words_cloud = config_browser.getint('top_words_cloud', 5)
     model_type = config_browser.get('model_type', 'NMF')
+    random_state = config_browser.getint('random_state', None)
     nmf_beta_loss = config_browser.get('nmf_beta_loss', 'frobenius')
     lda_algorithm = config_browser.get('lda_algorithm', 'variational')
     load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
@@ -142,9 +143,9 @@ def main(config_browser):
                         )
         # Initialize topic model
         if model_type == 'NMF':
-            topic_model = NonNegativeMatrixFactorization(corpus=corpus)
+            topic_model = NonNegativeMatrixFactorization(corpus=corpus, random_state=random_state)
         elif model_type == 'LDA':
-            topic_model = LatentDirichletAllocation(corpus=corpus)
+            topic_model = LatentDirichletAllocation(corpus=corpus, random_state=random_state)
 
         logger.info(f'Corpus size: {topic_model.corpus.size:,}')
         logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
