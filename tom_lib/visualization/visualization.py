@@ -406,7 +406,7 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}{ma_string}.{figformat}'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
@@ -476,7 +476,7 @@ class Visualization:
             topics_string = f'{len(topic_cols)}_topics'
             if normalized:
                 norm_string = f'_{norm_string}'
-            filename_out = f'{plot_string}_{topics_string}{norm_string}_{kind}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}_{kind}.{figformat}'
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
@@ -557,7 +557,7 @@ class Visualization:
             topics_string = f'{len(topic_cols)}_topics'
             if normalized:
                 norm_string = f'_{norm_string}'
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}.{figformat}'
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
             plt.close('all')
@@ -652,7 +652,7 @@ class Visualization:
             topics_string = f'{len(topic_cols)}_topics'
             if normalized:
                 norm_string = f'_{norm_string}'
-            filename_out = f'{plot_string}_{topics_string}{norm_string}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}'
             filename_out_img = f'{filename_out}.{figformat}'
             filename_out_data = f'{filename_out}.csv'
             # save image to disk
@@ -755,7 +755,7 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
@@ -819,7 +819,7 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
@@ -883,7 +883,7 @@ class Visualization:
             else:
                 norm_string = ''
 
-            filename_out = f'{plot_string}_{topics_string}{norm_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{topics_string}{norm_string}.{figformat}'
 
             # save image to disk
             fig.savefig(self.output_dir / filename_out, dpi=dpi, transparent=False, bbox_inches='tight')
@@ -1130,7 +1130,7 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
@@ -1272,7 +1272,7 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
@@ -1418,7 +1418,7 @@ class Visualization:
             else:
                 ma_string = ''
 
-            filename_out = f'{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
 
             # save image to disk
             if by_affil:
@@ -1487,7 +1487,7 @@ class Visualization:
 
         if savedata:
             save_data_string = title_str.lower().replace(' ', '_')
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
             # save data to disk
             result_count.to_csv(self.output_dir / filename_out)
         else:
@@ -1616,7 +1616,7 @@ class Visualization:
         if savedata:
             _df = pd.DataFrame(data=frequency, columns=[ylabel.lower()], index=years)
             save_data_string = title_str.lower().replace(' ', '_')
-            filename_out = f'{save_data_string}_t{topic_id}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}_t{topic_id}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -1704,7 +1704,7 @@ class Visualization:
 
         if savedata:
             _df = pd.DataFrame(data=[word_weights], columns=top_words)
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -1809,7 +1809,7 @@ class Visualization:
         )[topic_cols]
 
         if savedata:
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -1913,7 +1913,7 @@ class Visualization:
             save_data_string = f'{save_data_string}_norm'
 
         if savedata:
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -1996,7 +1996,7 @@ class Visualization:
         if savedata:
             _df = pd.DataFrame(data=[counts], columns=affiliations)
             save_data_string = 'affiliation_document_count'
-            filename_out = f'{save_data_string}_t{topic_id}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}_t{topic_id}.csv'
             # save data to disk
             _df.to_csv(self.output_dir / filename_out)
         else:
@@ -2100,7 +2100,7 @@ class Visualization:
             save_data_string = f'{save_data_string}_norm'
 
         if savedata:
-            filename_out = f'{save_data_string}.csv'
+            filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
             # save data to disk
             corr.to_csv(self.output_dir / filename_out)
         else:
@@ -2259,8 +2259,8 @@ class Visualization:
             if normalized:
                 save_data_string_cm = f'{save_data_string_cm}_norm'
                 save_data_string_hm = f'{save_data_string_hm}_norm'
-            filename_out_cm = f'{save_data_string_cm}.csv'
-            filename_out_hm = f'{save_data_string_hm}.csv'
+            filename_out_cm = f'{self.topic_model.corpus.name}_{save_data_string_cm}.csv'
+            filename_out_hm = f'{self.topic_model.corpus.name}_{save_data_string_hm}.csv'
 
             # save data to disk - clustermap
             _df = pd.DataFrame(data=z, columns=x, index=y)
