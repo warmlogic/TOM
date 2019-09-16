@@ -14,6 +14,7 @@ import seaborn as sns
 import plotly
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
+import plotly.express as px
 
 from tom_lib.utils import save_topic_number_metrics_data
 
@@ -2021,9 +2022,13 @@ class Visualization:
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
+        colorscale: str = None,
         zmax: float = None,
         zmin: float = None,
-        colorscale: str = None,
+        zhoverformat='.3f',
+        annotate: bool = True,
+        annotate_decimals: int = 2,
+        annotate_font_size: int = 12,
         savedata: bool = False,
     ):
         topic_cols_all = []
@@ -2032,10 +2037,10 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
-        # title_str = 'Correlation'
-
         if colorscale is None:
-            colorscale = 'RdBu'
+            # colorscale = 'RdBu'
+            # https://www.plotly.express/plotly_express/colors/index.html
+            colorscale = px.colors.diverging.RdBu
 
         if zmax is None or zmin is None:
             zauto = True
@@ -2060,55 +2065,71 @@ class Visualization:
         else:
             filename_out = None
 
-        data = go.Heatmap(
-            z=corr.values,
-            x=corr.columns,
-            y=corr.index,
+        z = corr.values
+        x = corr.columns.tolist()
+        y = corr.index.tolist()
+
+        if annotate:
+            z_text = np.round(z, decimals=annotate_decimals)
+        else:
+            z_text = None
+
+        figure = ff.create_annotated_heatmap(
+            z=z,
+            x=x,
+            y=y,
+            annotation_text=z_text,
+            showscale=True,
             colorscale=colorscale,
             reversescale=True,
             zmax=zmax,
             zmin=zmin,
             zmid=0,
             zauto=zauto,
+            zhoverformat=zhoverformat,
             colorbar={
                 'title': {
                     'text': 'Pearson Correlation Coefficient',
                     'side': 'right',
                 },
+            },
+        )
+
+        for annotation in figure['layout']['annotations']:
+            if annotate_font_size:
+                annotation['font']['size'] = annotate_font_size
+
+        figure.update_layout(
+            {
+                # 'title': 'Correlation',
+                'xaxis': go.layout.XAxis(
+                    tickangle=-30,
+                    tickfont=dict(
+                        size=10,
+                        color='rgb(107, 107, 107)'
+                    ),
+                ),
+                'yaxis': go.layout.YAxis(
+                    tickfont=dict(
+                        size=10,
+                        color='rgb(107, 107, 107)'
+                    ),
+                    autorange='reversed',
+                ),
+                # 'margin': go.layout.Margin(
+                #     t=30,
+                #     b=0,
+                #     l=30,
+                #     r=0,
+                #     pad=4,
+                # ),
+                # 'autosize': True,
+                'width': 1200,
+                'height': 1000,
+                'showlegend': False,
+                'hovermode': 'closest',
             }
         )
-
-        layout = go.Layout(
-            # title=title_str,
-            xaxis=go.layout.XAxis(
-                tickangle=-30,
-                tickfont=dict(
-                    size=10,
-                    color='rgb(107, 107, 107)'
-                ),
-            ),
-            yaxis=go.layout.YAxis(
-                tickfont=dict(
-                    size=10,
-                    color='rgb(107, 107, 107)'
-                ),
-                autorange='reversed',
-            ),
-            # margin=go.layout.Margin(
-            #     t=30,
-            #     b=0,
-            #     l=30,
-            #     r=0,
-            #     pad=4,
-            # ),
-            # autosize=True,
-            width=1200,
-            height=1000,
-            showlegend=False,
-            hovermode='closest',
-        )
-
-        figure = go.Figure(data=data, layout=layout)
 
         if output_type == 'div':
             return plotly.offline.plot(
@@ -2126,9 +2147,13 @@ class Visualization:
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
+        colorscale: str = None,
         zmax: float = None,
         zmin: float = None,
-        colorscale: str = None,
+        zhoverformat='.3f',
+        annotate: bool = True,
+        annotate_decimals: int = 2,
+        annotate_font_size: int = 12,
         savedata: bool = False,
     ):
         topic_cols_all = []
@@ -2137,10 +2162,10 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
-        # title_str = 'Correlation'
-
         if colorscale is None:
-            colorscale = 'RdBu'
+            # colorscale = 'RdBu'
+            # https://www.plotly.express/plotly_express/colors/index.html
+            colorscale = px.colors.diverging.RdBu
 
         if zmax is None or zmin is None:
             zauto = True
@@ -2177,8 +2202,8 @@ class Visualization:
         dendro_leaves = list(map(int, dendro_leaves))
 
         # Reorder columns and rows
-        x = x[dendro_leaves]
-        y = y[dendro_leaves]
+        x = list(x[dendro_leaves])
+        y = list(y[dendro_leaves])
 
         z = z[dendro_leaves, :]
         z = z[:, dendro_leaves]
@@ -2201,16 +2226,24 @@ class Visualization:
             filename_out_cm = None
             filename_out_hm = None
 
-        data = go.Heatmap(
+        if annotate:
+            z_text = np.round(z, decimals=annotate_decimals)
+        else:
+            z_text = None
+
+        hm_fig = ff.create_annotated_heatmap(
             z=z,
             x=x,
             y=y,
+            annotation_text=z_text,
+            showscale=True,
             colorscale=colorscale,
             reversescale=True,
             zmax=zmax,
             zmin=zmin,
             zmid=0,
             zauto=zauto,
+            zhoverformat=zhoverformat,
             colorbar={
                 'x': -0.15,
                 'title': {
@@ -2219,7 +2252,22 @@ class Visualization:
                 },
             },
         )
+        # Get the data from the heatmap
+        data = hm_fig['data'][0]
 
+        # Get the annotations from the heatmap
+        annotations = hm_fig['layout']['annotations']
+
+        # Replace annotation x- and y-axis string tick values with numerical locations
+        x_dict = {topic: x for topic, x in zip(data['x'], figure['layout']['xaxis']['tickvals'])}
+        y_dict = {topic: y for topic, y in zip(data['y'], dendro_side['layout']['yaxis']['tickvals'])}
+        for annotation in annotations:
+            annotation['x'] = x_dict[annotation['x']]
+            annotation['y'] = y_dict[annotation['y']]
+            if annotate_font_size:
+                annotation['font']['size'] = annotate_font_size
+
+        # Replace x- and y-axis string tick values with numerical locations
         data['x'] = figure['layout']['xaxis']['tickvals']
         data['y'] = dendro_side['layout']['yaxis']['tickvals']
 
@@ -2228,11 +2276,12 @@ class Visualization:
 
         figure.update_layout(
             {
+                # 'title': 'Correlation',
                 'width': 1400,
                 'height': 1100,
                 'showlegend': False,
                 'hovermode': 'closest',
-                # 'title': title_str,
+                'annotations': annotations,
             },
         )
 
