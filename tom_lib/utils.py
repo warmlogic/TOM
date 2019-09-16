@@ -2,6 +2,7 @@
 import codecs
 import json
 import pickle
+import pandas as pd
 import numpy as np
 from typing import List
 
@@ -96,6 +97,20 @@ def save_json_object(json_object, file_path):
         file_path.parent.mkdir(parents=True, exist_ok=True)
     with codecs.open(file_path, 'w', encoding='utf-8') as fp:
         json.dump(json_object, fp, indent=4, separators=(',', ': '))
+
+
+def save_top_words(num_top_words_save, topic_model, file_path):
+    df_top_words = pd.DataFrame(
+        data=np.array(topic_model.top_words_topics(num_words=num_top_words_save)).T,
+        index=range(1, num_top_words_save + 1),
+        columns=[f'Topic {i}' for i in range(topic_model.nb_topics)],
+    )
+    df_top_words.index.name = 'word rank'
+    if not file_path.parent.exists():
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+    df_top_words.to_csv(f'{file_path}.csv')
+    with pd.ExcelWriter(f'{file_path}.xlsx') as writer:
+        df_top_words.to_excel(writer, index=True)
 
 
 def delete_folder(pth):
