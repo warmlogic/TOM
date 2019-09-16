@@ -52,7 +52,7 @@
         <div class="main-content">
             <p>
                 Documents over time by affiliation: Count per year
-                (<a href={{ url_for('static', filename=docs_over_time_count_filepath) }}>raw data</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=docs_over_time_count_filepath) }}>raw data</a>)
             </p>
             {{ docs_over_time_count_line | safe }}
         </div>
@@ -60,7 +60,7 @@
         <div class="main-content">
             <p>
                 Documents over time by affiliation: Percent per year
-                (<a href={{ url_for('static', filename=docs_over_time_percent_filepath) }}>raw data</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=docs_over_time_percent_filepath) }}>raw data</a>)
             </p>
             {{ docs_over_time_percent_line | safe }}
         </div>
@@ -69,7 +69,7 @@
         <div class="main-content">
             <p>
                 Barplot of average topic loadings
-                (<a href={{ url_for('static', filename=topic_loading_filepath) }}>raw data</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=topic_loading_filepath) }}>raw data</a>)
             </p>
             {{ topic_loading_barplot | safe }}
         </div>
@@ -79,8 +79,8 @@
         <div class="main-content">
             <p>
                 Heatmap of topic-topic correlation values
-                (<a href={{ url_for('static', filename=topic_heatmap_filepath) }}>raw data ordered by topic number</a>,
-                <a href={{ url_for('static', filename=fig_topic_topic_corr_heatmap) }}>alternative image</a>
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=topic_heatmap_filepath) }}>raw data ordered by topic number</a>,
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_topic_corr_heatmap) }}>alternative image</a>
                 )
             </p>
             {{ topic_heatmap | safe }}
@@ -90,9 +90,9 @@
         <div class="main-content">
             <p>
                 Hierarchically-clustered topic-topic correlation values
-                (<a href={{ url_for('static', filename=topic_clustermap_filepath) }}>raw data ordered by clusters</a>,
-                <a href={{ url_for('static', filename=topic_heatmap_filepath) }}>raw data ordered by topic number</a>,
-                <a href={{ url_for('static', filename=fig_topic_topic_corr_clustermap) }}>alternative image</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=topic_clustermap_filepath) }}>raw data ordered by clusters</a>,
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=topic_heatmap_filepath) }}>raw data ordered by topic number</a>,
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_topic_corr_clustermap) }}>alternative image</a>)
             </p>
             {{ topic_clustermap | safe }}
         </div>
@@ -101,9 +101,9 @@
     <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <!-- <a href={{ url_for('static', filename=fig_topic_over_time_count) }}>Topics over time: Count of documents above the threshold per year</a> -->
+                <!-- <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count) }}>Topics over time: Count of documents above the threshold per year</a> -->
                 Topics over time: Count of documents above the threshold per year
-                (<a href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>alternative image split by affiliation</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>alternative image split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_count) }}>
         </div>
@@ -111,9 +111,9 @@
     <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <!-- <a href={{ url_for('static', filename=fig_topic_over_time_percent) }}>Topics over time: Percent of documents above the threshold for each topic, per year.</a> Each year across topics adds up to 100%. One document can contribute to multiple topics. -->
+                <!-- <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent) }}>Topics over time: Percent of documents above the threshold for each topic, per year.</a> Each year across topics adds up to 100%. One document can contribute to multiple topics. -->
                 Topics over time: Percent of documents above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.
-                (<a href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>alternative image split by affiliation</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>alternative image split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
         </div>
@@ -121,8 +121,8 @@
     <!-- <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a href={{ url_for('static', filename=fig_topic_over_time_loading) }}>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
-                Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year. (<a href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>alternative image split by affiliation</a>)
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading) }}>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
+                Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year. (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>alternative image split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>
@@ -131,7 +131,7 @@
     <!-- <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>Topics over time by affiliation: Count of documents above the threshold per year</a>
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>Topics over time by affiliation: Count of documents above the threshold per year</a>
                 Topics over time by affiliation: Count of documents above the threshold per year
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>
@@ -140,7 +140,7 @@
     <!-- <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>Topics over time by affiliation: Percent of documents above the threshold for each topic, per year.</a> For each affiliation, each year across topics adds up to 100%. One document can contribute to multiple topics.
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>Topics over time by affiliation: Percent of documents above the threshold for each topic, per year.</a> For each affiliation, each year across topics adds up to 100%. One document can contribute to multiple topics.
                 Topics over time by affiliation: Percent of documents above the threshold for each topic, per year. For each affiliation, each year across topics adds up to 100%. One document can contribute to multiple topics.
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>
@@ -149,7 +149,7 @@
     <!-- <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>Topics over time by affiliation: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
+                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>Topics over time by affiliation: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
                 Topics over time by affiliation: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>
