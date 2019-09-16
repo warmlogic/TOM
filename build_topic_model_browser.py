@@ -209,9 +209,10 @@ def main(config_browser):
     docs_over_time_percent_line, docs_over_time_percent_filepath = viz.plotly_docs_over_time(
         freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
     topic_loading_barplot, topic_loading_filepath = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div', savedata=True)
-    # topic_heatmap, topic_heatmap_filepath = viz.plotly_heatmap(normalized=normalized, output_type='div', savedata=True)
+    # topic_heatmap, topic_heatmap_filepath = viz.plotly_heatmap(
+    #     normalized=normalized, annotate=True, annot_decimals=1, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=False)
     topic_clustermap, topic_clustermap_filepath, topic_heatmap_filepath = viz.plotly_clustermap(
-        normalized=normalized, output_type='div', savedata=True)
+        normalized=normalized, annotate=True, annot_decimals=1, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=True)
 
     _, _, fig_topic_over_time_count = viz.plot_topic_over_time_count(
         normalized=normalized,
@@ -291,6 +292,24 @@ def main(config_browser):
     #     figformat=figformat,
     # )
 
+    # _, _, fig_topic_topic_corr_heatmap = viz.plot_heatmap(
+    #     normalized=normalized,
+    #     fmt='.2f',
+    #     annot_fontsize=12,
+    #     savefig=savefig,
+    #     dpi=dpi,
+    #     figformat=figformat,
+    # )
+
+    _, fig_topic_topic_corr_clustermap = viz.plot_clustermap(
+        normalized=normalized,
+        fmt='.2f',
+        annot_fontsize=12,
+        savefig=savefig,
+        dpi=dpi,
+        figformat=figformat,
+    )
+
     # # debug
     # fig_topic_over_time_count = ''
     # fig_topic_over_time_percent = ''
@@ -298,6 +317,8 @@ def main(config_browser):
     # fig_topic_over_time_count_affil = ''
     # fig_topic_over_time_percent_affil = ''
     # fig_topic_over_time_loading_affil = ''
+    # fig_topic_topic_corr_heatmap = ''
+    # fig_topic_topic_corr_clustermap = ''
 
     logger.info('Done.')
 
@@ -546,6 +567,8 @@ def main(config_browser):
             fig_topic_over_time_count_affil=figs_folder / fig_topic_over_time_count_affil,
             fig_topic_over_time_percent_affil=figs_folder / fig_topic_over_time_percent_affil,
             # fig_topic_over_time_loading_affil=figs_folder / fig_topic_over_time_loading_affil,
+            # fig_topic_topic_corr_heatmap=figs_folder / fig_topic_topic_corr_heatmap,
+            fig_topic_topic_corr_clustermap=figs_folder / fig_topic_topic_corr_clustermap,
         )
 
     @server.route('/topic_cloud.html')
