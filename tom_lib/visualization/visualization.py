@@ -1555,6 +1555,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
@@ -1671,6 +1672,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
@@ -1762,6 +1764,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
@@ -1867,23 +1870,13 @@ class Visualization:
 
             return plotly.offline.plot(
                 figure,
-                # config={"displayModeBar": False},
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
             ), filename_out
         else:
             return figure, filename_out
-        # else:
-        #     from plotly.offline import init_notebook_mode
-        #     init_notebook_mode(connected=True)
-        #     return plotly.offline.plot(
-        #         figure,
-        #         # config={"displayModeBar": False},
-        #         show_link=False,
-        #         include_plotlyjs=False,
-        #         # output_type='div',
-        #     )
 
     def plotly_word_topic_loading(
         self,
@@ -1977,23 +1970,13 @@ class Visualization:
 
             return plotly.offline.plot(
                 figure,
-                # config={"displayModeBar": False},
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
             ), filename_out
         else:
             return figure, filename_out
-        # else:
-        #     from plotly.offline import init_notebook_mode
-        #     init_notebook_mode(connected=True)
-        #     return plotly.offline.plot(
-        #         figure,
-        #         # config={"displayModeBar": False},
-        #         show_link=False,
-        #         include_plotlyjs=False,
-        #         # output_type='div',
-        #     )
 
     def plotly_topic_affiliation_count(
         self,
@@ -2065,6 +2048,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
@@ -2193,6 +2177,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
@@ -2406,6 +2391,7 @@ class Visualization:
         if output_type == 'div':
             return plotly.offline.plot(
                 figure,
+                config={'displayModeBar': False},
                 show_link=False,
                 include_plotlyjs=False,
                 output_type=output_type,
