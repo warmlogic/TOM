@@ -443,6 +443,7 @@ class Visualization:
         vmax: float = None,
         vmin: float = None,
         fmt: str = '.2f',
+        annot_fontsize: int = 13,
         n_words: int = 10,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
@@ -485,10 +486,11 @@ class Visualization:
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        ax = sns.heatmap(corr, ax=ax, center=0, annot=True, fmt=fmt, annot_kws={"fontsize": 13},
+        ax = sns.heatmap(corr, ax=ax, center=0, annot=True, fmt=fmt, annot_kws={'fontsize': annot_fontsize},
                          vmin=vmin, vmax=vmax,
                          mask=((corr > -mask_thresh) & (corr < mask_thresh)),
                          cmap=cmap,
+                         cbar_kws={'label': 'Pearson Correlation Coefficient'},
                          # square=True,
                          )
 
@@ -522,6 +524,7 @@ class Visualization:
         vmax: float = None,
         vmin: float = None,
         fmt: str = '.2f',
+        annot_fontsize: int = 13,
         n_words: int = 10,
         figsize: Tuple[int, int] = None,
         savefig: bool = False,
@@ -576,13 +579,14 @@ class Visualization:
 
         g = sns.clustermap(
             corr,
-            center=0, annot=True, fmt=fmt, annot_kws={"fontsize": 13},
+            center=0, annot=True, fmt=fmt, annot_kws={'fontsize': annot_fontsize},
             metric=metric,
             method=method,
             vmin=vmin, vmax=vmax,
             mask=((corr > -mask_thresh) & (corr < mask_thresh)),
             cmap=cmap,
             figsize=figsize,
+            cbar_kws={'label': '\n'.join('Pearson Correlation Coefficient'.split())},
         )
 
         g.ax_heatmap.hlines(range(1, corr.shape[0]), *g.ax_heatmap.get_xlim(), lw=0.5)
@@ -2027,8 +2031,9 @@ class Visualization:
         zmin: float = None,
         zhoverformat='.3f',
         annotate: bool = True,
-        annotate_decimals: int = 2,
-        annotate_font_size: int = 12,
+        annot_decimals: int = 2,
+        annot_fontsize: int = 12,
+        annot_fontcolor: str = None,
         savedata: bool = False,
     ):
         topic_cols_all = []
@@ -2070,7 +2075,7 @@ class Visualization:
         y = corr.index.tolist()
 
         if annotate:
-            z_text = np.round(z, decimals=annotate_decimals)
+            z_text = np.round(z, decimals=annot_decimals)
         else:
             z_text = None
 
@@ -2096,8 +2101,10 @@ class Visualization:
         )
 
         for annotation in figure['layout']['annotations']:
-            if annotate_font_size:
-                annotation['font']['size'] = annotate_font_size
+            if annot_fontsize:
+                annotation['font']['size'] = annot_fontsize
+            if annot_fontcolor:
+                annotation['font']['color'] = annot_fontcolor
 
         figure.update_layout(
             {
@@ -2152,8 +2159,9 @@ class Visualization:
         zmin: float = None,
         zhoverformat='.3f',
         annotate: bool = True,
-        annotate_decimals: int = 2,
-        annotate_font_size: int = 12,
+        annot_decimals: int = 2,
+        annot_fontsize: int = 12,
+        annot_fontcolor: str = None,
         savedata: bool = False,
     ):
         topic_cols_all = []
@@ -2227,7 +2235,7 @@ class Visualization:
             filename_out_hm = None
 
         if annotate:
-            z_text = np.round(z, decimals=annotate_decimals)
+            z_text = np.round(z, decimals=annot_decimals)
         else:
             z_text = None
 
@@ -2264,8 +2272,10 @@ class Visualization:
         for annotation in annotations:
             annotation['x'] = x_dict[annotation['x']]
             annotation['y'] = y_dict[annotation['y']]
-            if annotate_font_size:
-                annotation['font']['size'] = annotate_font_size
+            if annot_fontsize:
+                annotation['font']['size'] = annot_fontsize
+            if annot_fontcolor:
+                annotation['font']['color'] = annot_fontcolor
 
         # Replace x- and y-axis string tick values with numerical locations
         data['x'] = figure['layout']['xaxis']['tickvals']
