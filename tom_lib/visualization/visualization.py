@@ -2167,7 +2167,7 @@ class Visualization:
                 #     pad=4,
                 # ),
                 # 'autosize': True,
-                'width': 1200,
+                'width': 1400,
                 'height': 1000,
                 'showlegend': False,
                 'hovermode': 'closest',
@@ -2324,7 +2324,7 @@ class Visualization:
         figure.update_layout(
             {
                 # 'title': 'Correlation',
-                'width': 1400,
+                'width': 1600,
                 'height': 1100,
                 'showlegend': False,
                 'hovermode': 'closest',
