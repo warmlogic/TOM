@@ -125,7 +125,7 @@ def main(config_browser):
         topic_model = ut.load_topic_model(static_folder / topic_model_filepath)
 
         logger.info(f'Corpus size: {topic_model.corpus.size:,}')
-        logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
+        logger.info(f'Vocabulary size: {topic_model.corpus.vocabulary_size:,}')
     else:
         # Clean the topic model directory
         if (static_folder / tm_folder).exists():
@@ -153,7 +153,7 @@ def main(config_browser):
             topic_model = LatentDirichletAllocation(corpus=corpus)
 
         logger.info(f'Corpus size: {topic_model.corpus.size:,}')
-        logger.info(f'Vocabulary size: {len(topic_model.corpus.vocabulary):,}')
+        logger.info(f'Vocabulary size: {topic_model.corpus.vocabulary_size:,}')
 
         # Infer topics
         logger.info(f'Inferring {num_topics} topics')
@@ -576,8 +576,9 @@ def main(config_browser):
             topic_ids=topic_description,
             doc_ids=range(topic_model.corpus.size),
             method=type(topic_model).__name__,
+            corpus_name=corpus_name,
             corpus_size=topic_model.corpus.size,
-            vocabulary_size=len(topic_model.corpus.vocabulary),
+            vocabulary_size=topic_model.corpus.vocabulary_size,
             max_relative_frequency=max_relative_frequency,
             min_absolute_frequency=min_absolute_frequency,
             vectorization=vectorization,
