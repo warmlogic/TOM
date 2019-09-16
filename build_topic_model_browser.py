@@ -560,6 +560,7 @@ def main(config_browser):
             min_absolute_frequency=min_absolute_frequency,
             vectorization=vectorization,
             num_topics=num_topics,
+            random_state=topic_model.random_state,
             docs_over_time_count_line=docs_over_time_count_line,
             docs_over_time_count_filepath=figs_folder / docs_over_time_count_filepath,
             docs_over_time_percent_line=docs_over_time_percent_line,
