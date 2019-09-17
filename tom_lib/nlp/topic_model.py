@@ -42,7 +42,7 @@ class TopicModel(object):
         top_n_words: int = 10,
         tao: int = 10,
         sample: float = 0.8,
-        verbose: bool = True,
+        verbose: int = 0,
         nmf_init: str = None,
         nmf_solver: str = None,
         nmf_beta_loss: str = None,
@@ -81,8 +81,7 @@ class TopicModel(object):
         # Build reference topic model
         # Generate tao topic models with tao samples of the corpus
         for idx, k in enumerate(num_topics_infer):
-            if verbose:
-                print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
+            print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
             if self.model_type == 'NMF':
                 self.infer_topics(
                     num_topics=k,
@@ -93,6 +92,7 @@ class TopicModel(object):
                     nmf_alpha=nmf_alpha,
                     nmf_l1_ratio=nmf_l1_ratio,
                     nmf_shuffle=nmf_shuffle,
+                    verbose=verbose,
                     random_state=random_state,
                 )
             elif self.model_type == 'LDA':
@@ -104,6 +104,7 @@ class TopicModel(object):
                     lda_learning_method=lda_learning_method,
                     lda_n_jobs=lda_n_jobs,
                     lda_n_iter=lda_n_iter,
+                    verbose=verbose,
                     random_state=random_state,
                 )
             else:
@@ -135,13 +136,26 @@ class TopicModel(object):
                 if self.model_type == 'NMF':
                     tao_model.infer_topics(
                         num_topics=k,
+                        nmf_init=nmf_init,
+                        nmf_solver=nmf_solver,
                         nmf_beta_loss=nmf_beta_loss,
+                        nmf_max_iter=nmf_max_iter,
+                        nmf_alpha=nmf_alpha,
+                        nmf_l1_ratio=nmf_l1_ratio,
+                        nmf_shuffle=nmf_shuffle,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
                     tao_model.infer_topics(
                         num_topics=k,
                         lda_algorithm=lda_algorithm,
+                        lda_alpha=lda_alpha,
+                        lda_eta=lda_eta,
+                        lda_learning_method=lda_learning_method,
+                        lda_n_jobs=lda_n_jobs,
+                        lda_n_iter=lda_n_iter,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 else:
@@ -149,8 +163,7 @@ class TopicModel(object):
                 tao_rank = [next(zip(*tao_model.top_words(i, top_n_words))) for i in range(k)]
                 agreement_score_list.append(agreement_score(reference_rank, tao_rank))
             stability.append(np.mean(agreement_score_list))
-            if verbose:
-                print(f'    Stability={stability[-1]:.4f}')
+            print(f'    Stability={stability[-1]:.4f}')
         return stability
 
     def arun_metric(
@@ -159,7 +172,7 @@ class TopicModel(object):
         max_num_topics: int = 20,
         step: int = 5,
         iterations: int = 10,
-        verbose: bool = True,
+        verbose: int = 0,
         nmf_init: str = None,
         nmf_solver: str = None,
         nmf_beta_loss: str = None,
@@ -193,14 +206,12 @@ class TopicModel(object):
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         kl_matrix = []
         for j in range(iterations):
-            if verbose:
-                print(f'Iteration: {j+1} of {iterations}')
+            print(f'Iteration: {j+1} of {iterations}')
             kl_list = []
             doc_len = self.corpus.word_vector_for_document().sum(axis=1)  # document length
             norm = np.linalg.norm(doc_len)
             for idx, i in enumerate(num_topics_infer):
-                if verbose:
-                    print(f'    Topics={i} ({idx + 1} of {len(num_topics_infer)})')
+                print(f'    Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 if self.model_type == 'NMF':
                     self.infer_topics(
                         num_topics=i,
@@ -217,6 +228,7 @@ class TopicModel(object):
                         lda_learning_method=lda_learning_method,
                         lda_n_jobs=lda_n_jobs,
                         lda_n_iter=lda_n_iter,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
@@ -228,6 +240,7 @@ class TopicModel(object):
                         lda_learning_method=lda_learning_method,
                         lda_n_jobs=lda_n_jobs,
                         lda_n_iter=lda_n_iter,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 else:
@@ -238,12 +251,10 @@ class TopicModel(object):
                 c_m2 /= norm
                 kl_list.append(symmetric_kl(c_m1.tolist(), c_m2.tolist()[0]))
             kl_matrix.append(kl_list)
-            if verbose:
-                print(f'    Iteration KL list={kl_list}')
-                print(f'    Iteration Average={np.mean(kl_list)}')
+            print(f'    Iteration KL list={kl_list}')
+            print(f'    Iteration Average={np.mean(kl_list)}')
         avg_kl_matrix = np.array(kl_matrix).mean(axis=0).tolist()
-        if verbose:
-            print(f'            Overall KL average={avg_kl_matrix}')
+        print(f'            Overall KL average={avg_kl_matrix}')
         return avg_kl_matrix
 
     def brunet_metric(
@@ -252,7 +263,7 @@ class TopicModel(object):
         max_num_topics: int = 20,
         step: int = 5,
         iterations: int = 10,
-        verbose: bool = True,
+        verbose: int = 0,
         nmf_init: str = None,
         nmf_solver: str = None,
         nmf_beta_loss: str = None,
@@ -287,12 +298,10 @@ class TopicModel(object):
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         cophenetic_correlation = []
         for idx, i in enumerate(num_topics_infer):
-            if verbose:
-                print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
+            print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
             average_C = np.zeros((self.corpus.size, self.corpus.size))
             for j in range(iterations):
-                if verbose:
-                    print(f'    Iteration: {j+1} of {iterations}')
+                print(f'    Iteration: {j+1} of {iterations}')
                 if self.model_type == 'NMF':
                     self.infer_topics(
                         num_topics=i,
@@ -303,6 +312,7 @@ class TopicModel(object):
                         nmf_alpha=nmf_alpha,
                         nmf_l1_ratio=nmf_l1_ratio,
                         nmf_shuffle=nmf_shuffle,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
@@ -321,6 +331,7 @@ class TopicModel(object):
                         lda_learning_method=lda_learning_method,
                         lda_n_jobs=lda_n_jobs,
                         lda_n_iter=lda_n_iter,
+                        verbose=verbose,
                         random_state=random_state,
                     )
                 else:
@@ -328,24 +339,20 @@ class TopicModel(object):
                 mlt = self.most_likely_topic_for_document()
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
 
-            if verbose:
-                print('    Clustering...')
+            print('    Clustering...')
             Z = cluster.hierarchy.linkage(average_C, method='average')
-            if verbose:
-                print('    Getting list of leaves...')
+            print('    Getting list of leaves...')
             lvs = cluster.hierarchy.leaves_list(Z)
             average_C = average_C[lvs, :]
             average_C = average_C[:, lvs]
-            if verbose:
-                print('    Calculating cophenetic distances...')
+            print('    Calculating cophenetic distances...')
             (c, d) = cluster.hierarchy.cophenet(Z=Z, Y=spatial.distance.pdist(average_C))
             # plt.clf()
             # fig, ax = plt.subplots(figsize=(11, 9))
             # ax = sns.heatmap(average_C, ax=ax)
             # plt.savefig('reorderedC.png')
             cophenetic_correlation.append(c)
-            if verbose:
-                print(f'    Cophenetic correlation={c}')
+            print(f'    Cophenetic correlation={c}')
         return cophenetic_correlation
 
     def coherence_w2v_metric(
@@ -360,7 +367,7 @@ class TopicModel(object):
         w2v_max_final_vocab: int = None,
         w2v_sg: int = None,
         w2v_workers: int = None,
-        verbose: bool = True,
+        verbose: int = 0,
         nmf_init: str = None,
         nmf_solver: str = None,
         nmf_beta_loss: str = None,
@@ -425,15 +432,13 @@ class TopicModel(object):
             sg=w2v_sg,
             workers=w2v_workers,
         )
-        if verbose:
-            print(f'    Word2Vec model has {len(w2v_model.wv.vocab)} terms')
+        print(f'    Word2Vec model has {len(w2v_model.wv.vocab)} terms')
 
         print('Step 2/2: Training topic models...')
         num_topics_infer = range(min_num_topics, max_num_topics + 1, step)
         coherence = []
         for idx, k in enumerate(num_topics_infer):
-            if verbose:
-                print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
+            print(f'Topics={k} ({idx + 1} of {len(num_topics_infer)})')
             if self.model_type == 'NMF':
                 self.infer_topics(
                     num_topics=k,
@@ -444,6 +449,7 @@ class TopicModel(object):
                     nmf_alpha=nmf_alpha,
                     nmf_l1_ratio=nmf_l1_ratio,
                     nmf_shuffle=nmf_shuffle,
+                    verbose=verbose,
                     random_state=random_state,
                 )
             elif self.model_type == 'LDA':
@@ -455,6 +461,7 @@ class TopicModel(object):
                     lda_learning_method=lda_learning_method,
                     lda_n_jobs=lda_n_jobs,
                     lda_n_iter=lda_n_iter,
+                    verbose=verbose,
                     random_state=random_state,
                 )
             else:
@@ -462,8 +469,7 @@ class TopicModel(object):
 
             top_words_topics = self.top_words_topics(num_words=top_n_words)
             coh = calculate_coherence(w2v_model, top_words_topics)
-            if verbose:
-                print(f'    Coherence: {coh:.5f}')
+            print(f'    Coherence: {coh:.5f}')
             coherence.append(coh)
 
         return coherence
@@ -474,7 +480,7 @@ class TopicModel(object):
         max_num_topics: int = 20,
         step: int = 5,
         train_size: float = 0.7,
-        verbose: bool = True,
+        verbose: int = 0,
         lda_algorithm: str = None,
         lda_alpha: float = None,
         lda_eta: float = None,
@@ -526,8 +532,7 @@ class TopicModel(object):
             tf_test = corpus_train.vectorizer.transform(df_test[corpus_train._text_col].tolist())
             lda_model = type(self)(corpus_train)
             for idx, i in enumerate(num_topics_infer):
-                if verbose:
-                    print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
+                print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 lda_model.infer_topics(
                     num_topics=i,
                     lda_algorithm=lda_algorithm,
@@ -536,13 +541,13 @@ class TopicModel(object):
                     lda_learning_method=lda_learning_method,
                     lda_n_jobs=lda_n_jobs,
                     lda_n_iter=lda_n_iter,
+                    verbose=verbose,
                     random_state=random_state,
                 )
                 train_perplexities.append(lda_model.model.perplexity(
                     corpus_train.sklearn_vector_space))
                 test_perplexities.append(lda_model.model.perplexity(tf_test))
-                if verbose:
-                    print(f'\tTrain perplexity={train_perplexities[-1]:.4f}, Test perplexity={test_perplexities[-1]:.4f}')
+                print(f'\tTrain perplexity={train_perplexities[-1]:.4f}, Test perplexity={test_perplexities[-1]:.4f}')
         else:
             raise TypeError("Computing perplexity only supported for LDA with lda_algorithm: str = None. Not running.")
         return train_perplexities, test_perplexities
@@ -842,6 +847,7 @@ class LatentDirichletAllocation(TopicModel):
         lda_learning_method: str = None,
         lda_n_jobs: int = None,
         lda_n_iter: int = None,
+        verbose: int = 0,
         random_state=None,
         **kwargs,
     ):
@@ -853,6 +859,7 @@ class LatentDirichletAllocation(TopicModel):
         self.lda_learning_method = lda_learning_method or 'batch'
         self.lda_n_jobs = lda_n_jobs or -1  # only for sklearn
         self.lda_n_iter = lda_n_iter or 2000  # only for lda library
+        self.verbose = verbose
         self.random_state = random_state
 
         if self.lda_algorithm == 'variational':
@@ -863,6 +870,7 @@ class LatentDirichletAllocation(TopicModel):
                 topic_word_prior=self.lda_eta,
                 learning_method=self.lda_learning_method,
                 n_jobs=self.lda_n_jobs,
+                verbose=self.verbose,
                 random_state=self.random_state,
             )
         elif self.lda_algorithm == 'gibbs':
@@ -922,6 +930,7 @@ class NonNegativeMatrixFactorization(TopicModel):
         nmf_alpha: float = None,
         nmf_l1_ratio: float = None,
         nmf_shuffle: bool = None,
+        verbose: int = 0,
         random_state=None,
         **kwargs,
     ):
@@ -934,6 +943,7 @@ class NonNegativeMatrixFactorization(TopicModel):
         self.nmf_alpha = nmf_alpha or 0.0  # 0 = no regularization; used in the 'cd' nmf_solver
         self.nmf_l1_ratio = nmf_l1_ratio or 0.0  # 0 = L2, 1 = L1; used in the 'cd' nmf_solver
         self.nmf_shuffle = nmf_shuffle or False  # randomize the order of coordinates in the 'cd' nmf_solver
+        self.verbose = verbose
         self.random_state = random_state
 
         if (nmf_solver == 'mu') and (nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
@@ -949,6 +959,7 @@ class NonNegativeMatrixFactorization(TopicModel):
             alpha=self.nmf_alpha,
             l1_ratio=self.nmf_l1_ratio,
             shuffle=self.nmf_shuffle,
+            verbose=self.verbose,
             random_state=self.random_state,
         )
         topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)

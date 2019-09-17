@@ -78,6 +78,7 @@ def main(config_infer):
     sample = config_infer.getfloat('sample', 1.0)
     # General model parameters
     model_type = config_infer.get('model_type', 'NMF')
+    verbose = config_infer.getint('verbose', 0)
     random_state = config_infer.getint('random_state', None)
     # NMF parameters
     nmf_init = config_infer.get('nmf_init', None)
@@ -107,7 +108,6 @@ def main(config_infer):
     coherence_w2v_top_n_words = config_infer.getint('coherence_w2v_top_n_words', 10)
     coherence_w2v_size = config_infer.getint('coherence_w2v_size', 100)
     # perplexity_train_size = config_infer.getfloat('perplexity_train_size', 0.7)
-    verbose = config_infer.getboolean('verbose', )
 
     if model_type not in ['NMF', 'LDA']:
         raise ValueError('model_type must be NMF or LDA')

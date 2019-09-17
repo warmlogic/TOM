@@ -80,6 +80,7 @@ def main(config_browser):
     # General model parameters
     model_type = config_browser.get('model_type', 'NMF')
     num_topics = config_browser.getint('num_topics', 15)
+    verbose = config_browser.getint('verbose', 0)
     random_state = config_browser.getint('random_state', None)
     load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
     # NMF parameters
@@ -186,6 +187,7 @@ def main(config_browser):
                 nmf_alpha=nmf_alpha,
                 nmf_l1_ratio=nmf_l1_ratio,
                 nmf_shuffle=nmf_shuffle,
+                verbose=verbose,
                 random_state=random_state,
             )
         elif model_type == 'LDA':
@@ -197,6 +199,7 @@ def main(config_browser):
                 lda_learning_method=lda_learning_method,
                 lda_n_jobs=lda_n_jobs,
                 lda_n_iter=lda_n_iter,
+                verbose=verbose,
                 random_state=random_state,
             )
 
