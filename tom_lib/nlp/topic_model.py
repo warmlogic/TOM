@@ -109,6 +109,7 @@ class TopicModel(object):
                 )
             else:
                 raise TypeError(f'Unsupported model type: {self.model_type}')
+
             reference_rank = [list(zip(*self.top_words(i, top_n_words)))[0] for i in range(k)]
             agreement_score_list = []
             for t in range(tao):
@@ -245,6 +246,7 @@ class TopicModel(object):
                     )
                 else:
                     raise TypeError(f'Unsupported model type: {self.model_type}')
+
                 c_m1 = np.linalg.svd(self.topic_word_matrix.todense(), compute_uv=False)
                 c_m2 = doc_len.dot(self.document_topic_matrix.todense())
                 c_m2 += 0.0001  # we need this to prevent components equal to zero
@@ -336,6 +338,7 @@ class TopicModel(object):
                     )
                 else:
                     raise TypeError(f'Unsupported model type: {self.model_type}')
+
                 mlt = self.most_likely_topic_for_document()
                 average_C[np.equal(mlt, mlt[:, np.newaxis])] += float(1. / iterations)
 
@@ -884,6 +887,10 @@ class LatentDirichletAllocation(TopicModel):
             )
         else:
             raise ValueError(f"lda_algorithm must be either 'variational' or 'gibbs', got {self.lda_algorithm}")
+
+        if self.corpus.vectorization == 'tfidf':
+            raise ValueError(f"for LDA, corpus vectorization should be 'tf', but is set to '{self.corpus.vectorization}'")
+
         topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)
 
         self.topic_word_matrix = []
@@ -947,7 +954,10 @@ class NonNegativeMatrixFactorization(TopicModel):
         self.random_state = random_state
 
         if (nmf_solver == 'mu') and (nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
-            raise ValueError(f"nmf_beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {nmf_beta_loss}")
+            raise ValueError(f"when solver='mu' nmf_beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {nmf_beta_loss}")
+
+        if self.corpus.vectorization == 'tf':
+            raise ValueError(f"for NMF, corpus vectorization should be 'tfidf', but is set to '{self.corpus.vectorization}'")
 
         # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html
         self.model = NMF(

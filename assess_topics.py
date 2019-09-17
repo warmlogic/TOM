@@ -110,10 +110,10 @@ def main(config_infer):
     # perplexity_train_size = config_infer.getfloat('perplexity_train_size', 0.7)
 
     if model_type not in ['NMF', 'LDA']:
-        raise ValueError('model_type must be NMF or LDA')
+        raise ValueError(f"model_type must be 'NMF' or 'LDA', got {model_type}")
 
     if model_type == 'NMF':
-        if nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']:
+        if (nmf_solver == 'mu') and (nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
             raise ValueError(f"For NMF, 'beta_loss' must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got '{nmf_beta_loss}'")
         if vectorization == 'tf':
             raise ValueError(f"for NMF, 'vectorization' should be 'tfidf', got '{vectorization}'")
