@@ -888,8 +888,8 @@ class LatentDirichletAllocation(TopicModel):
         else:
             raise ValueError(f"lda_algorithm must be either 'variational' or 'gibbs', got {self.lda_algorithm}")
 
-        if self.corpus.vectorization == 'tfidf':
-            raise ValueError(f"for LDA, corpus vectorization should be 'tf', but is set to '{self.corpus.vectorization}'")
+        if self.corpus._vectorization == 'tfidf':
+            raise ValueError(f"for LDA, corpus vectorization should be 'tf', but is set to '{self.corpus._vectorization}'")
 
         topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)
 
@@ -956,8 +956,8 @@ class NonNegativeMatrixFactorization(TopicModel):
         if (nmf_solver == 'mu') and (nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
             raise ValueError(f"when solver='mu' nmf_beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {nmf_beta_loss}")
 
-        if self.corpus.vectorization == 'tf':
-            raise ValueError(f"for NMF, corpus vectorization should be 'tfidf', but is set to '{self.corpus.vectorization}'")
+        if self.corpus._vectorization == 'tf':
+            raise ValueError(f"for NMF, corpus vectorization should be 'tfidf', but is set to '{self.corpus._vectorization}'")
 
         # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html
         self.model = NMF(
