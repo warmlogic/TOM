@@ -1624,6 +1624,7 @@ class Visualization:
                 showticklabels=True,
                 ticks='outside',
                 nticks=len(result_count.index),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -1635,6 +1636,7 @@ class Visualization:
                 automargin=True,
                 tickformat=tickformat,
                 range=yrange,
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -1741,6 +1743,7 @@ class Visualization:
                 showticklabels=True,
                 ticks='outside',
                 nticks=len(years),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -1752,6 +1755,7 @@ class Visualization:
                 ),
                 tickformat=tickformat,
                 range=yrange,
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -1835,6 +1839,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -1844,6 +1849,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -1939,6 +1945,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -1948,6 +1955,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -2039,6 +2047,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -2048,6 +2057,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -2119,6 +2129,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             yaxis=go.layout.YAxis(
                 title=ylabel,
@@ -2128,6 +2139,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)',
                 ),
+                fixedrange=True,
             ),
             margin=go.layout.Margin(
                 t=30,
@@ -2249,6 +2261,7 @@ class Visualization:
                         size=10,
                         color='rgb(107, 107, 107)'
                     ),
+                    fixedrange=True,
                 ),
                 'yaxis': go.layout.YAxis(
                     tickfont=dict(
@@ -2256,6 +2269,7 @@ class Visualization:
                         color='rgb(107, 107, 107)'
                     ),
                     autorange='reversed',
+                    fixedrange=True,
                 ),
                 # 'margin': go.layout.Margin(
                 #     t=30,
@@ -2443,6 +2457,7 @@ class Visualization:
                     size=10,
                     color='rgb(107, 107, 107)'
                 ),
+                'fixedrange': True,
             })
 
         figure.update_layout(
@@ -2454,6 +2469,7 @@ class Visualization:
                 'zeroline': False,
                 'showticklabels': False,
                 'ticks': '',
+                'fixedrange': True,
             })
 
         figure.update_layout(
@@ -2473,6 +2489,7 @@ class Visualization:
                 ),
                 'side': 'right',
                 'autorange': 'reversed',
+                'fixedrange': True,
             })
 
         figure.update_layout(
@@ -2484,6 +2501,7 @@ class Visualization:
                 'zeroline': False,
                 'showticklabels': False,
                 'ticks': '',
+                'fixedrange': True,
             })
 
         if output_type == 'div':
