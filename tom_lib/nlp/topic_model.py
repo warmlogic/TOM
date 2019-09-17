@@ -36,16 +36,27 @@ class TopicModel(object):
 
     def greene_metric(
         self,
-        min_num_topics=10,
-        step=5,
-        max_num_topics=50,
-        top_n_words=10,
-        tao=10,
-        sample=0.8,
-        beta_loss='frobenius',
-        algorithm='variational',
+        min_num_topics: int = 10,
+        max_num_topics: int = 20,
+        step: int = 5,
+        top_n_words: int = 10,
+        tao: int = 10,
+        sample: float = 0.8,
+        verbose: bool = True,
+        nmf_init: str = None,
+        nmf_solver: str = None,
+        nmf_beta_loss: str = None,
+        nmf_max_iter: int = None,
+        nmf_alpha: float = None,
+        nmf_l1_ratio: float = None,
+        nmf_shuffle: bool = None,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
-        verbose=True,
     ):
         """
         Higher is better.
@@ -75,13 +86,24 @@ class TopicModel(object):
             if self.model_type == 'NMF':
                 self.infer_topics(
                     num_topics=k,
-                    beta_loss=beta_loss,
+                    nmf_init=nmf_init,
+                    nmf_solver=nmf_solver,
+                    nmf_beta_loss=nmf_beta_loss,
+                    nmf_max_iter=nmf_max_iter,
+                    nmf_alpha=nmf_alpha,
+                    nmf_l1_ratio=nmf_l1_ratio,
+                    nmf_shuffle=nmf_shuffle,
                     random_state=random_state,
                 )
             elif self.model_type == 'LDA':
                 self.infer_topics(
                     num_topics=k,
-                    algorithm=algorithm,
+                    lda_algorithm=lda_algorithm,
+                    lda_alpha=lda_alpha,
+                    lda_eta=lda_eta,
+                    lda_learning_method=lda_learning_method,
+                    lda_n_jobs=lda_n_jobs,
+                    lda_n_iter=lda_n_iter,
                     random_state=random_state,
                 )
             else:
@@ -91,6 +113,7 @@ class TopicModel(object):
             for t in range(tao):
                 tao_corpus = Corpus(
                     source_filepath=self.corpus.data_frame,
+                    name=self.corpus.name,
                     sep=self.corpus._sep,
                     language=self.corpus._language,
                     n_gram=self.corpus._n_gram,
@@ -99,18 +122,26 @@ class TopicModel(object):
                     min_absolute_frequency=self.corpus._min_absolute_frequency,
                     max_features=self.corpus.max_features,
                     sample=sample,
+                    text_col=self.corpus.text_col,
+                    full_text_col=self.corpus.full_text_col,
+                    title_col=self.corpus.title_col,
+                    author_col=self.corpus.author_col,
+                    affiliation_col=self.corpus.affiliation_col,
+                    dataset_col=self.corpus.dataset_col,
+                    date_col=self.corpus.date_col,
+                    id_col=self.corpus.id_col,
                 )
                 tao_model = type(self)(tao_corpus)
                 if self.model_type == 'NMF':
                     tao_model.infer_topics(
                         num_topics=k,
-                        beta_loss=beta_loss,
+                        nmf_beta_loss=nmf_beta_loss,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
                     tao_model.infer_topics(
                         num_topics=k,
-                        algorithm=algorithm,
+                        lda_algorithm=lda_algorithm,
                         random_state=random_state,
                     )
                 else:
@@ -124,14 +155,25 @@ class TopicModel(object):
 
     def arun_metric(
         self,
-        min_num_topics=10,
-        step=5,
-        max_num_topics=50,
-        iterations=10,
-        beta_loss='frobenius',
-        algorithm='variational',
+        min_num_topics: int = 10,
+        max_num_topics: int = 20,
+        step: int = 5,
+        iterations: int = 10,
+        verbose: bool = True,
+        nmf_init: str = None,
+        nmf_solver: str = None,
+        nmf_beta_loss: str = None,
+        nmf_max_iter: int = None,
+        nmf_alpha: float = None,
+        nmf_l1_ratio: float = None,
+        nmf_shuffle: bool = None,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
-        verbose=True,
     ):
         """
         Lower is better.
@@ -162,13 +204,30 @@ class TopicModel(object):
                 if self.model_type == 'NMF':
                     self.infer_topics(
                         num_topics=i,
-                        beta_loss=beta_loss,
+                        nmf_init=nmf_init,
+                        nmf_solver=nmf_solver,
+                        nmf_beta_loss=nmf_beta_loss,
+                        nmf_max_iter=nmf_max_iter,
+                        nmf_alpha=nmf_alpha,
+                        nmf_l1_ratio=nmf_l1_ratio,
+                        nmf_shuffle=nmf_shuffle,
+                        lda_algorithm=lda_algorithm,
+                        lda_alpha=lda_alpha,
+                        lda_eta=lda_eta,
+                        lda_learning_method=lda_learning_method,
+                        lda_n_jobs=lda_n_jobs,
+                        lda_n_iter=lda_n_iter,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
                     self.infer_topics(
                         num_topics=i,
-                        algorithm=algorithm,
+                        lda_algorithm=lda_algorithm,
+                        lda_alpha=lda_alpha,
+                        lda_eta=lda_eta,
+                        lda_learning_method=lda_learning_method,
+                        lda_n_jobs=lda_n_jobs,
+                        lda_n_iter=lda_n_iter,
                         random_state=random_state,
                     )
                 else:
@@ -189,14 +248,25 @@ class TopicModel(object):
 
     def brunet_metric(
         self,
-        min_num_topics=10,
-        step=5,
-        max_num_topics=50,
-        iterations=10,
-        beta_loss='frobenius',
-        algorithm='variational',
+        min_num_topics: int = 10,
+        max_num_topics: int = 20,
+        step: int = 5,
+        iterations: int = 10,
+        verbose: bool = True,
+        nmf_init: str = None,
+        nmf_solver: str = None,
+        nmf_beta_loss: str = None,
+        nmf_max_iter: int = None,
+        nmf_alpha: float = None,
+        nmf_l1_ratio: float = None,
+        nmf_shuffle: bool = None,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
-        verbose=True,
     ):
         """
         Higher is better.
@@ -226,13 +296,31 @@ class TopicModel(object):
                 if self.model_type == 'NMF':
                     self.infer_topics(
                         num_topics=i,
-                        beta_loss=beta_loss,
+                        nmf_init=nmf_init,
+                        nmf_solver=nmf_solver,
+                        nmf_beta_loss=nmf_beta_loss,
+                        nmf_max_iter=nmf_max_iter,
+                        nmf_alpha=nmf_alpha,
+                        nmf_l1_ratio=nmf_l1_ratio,
+                        nmf_shuffle=nmf_shuffle,
                         random_state=random_state,
                     )
                 elif self.model_type == 'LDA':
                     self.infer_topics(
                         num_topics=i,
-                        algorithm=algorithm,
+                        nmf_init=nmf_init,
+                        nmf_solver=nmf_solver,
+                        nmf_beta_loss=nmf_beta_loss,
+                        nmf_max_iter=nmf_max_iter,
+                        nmf_alpha=nmf_alpha,
+                        nmf_l1_ratio=nmf_l1_ratio,
+                        nmf_shuffle=nmf_shuffle,
+                        lda_algorithm=lda_algorithm,
+                        lda_alpha=lda_alpha,
+                        lda_eta=lda_eta,
+                        lda_learning_method=lda_learning_method,
+                        lda_n_jobs=lda_n_jobs,
+                        lda_n_iter=lda_n_iter,
                         random_state=random_state,
                     )
                 else:
@@ -262,20 +350,31 @@ class TopicModel(object):
 
     def coherence_w2v_metric(
         self,
-        min_num_topics=10,
-        step=5,
-        max_num_topics=50,
-        top_n_words=10,
-        w2v_size=None,
-        w2v_min_count=None,
-        # w2v_max_vocab_size=None,
-        w2v_max_final_vocab=None,
-        w2v_sg=None,
-        w2v_workers=None,
-        beta_loss='frobenius',
-        algorithm='variational',
+        min_num_topics: int = 10,
+        max_num_topics: int = 20,
+        step: int = 5,
+        top_n_words: int = 10,
+        w2v_size: int = None,
+        w2v_min_count: int = None,
+        # w2v_max_vocab_size: int = None,
+        w2v_max_final_vocab: int = None,
+        w2v_sg: int = None,
+        w2v_workers: int = None,
+        verbose: bool = True,
+        nmf_init: str = None,
+        nmf_solver: str = None,
+        nmf_beta_loss: str = None,
+        nmf_max_iter: int = None,
+        nmf_alpha: float = None,
+        nmf_l1_ratio: float = None,
+        nmf_shuffle: bool = None,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
-        verbose=True,
     ):
         """
         Higher is better.
@@ -338,13 +437,24 @@ class TopicModel(object):
             if self.model_type == 'NMF':
                 self.infer_topics(
                     num_topics=k,
-                    beta_loss=beta_loss,
+                    nmf_init=nmf_init,
+                    nmf_solver=nmf_solver,
+                    nmf_beta_loss=nmf_beta_loss,
+                    nmf_max_iter=nmf_max_iter,
+                    nmf_alpha=nmf_alpha,
+                    nmf_l1_ratio=nmf_l1_ratio,
+                    nmf_shuffle=nmf_shuffle,
                     random_state=random_state,
                 )
             elif self.model_type == 'LDA':
                 self.infer_topics(
                     num_topics=k,
-                    algorithm=algorithm,
+                    lda_algorithm=lda_algorithm,
+                    lda_alpha=lda_alpha,
+                    lda_eta=lda_eta,
+                    lda_learning_method=lda_learning_method,
+                    lda_n_jobs=lda_n_jobs,
+                    lda_n_iter=lda_n_iter,
                     random_state=random_state,
                 )
             else:
@@ -360,20 +470,25 @@ class TopicModel(object):
 
     def perplexity_metric(
         self,
-        min_num_topics=10,
-        step=5,
-        max_num_topics=50,
-        train_size=0.7,
-        algorithm='variational',
+        min_num_topics: int = 10,
+        max_num_topics: int = 20,
+        step: int = 5,
+        train_size: float = 0.7,
+        verbose: bool = True,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
-        verbose=True,
     ):
         """
         Measures perplexity for LDA as computed by scikit-learn.
 
         http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html#sklearn.decomposition.LatentDirichletAllocation.perplexity
 
-        NB: Only supports algorithm='variational' (sklearn LDA)
+        NB: Only supports lda_algorithm: str = None (sklearn LDA)
 
         :param min_num_topics:
         :param max_num_topics:
@@ -386,10 +501,11 @@ class TopicModel(object):
         train_perplexities = []
         test_perplexities = []
         if self.model_type == 'LDA':
-            print(f"Computing perplexity with algorithm='{algorithm}'")
+            print(f"Computing perplexity with lda_algorithm='{lda_algorithm}'")
             df_train, df_test = train_test_split(self.corpus.data_frame, train_size=train_size, test_size=1 - train_size)
             corpus_train = Corpus(
                 source_filepath=df_train,
+                name=self.corpus.name,
                 sep=self.corpus._sep,
                 language=self.corpus._language,
                 n_gram=self.corpus._n_gram,
@@ -398,6 +514,14 @@ class TopicModel(object):
                 min_absolute_frequency=self.corpus._min_absolute_frequency,
                 max_features=self.corpus.max_features,
                 sample=None,
+                text_col=self.corpus.text_col,
+                full_text_col=self.corpus.full_text_col,
+                title_col=self.corpus.title_col,
+                author_col=self.corpus.author_col,
+                affiliation_col=self.corpus.affiliation_col,
+                dataset_col=self.corpus.dataset_col,
+                date_col=self.corpus.date_col,
+                id_col=self.corpus.id_col,
             )
             tf_test = corpus_train.vectorizer.transform(df_test[corpus_train._text_col].tolist())
             lda_model = type(self)(corpus_train)
@@ -406,7 +530,12 @@ class TopicModel(object):
                     print(f'Topics={i} ({idx + 1} of {len(num_topics_infer)})')
                 lda_model.infer_topics(
                     num_topics=i,
-                    algorithm=algorithm,
+                    lda_algorithm=lda_algorithm,
+                    lda_alpha=lda_alpha,
+                    lda_eta=lda_eta,
+                    lda_learning_method=lda_learning_method,
+                    lda_n_jobs=lda_n_jobs,
+                    lda_n_iter=lda_n_iter,
                     random_state=random_state,
                 )
                 train_perplexities.append(lda_model.model.perplexity(
@@ -415,7 +544,7 @@ class TopicModel(object):
                 if verbose:
                     print(f'\tTrain perplexity={train_perplexities[-1]:.4f}, Test perplexity={test_perplexities[-1]:.4f}')
         else:
-            raise TypeError("Computing perplexity only supported for LDA with algorithm='variational'. Not running.")
+            raise TypeError("Computing perplexity only supported for LDA with lda_algorithm: str = None. Not running.")
         return train_perplexities, test_perplexities
 
     def print_topics(self, num_words: int = 10, sort_by_freq: str = ''):
@@ -707,45 +836,46 @@ class LatentDirichletAllocation(TopicModel):
     def infer_topics(
         self,
         num_topics: int = None,
-        algorithm: str = None,
-        n_iter: int = None,
-        alpha: float = None,
-        eta: float = None,
-        n_jobs: int = None,
+        lda_algorithm: str = None,
+        lda_alpha: float = None,
+        lda_eta: float = None,
+        lda_learning_method: str = None,
+        lda_n_jobs: int = None,
+        lda_n_iter: int = None,
         random_state=None,
         **kwargs,
     ):
         self.trained = True
         self.nb_topics = num_topics or 10
-        self.algorithm = algorithm or 'variational'  # default sklearn
-        self.n_iter = n_iter or 2000  # only for lda library
-        self.n_jobs = n_jobs or -1  # only for sklearn
+        self.lda_algorithm = lda_algorithm or 'variational'  # default sklearn
+        self.lda_alpha = lda_alpha or 1 / num_topics
+        self.lda_eta = lda_eta or 1 / num_topics
+        self.lda_learning_method = lda_learning_method or 'batch'
+        self.lda_n_jobs = lda_n_jobs or -1  # only for sklearn
+        self.lda_n_iter = lda_n_iter or 2000  # only for lda library
         self.random_state = random_state
 
-        self.alpha = alpha or 1 / num_topics
-        self.eta = eta or 1 / num_topics
-
-        if self.algorithm == 'variational':
+        if self.lda_algorithm == 'variational':
             # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html
             self.model = LDA(
                 n_components=num_topics,
-                doc_topic_prior=self.alpha,
-                topic_word_prior=self.eta,
-                learning_method='batch',
-                n_jobs=self.n_jobs,
+                doc_topic_prior=self.lda_alpha,
+                topic_word_prior=self.lda_eta,
+                learning_method=self.lda_learning_method,
+                n_jobs=self.lda_n_jobs,
                 random_state=self.random_state,
             )
-        elif self.algorithm == 'gibbs':
+        elif self.lda_algorithm == 'gibbs':
             # https://github.com/ariddell/lda/
             self.model = lda.LDA(
                 n_topics=num_topics,
-                n_iter=self.n_iter,
-                alpha=self.alpha,
-                eta=self.eta,
+                lda_n_iter=self.lda_n_iter,
+                alpha=self.lda_alpha,
+                eta=self.lda_eta,
                 random_state=self.random_state,
             )
         else:
-            raise ValueError(f"algorithm must be either 'variational' or 'gibbs', got {self.algorithm}")
+            raise ValueError(f"lda_algorithm must be either 'variational' or 'gibbs', got {self.lda_algorithm}")
         topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)
 
         self.topic_word_matrix = []
@@ -785,40 +915,40 @@ class NonNegativeMatrixFactorization(TopicModel):
     def infer_topics(
         self,
         num_topics: int = None,
-        init: str = None,
-        solver: str = None,
-        beta_loss: str = None,
-        max_iter: int = None,
-        alpha: float = None,
-        l1_ratio: float = None,
-        shuffle: bool = None,
+        nmf_init: str = None,
+        nmf_solver: str = None,
+        nmf_beta_loss: str = None,
+        nmf_max_iter: int = None,
+        nmf_alpha: float = None,
+        nmf_l1_ratio: float = None,
+        nmf_shuffle: bool = None,
         random_state=None,
         **kwargs,
     ):
         self.trained = True
         self.nb_topics = num_topics or 10
-        self.init = init
-        self.solver = solver or 'cd'
-        self.beta_loss = beta_loss or 'frobenius'  # Used in 'mu' solver
-        self.max_iter = max_iter or 200
-        self.alpha = alpha or 0.0  # 0 = no regularization; used in the 'cd' solver
-        self.l1_ratio = l1_ratio or 0.0  # 0 = L2, 1 = L1; used in the 'cd' solver
-        self.shuffle = shuffle or False  # randomize the order of coordinates in the 'cd' solver
+        self.nmf_init = nmf_init
+        self.nmf_solver = nmf_solver or 'cd'
+        self.nmf_beta_loss = nmf_beta_loss or 'frobenius'  # Used in 'mu' nmf_solver
+        self.nmf_max_iter = nmf_max_iter or 200
+        self.nmf_alpha = nmf_alpha or 0.0  # 0 = no regularization; used in the 'cd' nmf_solver
+        self.nmf_l1_ratio = nmf_l1_ratio or 0.0  # 0 = L2, 1 = L1; used in the 'cd' nmf_solver
+        self.nmf_shuffle = nmf_shuffle or False  # randomize the order of coordinates in the 'cd' nmf_solver
         self.random_state = random_state
 
-        if (solver == 'mu') and (beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
-            raise ValueError(f"beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {beta_loss}")
+        if (nmf_solver == 'mu') and (nmf_beta_loss not in ['frobenius', 'kullback-leibler', 'itakura-saito']):
+            raise ValueError(f"nmf_beta_loss must be 'frobenius', 'kullback-leibler', or 'itakura-saito', got {nmf_beta_loss}")
 
         # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html
         self.model = NMF(
             n_components=num_topics,
-            init=self.init,
-            solver=self.solver,
-            beta_loss=self.beta_loss,
-            max_iter=self.max_iter,
-            alpha=self.alpha,
-            l1_ratio=self.l1_ratio,
-            shuffle=self.shuffle,
+            init=self.nmf_init,
+            solver=self.nmf_solver,
+            beta_loss=self.nmf_beta_loss,
+            max_iter=self.nmf_max_iter,
+            alpha=self.nmf_alpha,
+            l1_ratio=self.nmf_l1_ratio,
+            shuffle=self.nmf_shuffle,
             random_state=self.random_state,
         )
         topic_document = self.model.fit_transform(self.corpus.sklearn_vector_space)

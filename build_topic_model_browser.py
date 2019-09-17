@@ -43,6 +43,7 @@ def get_config(config_filepath):
 
 
 def main(config_browser):
+    # Data parameters
     data_dir = config_browser.get('data_dir', '', vars=os.environ)
     if not data_dir:
         data_dir = '.'
@@ -50,22 +51,22 @@ def main(config_browser):
     docs_filename = config_browser.get('docs_filename', '')
     if not docs_filename:
         raise ValueError(f'docs_filename not specified in {config_filepath}')
+    source_filepath = data_dir / docs_filename
+    if not source_filepath.exists():
+        raise OSError(f'Documents file does not exist: {source_filepath}')
+    # Corpus parameters
     corpus_name = config_browser.get('corpus_name', '')
     if not corpus_name:
         corpus_name = 'corpus'
     # remove spaces
     corpus_name = '_'.join(corpus_name.split())
-
-    source_filepath = data_dir / docs_filename
-    # Ensure data exists
-    if not source_filepath.exists():
-        raise OSError(f'Documents file does not exist: {source_filepath}')
-
     language = config_browser.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
+    # ignore words which relative frequency is > than max_relative_frequency
     max_relative_frequency = config_browser.getfloat('max_relative_frequency', 0.8)
+    # ignore words which absolute frequency is < than min_absolute_frequency
     min_absolute_frequency = config_browser.getint('min_absolute_frequency', 5)
-    num_topics = config_browser.getint('num_topics', 15)
+    # 'tf' (term-frequency) or 'tfidf' (term-frequency inverse-document-frequency)
     vectorization = config_browser.get('vectorization', 'tfidf')
     n_gram = config_browser.getint('n_gram', 1)
     max_features = config_browser.get('max_features', None)
@@ -76,13 +77,29 @@ def main(config_browser):
             max_features = None
     assert isinstance(max_features, int) or (max_features is None)
     sample = config_browser.getfloat('sample', 1.0)
+    # General model parameters
+    model_type = config_browser.get('model_type', 'NMF')
+    num_topics = config_browser.getint('num_topics', 15)
+    random_state = config_browser.getint('random_state', None)
+    load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
+    # NMF parameters
+    nmf_init = config_browser.get('nmf_init', None)
+    nmf_solver = config_browser.get('nmf_solver', None)
+    nmf_beta_loss = config_browser.get('nmf_beta_loss', 'frobenius')
+    nmf_max_iter = config_browser.getint('nmf_max_iter', None)
+    nmf_alpha = config_browser.getfloat('nmf_alpha', None)
+    nmf_l1_ratio = config_browser.getfloat('nmf_l1_ratio', None)
+    nmf_shuffle = config_browser.getboolean('nmf_shuffle', None)
+    # LDA parameters
+    lda_algorithm = config_browser.get('lda_algorithm', 'variational')
+    lda_alpha = config_browser.getfloat('lda_alpha', None)
+    lda_eta = config_browser.getfloat('lda_eta', None)
+    lda_learning_method = config_browser.get('lda_algorithm', 'batch')
+    lda_n_jobs = config_browser.getint('lda_n_jobs', -1)
+    lda_n_iter = config_browser.getint('lda_n_iter', None)
+    # Web app parameters
     top_words_description = config_browser.getint('top_words_description', 10)
     top_words_cloud = config_browser.getint('top_words_cloud', 5)
-    model_type = config_browser.get('model_type', 'NMF')
-    random_state = config_browser.getint('random_state', None)
-    nmf_beta_loss = config_browser.get('nmf_beta_loss', 'frobenius')
-    lda_algorithm = config_browser.get('lda_algorithm', 'variational')
-    load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
 
     if model_type not in ['NMF', 'LDA']:
         raise ValueError('model_type must be NMF or LDA')
@@ -162,13 +179,24 @@ def main(config_browser):
         if model_type == 'NMF':
             topic_model.infer_topics(
                 num_topics=num_topics,
-                beta_loss=nmf_beta_loss,
+                nmf_init=nmf_init,
+                nmf_solver=nmf_solver,
+                nmf_beta_loss=nmf_beta_loss,
+                nmf_max_iter=nmf_max_iter,
+                nmf_alpha=nmf_alpha,
+                nmf_l1_ratio=nmf_l1_ratio,
+                nmf_shuffle=nmf_shuffle,
                 random_state=random_state,
             )
         elif model_type == 'LDA':
             topic_model.infer_topics(
                 num_topics=num_topics,
-                algorithm=lda_algorithm,
+                lda_algorithm=lda_algorithm,
+                lda_alpha=lda_alpha,
+                lda_eta=lda_eta,
+                lda_learning_method=lda_learning_method,
+                lda_n_jobs=lda_n_jobs,
+                lda_n_iter=lda_n_iter,
                 random_state=random_state,
             )
 
