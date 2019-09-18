@@ -745,7 +745,7 @@ def main(config_browser):
         return render_template(
             'topic.html',
             topic_id=tid,
-            description=descriptions[tid] if descriptions else None,
+            description=f"{tid}{': ' + descriptions[tid] if descriptions else None}",
             frequency=round(topic_model.topic_frequency(tid) * 100, 2),
             documents=documents,
             topic_ids=topic_description,
