@@ -533,9 +533,7 @@ class Visualization:
 
         fig, ax = plt.subplots(figsize=figsize)
 
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -602,9 +600,7 @@ class Visualization:
     ):
         """Plot a heatmap of topic-topic Pearson correlation coefficient values
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -686,9 +682,7 @@ class Visualization:
         """Plot a hierarchical clustermap of topic-topic Pearson correlation coefficient values
         (computed with np.corrcoef). Plot is made with Seaborn's clustermap.
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -780,9 +774,7 @@ class Visualization:
     ):
         """Plot histogram of document loading distributions per topic
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -879,9 +871,7 @@ class Visualization:
 
         Plot Boxplot of document loading distributions per topic
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -943,9 +933,7 @@ class Visualization:
 
         Plot Barplot of document loading distributions per topic
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -1001,9 +989,7 @@ class Visualization:
         n_words: int = 10,
     ):
 
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
 
         idx = topic_cols_all.index(topic_col)
 
@@ -1054,9 +1040,7 @@ class Visualization:
         n_words: int = 10,
     ):
 
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
 
         idx = topic_cols_all.index(topic_col)
 
@@ -1120,9 +1104,7 @@ class Visualization:
     ):
         """Plot count of documents >= a given threshold per frequency window
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -1264,9 +1246,7 @@ class Visualization:
         Each year across topics adds up to 100%.
         One document can contribute to multiple topics.
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -1405,9 +1385,7 @@ class Visualization:
         """For each topic (separately), of the documents above the threshold,
         plot the average topic loading for that year.
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -1887,9 +1865,7 @@ class Visualization:
     ):
         """Bar plot of the topic loadings for a given document.
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -1995,9 +1971,7 @@ class Visualization:
     ):
         """Bar plot of the topic loadings for a given word.
         """
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -2182,9 +2156,7 @@ class Visualization:
         annot_fontcolor: str = None,
         savedata: bool = False,
     ):
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
@@ -2313,9 +2285,7 @@ class Visualization:
         annot_fontcolor: str = None,
         savedata: bool = False,
     ):
-        topic_cols_all = []
-        for top_words in self.topic_model.top_words_topics(n_words):
-            topic_cols_all.append(' '.join(top_words))
+        topic_cols_all = [' '.join(tw) for tw in self.topic_model.top_words_topics(num_words=n_words)]
         if not topic_cols:
             topic_cols = topic_cols_all
 
