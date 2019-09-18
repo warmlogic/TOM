@@ -1,5 +1,5 @@
 # coding: utf-8
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import codecs
 import json
 from pathlib import Path
@@ -21,7 +21,7 @@ from tom_lib.utils import save_topic_number_metrics_data
 sns.set(rc={"lines.linewidth": 2})
 sns.set_style("whitegrid")
 
-mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
+# mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
 
 
 def split_string_sep(string: str, sep: str = None):
@@ -1088,6 +1088,7 @@ class Visualization:
     def plot_topic_over_time_count(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1140,6 +1141,11 @@ class Visualization:
             columns=topic_cols_all,
         )
         _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1228,6 +1234,7 @@ class Visualization:
     def plot_topic_over_time_percent(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1282,6 +1289,11 @@ class Visualization:
             columns=topic_cols_all,
         )
         _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
 
         # join the date with boolean >= thresh
@@ -1368,6 +1380,7 @@ class Visualization:
     def plot_topic_over_time_loading(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1421,6 +1434,11 @@ class Visualization:
             columns=topic_cols_all,
         )
         _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1858,6 +1876,7 @@ class Visualization:
         self,
         doc_id: int = None,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
@@ -1887,6 +1906,10 @@ class Visualization:
             data=data,
             columns=topic_cols_all,
         )[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
 
         if savedata:
             filename_out = f'{self.topic_model.corpus.name}_{save_data_string}.csv'
@@ -1935,7 +1958,7 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=n_words * 32,
+                b=int(len(max(topic_cols, key=len)) * 2.5),
                 l=30,
                 r=0,
                 pad=4,
@@ -1964,6 +1987,7 @@ class Visualization:
         self,
         word_id: int,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
@@ -1979,6 +2003,10 @@ class Visualization:
             data=[self.topic_model.topic_distribution_for_word(word_id=word_id, normalized=normalized)],
             columns=topic_cols_all,
         )[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
 
         x = [f'Topic {i}: {words}' for i, words in enumerate(topic_cols)]
 
@@ -2035,7 +2063,7 @@ class Visualization:
             ),
             margin=go.layout.Margin(
                 t=30,
-                b=n_words * 32,
+                b=int(len(max(topic_cols, key=len)) * 2.5),
                 l=30,
                 r=0,
                 pad=4,
@@ -2143,6 +2171,7 @@ class Visualization:
     def plotly_heatmap(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
@@ -2176,6 +2205,10 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        if rename:
+            corr = corr.rename(columns=rename, index=rename)
+            topic_cols = list(rename.values())
 
         save_data_string = 'topic_topic_corr_heatmap'
         if normalized:
@@ -2272,6 +2305,7 @@ class Visualization:
     def plotly_clustermap(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         output_type: str = 'div',
@@ -2305,6 +2339,10 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        if rename:
+            corr = corr.rename(columns=rename, index=rename)
+            topic_cols = list(rename.values())
 
         z = corr.values
         x = corr.columns
