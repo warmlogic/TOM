@@ -44,8 +44,7 @@ def main(config_infer):
     now_str = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     # Data parameters
     data_dir = config_infer.get('data_dir', '', vars=os.environ)
-    if not data_dir:
-        data_dir = '.'
+    data_dir = data_dir or '.'
     data_dir = Path(data_dir)
     docs_filename = config_infer.get('docs_filename', '')
     if not docs_filename:
@@ -55,10 +54,8 @@ def main(config_infer):
         raise OSError(f'Documents file does not exist: {source_filepath}')
     # Corpus parameters
     corpus_name = config_infer.get('corpus_name', '')
-    if not corpus_name:
-        corpus_name = 'corpus'
-    # remove spaces
-    corpus_name = '_'.join(corpus_name.split())
+    corpus_name = corpus_name or 'corpus'
+    corpus_name = '_'.join(corpus_name.split())  # remove spaces
     language = config_infer.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
     # ignore words which relative frequency is > than max_relative_frequency
