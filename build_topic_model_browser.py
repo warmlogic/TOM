@@ -45,8 +45,7 @@ def get_config(config_filepath):
 def main(config_browser):
     # Data parameters
     data_dir = config_browser.get('data_dir', '', vars=os.environ)
-    if not data_dir:
-        data_dir = '.'
+    data_dir = data_dir or '.'
     data_dir = Path(data_dir)
     docs_filename = config_browser.get('docs_filename', '')
     if not docs_filename:
@@ -56,10 +55,8 @@ def main(config_browser):
         raise OSError(f'Documents file does not exist: {source_filepath}')
     # Corpus parameters
     corpus_name = config_browser.get('corpus_name', '')
-    if not corpus_name:
-        corpus_name = 'corpus'
-    # remove spaces
-    corpus_name = '_'.join(corpus_name.split())
+    corpus_name = corpus_name or 'corpus'
+    corpus_name = '_'.join(corpus_name.split())  # remove spaces
     language = config_browser.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
     # ignore words which relative frequency is > than max_relative_frequency
@@ -80,6 +77,8 @@ def main(config_browser):
     # General model parameters
     model_type = config_browser.get('model_type', 'NMF')
     num_topics = config_browser.getint('num_topics', 15)
+    descriptions = config_browser.get('descriptions', None)
+    descriptions = descriptions.split(',') if descriptions else None
     verbose = config_browser.getint('verbose', 0)
     random_state = config_browser.getint('random_state', None)
     load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
@@ -207,9 +206,16 @@ def main(config_browser):
         logger.info(f'Saving topic model: {topic_model_filepath}')
         ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
 
+    topic_cols_all = [' '.join(tw) for tw in topic_model.top_words_topics(num_words=top_words_description)]
+    if descriptions is not None and isinstance(descriptions, list):
+        assert len(descriptions) == len(topic_cols_all)
+        rename = {tc: d for tc, d in zip(topic_cols_all, descriptions)}
+    else:
+        rename = None
+
     # Get the top words for each topic for use around the site
     topic_description = [
-        f"Topic {i:2d}: {', '.join(topic_words)}" for i, topic_words in enumerate(
+        f"Topic {i:2d}: {descriptions[i] + ' --- ' if descriptions else None}{', '.join(tw)}" for i, tw in enumerate(
             topic_model.top_words_topics(num_words=top_words_description)
         )
     ]
@@ -221,7 +227,8 @@ def main(config_browser):
     ut.save_top_words(num_top_words_save, topic_model, static_folder / data_folder / top_words_filename)
 
     # Get the vocabularly and split into sublists
-    words_per_col = int(ceil(topic_model.corpus.vocabulary_size / 5))
+    n_cols = 5
+    words_per_col = int(ceil(topic_model.corpus.vocabulary_size / n_cols))
     split_vocabulary = [sublist for sublist in ut.chunks([(k, v) for k, v in topic_model.corpus.vocabulary.items()], words_per_col)]
 
     # Export topic cloud
@@ -258,20 +265,65 @@ def main(config_browser):
 
     logger.info(f'Will save figures and figure data to: {viz.output_dir}')
 
+    # count
     docs_over_time_count_line, docs_over_time_count_filepath = viz.plotly_docs_over_time(
-        freq=freq, count=True, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
+        freq=freq,
+        count=True,
+        by_affil=True,
+        ma_window=ma_window,
+        output_type='div',
+        savedata=True,
+    )
+
+    # percent
     docs_over_time_percent_line, docs_over_time_percent_filepath = viz.plotly_docs_over_time(
-        freq=freq, count=False, by_affil=True, ma_window=ma_window, output_type='div', savedata=True)
-    topic_loading_barplot, topic_loading_filepath = viz.plotly_doc_topic_loading(normalized=normalized, output_type='div', savedata=True)
+        freq=freq,
+        count=False,
+        by_affil=True,
+        ma_window=ma_window,
+        output_type='div',
+        savedata=True,
+    )
+
+    # average topic loading
+    topic_loading_barplot, topic_loading_filepath = viz.plotly_doc_topic_loading(
+        rename=rename,
+        normalized=normalized,
+        n_words=top_words_description,
+        output_type='div',
+        savedata=True,
+    )
+
     # topic_heatmap, topic_heatmap_filepath = viz.plotly_heatmap(
-    #     normalized=normalized, annotate=True, annot_decimals=2, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=False)
+    #     rename=rename,
+    #     normalized=normalized,
+    #     n_words=top_words_description,
+    #     annotate=True,
+    #     annot_decimals=2,
+    #     annot_fontsize=7,
+    #     annot_fontcolor='black',
+    #     output_type='div',
+    #     savedata=False,
+    # )
+
     topic_clustermap, topic_clustermap_filepath, topic_heatmap_filepath = viz.plotly_clustermap(
-        normalized=normalized, annotate=True, annot_decimals=2, annot_fontsize=7, annot_fontcolor='black', output_type='div', savedata=True)
+        rename=rename,
+        normalized=normalized,
+        n_words=top_words_description,
+        annotate=True,
+        annot_decimals=2,
+        annot_fontsize=7,
+        annot_fontcolor='black',
+        output_type='div',
+        savedata=True,
+    )
 
     _, _, fig_topic_over_time_count = viz.plot_topic_over_time_count(
+        rename=rename,
         normalized=normalized,
         thresh=thresh,
         freq=freq,
+        n_words=top_words_description,
         by_affil=False,
         ma_window=ma_window,
         nchar_title=nchar_title,
@@ -282,9 +334,11 @@ def main(config_browser):
     )
 
     _, _, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
+        rename=rename,
         normalized=normalized,
         thresh=thresh,
         freq=freq,
+        n_words=top_words_description,
         by_affil=False,
         ma_window=ma_window,
         nchar_title=nchar_title,
@@ -295,9 +349,11 @@ def main(config_browser):
     )
 
     # _, _, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+    #     rename=rename,
     #     normalized=normalized,
     #     thresh=thresh,
     #     freq=freq,
+    #     n_words=top_words_description,
     #     by_affil=False,
     #     ma_window=ma_window,
     #     nchar_title=nchar_title,
@@ -308,9 +364,11 @@ def main(config_browser):
     # )
 
     _, _, fig_topic_over_time_count_affil = viz.plot_topic_over_time_count(
+        rename=rename,
         normalized=normalized,
         thresh=thresh,
         freq=freq,
+        n_words=top_words_description,
         by_affil=True,
         ma_window=ma_window,
         nchar_title=nchar_title,
@@ -321,9 +379,11 @@ def main(config_browser):
     )
 
     _, _, fig_topic_over_time_percent_affil = viz.plot_topic_over_time_percent(
+        rename=rename,
         normalized=normalized,
         thresh=thresh,
         freq=freq,
+        n_words=top_words_description,
         by_affil=True,
         ma_window=ma_window,
         nchar_title=nchar_title,
@@ -334,9 +394,11 @@ def main(config_browser):
     )
 
     # _, _, fig_topic_over_time_loading_affil = viz.plot_topic_over_time_loading(
+    #     rename=rename,
     #     normalized=normalized,
     #     thresh=thresh,
     #     freq=freq,
+    #     n_words=top_words_description,
     #     by_affil=True,
     #     ma_window=ma_window,
     #     nchar_title=nchar_title,
@@ -347,18 +409,22 @@ def main(config_browser):
     # )
 
     # _, _, fig_topic_topic_corr_heatmap = viz.plot_heatmap(
+    #     rename=rename,
     #     normalized=normalized,
     #     fmt='.2f',
     #     annot_fontsize=12,
+    #     n_words=top_words_description,
     #     savefig=savefig,
     #     dpi=dpi,
     #     figformat=figformat,
     # )
 
     _, fig_topic_topic_corr_clustermap = viz.plot_clustermap(
+        rename=rename,
         normalized=normalized,
         fmt='.2f',
         annot_fontsize=12,
+        n_words=top_words_description,
         savefig=savefig,
         dpi=dpi,
         figformat=figformat,
@@ -416,7 +482,7 @@ def main(config_browser):
     app.layout = html.Div([
         html.Div([
             html.Div(
-                html.P('Drag the sliders to describe a topic loading vector. The most similar documents are displayed below.'),
+                html.P('Drag or click the sliders to describe a topic loading vector. The most similar documents are displayed below.'),
                 style={'float': 'left'},
             ),
             html.Div(
@@ -452,7 +518,7 @@ def main(config_browser):
                 ),
                 html.Div(
                     html.Label(
-                        f'Topic {n}: ' + ', '.join([x[0] for x in topic_model.top_words(n, 10)])
+                        topic_description[n]
                     ),
                     style={
                         'font-weight': 'bold',
@@ -679,6 +745,7 @@ def main(config_browser):
         return render_template(
             'topic.html',
             topic_id=tid,
+            description=descriptions[tid] if descriptions else None,
             frequency=round(topic_model.topic_frequency(tid) * 100, 2),
             documents=documents,
             topic_ids=topic_description,
@@ -712,7 +779,13 @@ def main(config_browser):
             )
 
         doc_topic_loading_barplot, _ = viz.plotly_doc_topic_loading(
-            did, normalized=True, n_words=top_words_description, output_type='div', savedata=False)
+            did,
+            rename=rename,
+            normalized=True,
+            n_words=top_words_description,
+            output_type='div',
+            savedata=False,
+        )
 
         return render_template(
             'document.html',
@@ -749,7 +822,13 @@ def main(config_browser):
             )
 
         word_topic_loading_barplot, _ = viz.plotly_word_topic_loading(
-            wid, normalized=True, n_words=top_words_description, output_type='div', savedata=False)
+            wid,
+            rename=rename,
+            normalized=True,
+            n_words=top_words_description,
+            output_type='div',
+            savedata=False,
+        )
 
         return render_template(
             'word.html',
