@@ -21,7 +21,7 @@ from tom_lib.utils import save_topic_number_metrics_data
 sns.set(rc={"lines.linewidth": 2})
 sns.set_style("whitegrid")
 
-# mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
+mpl.use("Agg")  # To be able to create figures on a headless server (no DISPLAY variable)
 
 
 def split_string_sep(string: str, sep: str = None):
