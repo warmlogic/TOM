@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html">
-    <title>Details for topic {{ topic_id }}</title>
+    <title>Details for topic {{ description }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.6/css/buttons.dataTables.min.css">
@@ -34,7 +34,7 @@
     </select>
 </div>
 <div id="header">
-    <h1>Details for topic {{ topic_id }}</h1>
+    <h1>Details for topic {{ description }}</h1>
     <p>Overall frequency : {{ frequency }}%</p>
 </div>
 <div id="wrap">
