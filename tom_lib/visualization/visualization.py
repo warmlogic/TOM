@@ -585,6 +585,7 @@ class Visualization:
     def plot_heatmap(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         mask_thresh: float = None,
         cmap=None,
@@ -615,6 +616,10 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        if rename:
+            corr = corr.rename(columns=rename, index=rename)
+            topic_cols = list(rename.values())
 
         if mask_thresh is None:
             mask_thresh = 0
@@ -664,6 +669,7 @@ class Visualization:
     def plot_clustermap(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         mask_thresh: float = None,
         cmap=None,
@@ -697,6 +703,10 @@ class Visualization:
             index=topic_cols_all,
         )
         corr = corr.loc[topic_cols, topic_cols]
+
+        if rename:
+            corr = corr.rename(columns=rename, index=rename)
+            topic_cols = list(rename.values())
 
         if mask_thresh is None:
             mask_thresh = 0
@@ -761,6 +771,7 @@ class Visualization:
     def plot_topic_loading_hist(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         bins=None,
         ncols: int = None,
@@ -813,6 +824,10 @@ class Visualization:
         )
         _df = _df[topic_cols]
 
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             _df[topic_col].plot(ax=ax, kind='hist', bins=bins)
             title = split_string_nchar(topic_col, nchar=nchar_title)
@@ -859,6 +874,7 @@ class Visualization:
     def plot_topic_loading_boxplot(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
@@ -890,6 +906,11 @@ class Visualization:
             columns=topic_cols_all,
         )
         _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         ax = sns.boxplot(ax=ax, data=_df)
 
         ax.set_title('Topic Loading Distribution (boxplot)')
@@ -921,6 +942,7 @@ class Visualization:
     def plot_topic_loading_barplot(
         self,
         topic_cols: List[str] = None,
+        rename: Dict = None,
         normalized: bool = True,
         n_words: int = 10,
         ylim: Tuple[float, float] = None,
@@ -951,7 +973,13 @@ class Visualization:
             data=self.topic_model.topic_distribution_for_document(normalized=normalized),
             columns=topic_cols_all,
         )
+
         _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         ax = sns.barplot(ax=ax, data=_df, estimator=np.mean)
 
         ax.set_title('Topic Loading Distribution (barplot; 95% CI of the mean)')
@@ -983,6 +1011,7 @@ class Visualization:
     def plot_one_topic_over_time_count(
         self,
         topic_col: str,
+        rename: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1004,6 +1033,11 @@ class Visualization:
             data=self.topic_model.topic_distribution_for_document(normalized=normalized)[:, idx],
             columns=[topic_col],
         )
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_col = list(rename.values())
+
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
@@ -1034,6 +1068,7 @@ class Visualization:
     def plot_one_topic_over_time_percent(
         self,
         topic_col: str,
+        rename: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1055,6 +1090,11 @@ class Visualization:
             data=self.topic_model.topic_distribution_for_document(normalized=normalized)[:, idx],
             columns=[topic_col],
         )
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_col = list(rename.values())
+
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
         _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
 
