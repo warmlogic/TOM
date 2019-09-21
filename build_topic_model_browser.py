@@ -155,13 +155,17 @@ def main(config_browser):
         logger.info(f'Loading topic model: {static_folder / topic_model_filepath}')
         topic_model = ut.load_topic_model(static_folder / topic_model_filepath)
 
+        # if loading a model and random_state is set, ensure they match
+        if random_state:
+            assert topic_model.random_state == random_state
+
         logger.info(f'Corpus size: {topic_model.corpus.size:,}')
         logger.info(f'Vocabulary size: {topic_model.corpus.vocabulary_size:,}')
     else:
         # Clean the topic model directory
         if (static_folder / tm_folder).exists():
             ut.delete_folder(static_folder / tm_folder)
-        (static_folder / tm_folder).mkdir(parents=True, exist_ok=True)
+        (static_folder / tm_folder).mkdir(parents=True, exist_ok=False)
 
         # Load and prepare a corpus
         logger.info(f'Loading documents: {source_filepath}')
