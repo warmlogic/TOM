@@ -53,9 +53,16 @@ def main(config_infer):
     if not source_filepath.exists():
         raise OSError(f'Documents file does not exist: {source_filepath}')
     # Corpus parameters
-    corpus_name = config_infer.get('corpus_name', '')
-    corpus_name = corpus_name or 'corpus'
-    corpus_name = '_'.join(corpus_name.split())  # remove spaces
+    id_col = config_infer.get('id_col', None)
+    affiliation_col = config_infer.get('affiliation_col', None)
+    dataset_col = config_infer.get('dataset_col', None)
+    title_col = config_infer.get('title_col', None)
+    author_col = config_infer.get('author_col', None)
+    date_col = config_infer.get('date_col', None)
+    text_col = config_infer.get('text_col', None)
+    full_text_col = config_infer.get('full_text_col', None)
+    corpus_name = config_infer.get('corpus_name', None)
+    corpus_name = '_'.join(corpus_name.split()) if corpus_name else 'corpus'  # remove spaces
     language = config_infer.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
     # ignore words which relative frequency is > than max_relative_frequency
@@ -120,9 +127,6 @@ def main(config_infer):
         if vectorization == 'tfidf':
             raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
 
-    full_text_col = 'orig_text'
-    id_col = 'access_num'
-
     # Load and prepare a corpus
     logger.info(f'Loading documents: {source_filepath}')
     corpus = Corpus(
@@ -135,8 +139,14 @@ def main(config_infer):
         min_absolute_frequency=min_absolute_frequency,
         max_features=max_features,
         sample=sample,
-        full_text_col=full_text_col,
         id_col=id_col,
+        affiliation_col=affiliation_col,
+        dataset_col=dataset_col,
+        title_col=title_col,
+        author_col=author_col,
+        date_col=date_col,
+        text_col=text_col,
+        full_text_col=full_text_col,
     )
     logger.info(f'Corpus size: {corpus.size:,}')
     logger.info(f'Vocabulary size: {len(corpus.vocabulary):,}')

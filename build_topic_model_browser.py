@@ -54,9 +54,16 @@ def main(config_browser):
     if not source_filepath.exists():
         raise OSError(f'Documents file does not exist: {source_filepath}')
     # Corpus parameters
-    corpus_name = config_browser.get('corpus_name', '')
-    corpus_name = corpus_name or 'corpus'
-    corpus_name = '_'.join(corpus_name.split())  # remove spaces
+    id_col = config_browser.get('id_col', None)
+    affiliation_col = config_browser.get('affiliation_col', None)
+    dataset_col = config_browser.get('dataset_col', None)
+    title_col = config_browser.get('title_col', None)
+    author_col = config_browser.get('author_col', None)
+    date_col = config_browser.get('date_col', None)
+    text_col = config_browser.get('text_col', None)
+    full_text_col = config_browser.get('full_text_col', None)
+    corpus_name = config_browser.get('corpus_name', None)
+    corpus_name = '_'.join(corpus_name.split()) if corpus_name else 'corpus'  # remove spaces
     language = config_browser.get('language', None)
     assert (isinstance(language, str) and language in ['english']) or (isinstance(language, list)) or (language is None)
     # ignore words which relative frequency is > than max_relative_frequency
@@ -139,9 +146,6 @@ def main(config_browser):
     # # author_network_folder = data_folder / 'author_network'
     figs_folder = data_folder / 'figs'
 
-    full_text_col = 'orig_text'
-    id_col = 'access_num'
-
     # ##################################
     # Load or train model
     # ##################################
@@ -171,8 +175,14 @@ def main(config_browser):
             min_absolute_frequency=min_absolute_frequency,
             max_features=max_features,
             sample=sample,
-            full_text_col=full_text_col,
             id_col=id_col,
+            affiliation_col=affiliation_col,
+            dataset_col=dataset_col,
+            title_col=title_col,
+            author_col=author_col,
+            date_col=date_col,
+            text_col=text_col,
+            full_text_col=full_text_col,
         )
         # Initialize topic model
         if model_type == 'NMF':
