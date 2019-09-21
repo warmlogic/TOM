@@ -1,10 +1,37 @@
 # coding: utf-8
+from typing import List
+import argparse
+import configparser
+import logging
 import codecs
 import json
 import pickle
 import pandas as pd
 import numpy as np
-from typing import List
+
+logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
+logger = logging.getLogger(__name__)
+
+
+def get_parser():
+    """
+    Creates a new argument parser
+    """
+    parser = argparse.ArgumentParser(prog='assess_topics')
+    parser.add_argument('--config_filepath', '-c', type=str, nargs='?', default='config.ini')
+    return parser
+
+
+def get_config(config_filepath):
+    """
+    Read the specified config file
+    """
+    config = configparser.ConfigParser(allow_no_value=True)
+    try:
+        config.read(config_filepath)
+    except OSError:
+        logger.exception(f'Config file {config_filepath} not found. Did you set it up?')
+    return config
 
 
 def print_matrix(matrix):
