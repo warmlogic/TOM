@@ -193,7 +193,7 @@ class TopicModel(object):
         Lower is better.
 
         Arun, R., Suresh, V., Madhavan, C. E. V., and Murthy, M. N.
-        On finding the natural number of topics with latent dirichlet allocation: Some observations.
+        On finding the natural number of topics with Latent Dirichlet Allocation: Some observations.
         PAKDD (2010), pp. 391–402.
         https://doi.org/10.1007/978-3-642-13657-3_43
 
@@ -497,7 +497,7 @@ class TopicModel(object):
 
         http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.LatentDirichletAllocation.html#sklearn.decomposition.LatentDirichletAllocation.perplexity
 
-        NB: Only supports lda_algorithm: str = None (sklearn LDA)
+        NB: Only supports lda_algorithm 'variational' (sklearn LDA)
 
         :param min_num_topics:
         :param max_num_topics:

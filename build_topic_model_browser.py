@@ -77,10 +77,16 @@ def main(config_browser):
     # General model parameters
     model_type = config_browser.get('model_type', 'NMF')
     num_topics = config_browser.getint('num_topics', 15)
-    descriptions = config_browser.get('descriptions', None)
-    descriptions = descriptions.split(',') if descriptions else None
     verbose = config_browser.getint('verbose', 0)
     random_state = config_browser.getint('random_state', None)
+    rename_topics = config_browser.get('rename_topics', None)
+    rename_topics = rename_topics.split(',') if rename_topics else None
+    merge_topics = config_browser.get('merge_topics', None)
+    if merge_topics:
+        merge_topics = {t.split(':')[0]: t.split(':')[1:][0].split(',') for t in merge_topics.split('.') if t}
+    # must define the state if renaming or merging topics
+    if rename_topics or merge_topics:
+        assert random_state is not None
     load_if_existing_model = config_browser.getboolean('load_if_existing_model', True)
     # NMF parameters
     nmf_init = config_browser.get('nmf_init', None)
@@ -114,6 +120,9 @@ def main(config_browser):
             raise ValueError(f"For LDA, 'lda_algorithm' must be 'variational' or 'gibbs', got '{lda_algorithm}'")
         if vectorization == 'tfidf':
             raise ValueError(f"for LDA, 'vectorization' should be 'tf', got '{vectorization}'")
+
+    if rename_topics:
+        assert len(rename_topics) == num_topics
 
     # Flask Web server
     static_folder = Path('browser/static')
@@ -207,15 +216,14 @@ def main(config_browser):
         ut.save_topic_model(topic_model, static_folder / topic_model_filepath)
 
     topic_cols_all = [' '.join(tw) for tw in topic_model.top_words_topics(num_words=top_words_description)]
-    if descriptions is not None and isinstance(descriptions, list):
-        assert len(descriptions) == len(topic_cols_all)
-        rename = {tc: d for tc, d in zip(topic_cols_all, descriptions)}
+    if rename_topics:
+        rename = {tc: d for tc, d in zip(topic_cols_all, rename_topics)}
     else:
         rename = None
 
     # Get the top words for each topic for use around the site
     topic_description = [
-        f"Topic {i:2d}: {descriptions[i] + ' --- ' if descriptions else None}{', '.join(tw)}" for i, tw in enumerate(
+        f"Topic {i:2d}: {rename_topics[i] + ' --- ' if rename_topics else None}{', '.join(tw)}" for i, tw in enumerate(
             topic_model.top_words_topics(num_words=top_words_description)
         )
     ]
@@ -260,6 +268,11 @@ def main(config_browser):
     nchar_title = 30
     dpi = 72
     figformat = 'png'
+    by_affil_list = [False, True]
+    if merge_topics:
+        merge_topics_list = [False, True]
+    else:
+        merge_topics_list = [False, False]
 
     viz = Visualization(topic_model, output_dir=static_folder / figs_folder)
 
@@ -318,95 +331,70 @@ def main(config_browser):
         savedata=True,
     )
 
-    _, _, fig_topic_over_time_count = viz.plot_topic_over_time_count(
-        rename=rename,
-        normalized=normalized,
-        thresh=thresh,
-        freq=freq,
-        n_words=top_words_description,
-        by_affil=False,
-        ma_window=ma_window,
-        nchar_title=nchar_title,
-        ncols=ncols,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
+    totc = []
+    totp = []
+    # totl = []
+    for i, mt in enumerate(merge_topics_list):
+        for ba in by_affil_list:
+            if (not any(merge_topics_list)) and (i == 1):
+                fig_topic_over_time_count = None
+            else:
+                _, _, fig_topic_over_time_count = viz.plot_topic_over_time_count(
+                    rename=rename,
+                    merge_topics=merge_topics if mt else None,
+                    normalized=normalized,
+                    thresh=thresh,
+                    freq=freq,
+                    n_words=top_words_description,
+                    by_affil=ba,
+                    ma_window=ma_window,
+                    nchar_title=nchar_title,
+                    ncols=ncols,
+                    savefig=savefig,
+                    dpi=dpi,
+                    figformat=figformat,
+                )
+            totc.append(fig_topic_over_time_count)
 
-    _, _, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
-        rename=rename,
-        normalized=normalized,
-        thresh=thresh,
-        freq=freq,
-        n_words=top_words_description,
-        by_affil=False,
-        ma_window=ma_window,
-        nchar_title=nchar_title,
-        ncols=ncols,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
+            if (not any(merge_topics_list)) and (i == 1):
+                fig_topic_over_time_percent = None
+            else:
+                _, _, fig_topic_over_time_percent = viz.plot_topic_over_time_percent(
+                    rename=rename,
+                    merge_topics=merge_topics if mt else None,
+                    normalized=normalized,
+                    thresh=thresh,
+                    freq=freq,
+                    n_words=top_words_description,
+                    by_affil=ba,
+                    ma_window=ma_window,
+                    nchar_title=nchar_title,
+                    ncols=ncols,
+                    savefig=savefig,
+                    dpi=dpi,
+                    figformat=figformat,
+                )
+            totp.append(fig_topic_over_time_percent)
 
-    # _, _, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
-    #     rename=rename,
-    #     normalized=normalized,
-    #     thresh=thresh,
-    #     freq=freq,
-    #     n_words=top_words_description,
-    #     by_affil=False,
-    #     ma_window=ma_window,
-    #     nchar_title=nchar_title,
-    #     ncols=ncols,
-    #     savefig=savefig,
-    #     dpi=dpi,
-    #     figformat=figformat,
-    # )
-
-    _, _, fig_topic_over_time_count_affil = viz.plot_topic_over_time_count(
-        rename=rename,
-        normalized=normalized,
-        thresh=thresh,
-        freq=freq,
-        n_words=top_words_description,
-        by_affil=True,
-        ma_window=ma_window,
-        nchar_title=nchar_title,
-        ncols=ncols,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
-
-    _, _, fig_topic_over_time_percent_affil = viz.plot_topic_over_time_percent(
-        rename=rename,
-        normalized=normalized,
-        thresh=thresh,
-        freq=freq,
-        n_words=top_words_description,
-        by_affil=True,
-        ma_window=ma_window,
-        nchar_title=nchar_title,
-        ncols=ncols,
-        savefig=savefig,
-        dpi=dpi,
-        figformat=figformat,
-    )
-
-    # _, _, fig_topic_over_time_loading_affil = viz.plot_topic_over_time_loading(
-    #     rename=rename,
-    #     normalized=normalized,
-    #     thresh=thresh,
-    #     freq=freq,
-    #     n_words=top_words_description,
-    #     by_affil=True,
-    #     ma_window=ma_window,
-    #     nchar_title=nchar_title,
-    #     ncols=ncols,
-    #     savefig=savefig,
-    #     dpi=dpi,
-    #     figformat=figformat,
-    # )
+            # if (not any(merge_topics_list)) and (i == 1):
+            #     fig_topic_over_time_loading = None
+            # else:
+            #     _, _, fig_topic_over_time_loading = viz.plot_topic_over_time_loading(
+            #         rename=rename,
+            #         merge_topics=merge_topics if mt else None,
+            #         normalized=normalized,
+            #         thresh=thresh,
+            #         freq=freq,
+            #         n_words=top_words_description,
+            #         by_affil=ba,
+            #         ma_window=ma_window,
+            #         nchar_title=nchar_title,
+            #         ncols=ncols,
+            #         savefig=savefig,
+            #         dpi=dpi,
+            #         figformat=figformat,
+            #     )
+            # totl.append(fig_topic_over_time_loading)
 
     # _, _, fig_topic_topic_corr_heatmap = viz.plot_heatmap(
     #     rename=rename,
@@ -685,12 +673,18 @@ def main(config_browser):
             topic_clustermap=topic_clustermap,
             topic_clustermap_filepath=figs_folder / topic_clustermap_filepath,
             topic_heatmap_filepath=figs_folder / topic_heatmap_filepath,
-            fig_topic_over_time_count=figs_folder / fig_topic_over_time_count,
-            fig_topic_over_time_percent=figs_folder / fig_topic_over_time_percent,
-            # fig_topic_over_time_loading=figs_folder / fig_topic_over_time_loading,
-            fig_topic_over_time_count_affil=figs_folder / fig_topic_over_time_count_affil,
-            fig_topic_over_time_percent_affil=figs_folder / fig_topic_over_time_percent_affil,
-            # fig_topic_over_time_loading_affil=figs_folder / fig_topic_over_time_loading_affil,
+            fig_topic_over_time_count=figs_folder / totc[0] if totc[0] else None,  # count, original topics, combined affiliations
+            fig_topic_over_time_percent=figs_folder / totp[0] if totp[0] else None,  # percent, original topics, combined affiliations
+            # fig_topic_over_time_loading=figs_folder / totl[0] if totl[0] else None,  # loading, original topics, combined affiliations
+            fig_topic_over_time_count_affil=figs_folder / totc[1] if totc[1] else None,  # count, original topics, split affiliations
+            fig_topic_over_time_percent_affil=figs_folder / totp[1] if totp[1] else None,  # percent, original topics, split affiliations
+            # fig_topic_over_time_loading_affil=figs_folder / totl[1] if totl[1] else None,  # loading, original topics, split affiliations
+            fig_topic_over_time_count_merged=figs_folder / totc[2] if totc[2] else None,  # count, merged topics, combined affiliations
+            fig_topic_over_time_percent_merged=figs_folder / totp[2] if totp[2] else None,  # percent, merged topics, combined affiliations
+            # fig_topic_over_time_loading_merged=figs_folder / totl[2] if totl[2] else None,  # loading, merged topics, combined affiliations
+            fig_topic_over_time_count_affil_merged=figs_folder / totc[3] if totc[3] else None,  # count, merged topics, split affiliations
+            fig_topic_over_time_percent_affil_merged=figs_folder / totp[3] if totp[3] else None,  # percent, merged topics, split affiliations
+            # fig_topic_over_time_loading_affil_merged=figs_folder / totl[3] if totl[3] else None,  # loading, merged topics, split affiliations
             # fig_topic_topic_corr_heatmap=figs_folder / fig_topic_topic_corr_heatmap,
             fig_topic_topic_corr_clustermap=figs_folder / fig_topic_topic_corr_clustermap,
         )
@@ -745,7 +739,7 @@ def main(config_browser):
         return render_template(
             'topic.html',
             topic_id=tid,
-            description=f"{tid}{': ' + descriptions[tid] if descriptions else None}",
+            description=f"{tid}{': ' + rename_topics[tid] if rename_topics else None}",
             frequency=round(topic_model.topic_frequency(tid) * 100, 2),
             documents=documents,
             topic_ids=topic_description,

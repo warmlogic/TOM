@@ -37,5 +37,6 @@ setup(
         'plotly',
         'dash',
         'dash-daq',
+        'flask',
     ]
 )

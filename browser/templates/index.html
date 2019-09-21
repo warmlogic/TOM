@@ -106,9 +106,8 @@
     <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <!-- <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count) }}>Topics over time: Count of documents above the threshold per year</a> -->
                 Topics over time: Count of documents above the threshold per year
-                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>alternative image split by affiliation</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_count) }}>
         </div>
@@ -116,9 +115,8 @@
     <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <!-- <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent) }}>Topics over time: Percent of documents above the threshold for each topic, per year.</a> Each year across topics adds up to 100%. One document can contribute to multiple topics. -->
                 Topics over time: Percent of documents above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.
-                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>alternative image split by affiliation</a>)
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_percent) }}>
         </div>
@@ -127,37 +125,44 @@
         <div class="one_image_1200">
             <p>
                 <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading) }}>Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
-                Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year. (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>alternative image split by affiliation</a>)
+                Topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>split by affiliation</a>)
             </p>
             <img src={{ url_for('static', filename=fig_topic_over_time_loading) }}>
         </div>
     </div> -->
 
-    <!-- <div id="one_column">
+    {% if fig_topic_over_time_count_merged %}
+    <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>Topics over time by affiliation: Count of documents above the threshold per year</a>
-                Topics over time by affiliation: Count of documents above the threshold per year
+                Merged topics over time: Count of documents above the threshold per year
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_count_affil_merged) }}>split by affiliation</a>)
             </p>
-            <img src={{ url_for('static', filename=fig_topic_over_time_count_affil) }}>
+            <img src={{ url_for('static', filename=fig_topic_over_time_count_merged) }}>
         </div>
-    </div> -->
-    <!-- <div id="one_column">
+    </div>
+    {% endif %}
+    {% if fig_topic_over_time_percent_merged %}
+    <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>Topics over time by affiliation: Percent of documents above the threshold for each topic, per year.</a> For each affiliation, each year across topics adds up to 100%. One document can contribute to multiple topics.
-                Topics over time by affiliation: Percent of documents above the threshold for each topic, per year. For each affiliation, each year across topics adds up to 100%. One document can contribute to multiple topics.
+                Merged topics over time: Percent of documents above the threshold for each topic, per year. Each year across topics adds up to 100%. One document can contribute to multiple topics.
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_percent_affil_merged) }}>split by affiliation</a>)
             </p>
-            <img src={{ url_for('static', filename=fig_topic_over_time_percent_affil) }}>
+            <img src={{ url_for('static', filename=fig_topic_over_time_percent_merged) }}>
         </div>
-    </div> -->
-    <!-- <div id="one_column">
+    </div>
+    {% endif %}
+    <!-- {% if fig_topic_over_time_loading_merged %}
+    <div id="one_column">
         <div class="one_image_1200">
             <p>
-                <a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>Topics over time by affiliation: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.</a>
-                Topics over time by affiliation: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.
+                Merged topics over time: For each topic (separately), of the documents above the threshold, plot the average topic loading for that year.
+                (<a target="_blank" rel="noopener noreferrer" href={{ url_for('static', filename=fig_topic_over_time_loading_affil_merged) }}>split by affiliation</a>)
             </p>
-            <img src={{ url_for('static', filename=fig_topic_over_time_loading_affil) }}>
+            <img src={{ url_for('static', filename=fig_topic_over_time_loading_merged) }}>
         </div>
-    </div> -->
+    </div>
+    {% endif %} -->
 </body>

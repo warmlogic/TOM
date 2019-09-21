@@ -789,6 +789,25 @@ class Visualization:
         if not topic_cols:
             topic_cols = topic_cols_all
 
+        if normalized:
+            norm_string = 'normalized'
+            if bins is None:
+                bins = np.arange(0, 1.05, 0.05)
+        else:
+            norm_string = ''
+            if bins is None:
+                bins = 10
+
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
+        _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
         if ncols is None:
             ncols = 5
         if ncols > len(topic_cols):
@@ -808,25 +827,6 @@ class Visualization:
             sharey=True,
             sharex=True,
         )
-
-        if normalized:
-            norm_string = 'normalized'
-            if bins is None:
-                bins = np.arange(0, 1.05, 0.05)
-        else:
-            norm_string = ''
-            if bins is None:
-                bins = 10
-
-        _df = pd.DataFrame(
-            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
-            columns=topic_cols_all,
-        )
-        _df = _df[topic_cols]
-
-        if rename:
-            _df = _df.rename(columns=rename)
-            topic_cols = list(rename.values())
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             _df[topic_col].plot(ax=ax, kind='hist', bins=bins)
@@ -1129,6 +1129,7 @@ class Visualization:
         self,
         topic_cols: List[str] = None,
         rename: Dict = None,
+        merge_topics: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1151,6 +1152,42 @@ class Visualization:
 
         addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
 
+        if normalized:
+            norm_string = 'normalized'
+        else:
+            norm_string = ''
+
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
+        _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
+        if merge_topics:
+            _df_merged = pd.DataFrame(index=_df.index, columns=merge_topics.keys())
+            for k, v in merge_topics.items():
+                _df_merged[k] = _df[v].sum(axis=1)
+            _df = _df_merged
+            topic_cols = list(merge_topics.keys())
+
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        # so all have the same axes
+        idx = _df.groupby(
+            by=[pd.Grouper(freq=freq),
+                self.topic_model.corpus._affiliation_col,
+                ])[topic_cols].size().unstack().index
+
+        if by_affil:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
         if ncols is None:
             ncols = 5
         if ncols > len(topic_cols):
@@ -1170,35 +1207,6 @@ class Visualization:
             sharey=True,
             sharex=True,
         )
-
-        if normalized:
-            norm_string = 'normalized'
-        else:
-            norm_string = ''
-
-        _df = pd.DataFrame(
-            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
-            columns=topic_cols_all,
-        )
-        _df = _df[topic_cols]
-
-        if rename:
-            _df = _df.rename(columns=rename)
-            topic_cols = list(rename.values())
-
-        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
-        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
-
-        # so all have the same axes
-        idx = _df.groupby(
-            by=[pd.Grouper(freq=freq),
-                self.topic_model.corpus._affiliation_col,
-                ])[topic_cols].size().unstack().index
-
-        if by_affil:
-            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
-        else:
-            groupby = [pd.Grouper(freq=freq)]
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             result_thresh = _df[_df[topic_col] >= thresh].groupby(
@@ -1255,8 +1263,12 @@ class Visualization:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
+            if merge_topics:
+                merge_string = f'_merged'
+            else:
+                merge_string = ''
 
-            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}{merge_string}.{figformat}'
 
             # save image to disk
             if by_affil:
@@ -1275,6 +1287,7 @@ class Visualization:
         self,
         topic_cols: List[str] = None,
         rename: Dict = None,
+        merge_topics: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1299,26 +1312,6 @@ class Visualization:
 
         addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
 
-        if ncols is None:
-            ncols = 5
-        if ncols > len(topic_cols):
-            ncols = len(topic_cols)
-
-        nrows = int(np.ceil(len(topic_cols) / ncols))
-
-        if figsize_scale is None:
-            figsize_scale = 3
-
-        if figsize is None:
-            figsize = (ncols * figsize_scale, nrows * figsize_scale)
-
-        fig, axes = plt.subplots(
-            figsize=figsize,
-            nrows=nrows, ncols=ncols,
-            sharey=True,
-            sharex=True,
-        )
-
         if normalized:
             norm_string = 'normalized'
         else:
@@ -1333,6 +1326,13 @@ class Visualization:
         if rename:
             _df = _df.rename(columns=rename)
             topic_cols = list(rename.values())
+
+        if merge_topics:
+            _df_merged = pd.DataFrame(index=_df.index, columns=merge_topics.keys())
+            for k, v in merge_topics.items():
+                _df_merged[k] = _df[v].sum(axis=1)
+            _df = _df_merged
+            topic_cols = list(merge_topics.keys())
 
         _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
 
@@ -1354,6 +1354,26 @@ class Visualization:
 
         if ma_window:
             result = result.rolling(window=ma_window, min_periods=1, center=True).mean()
+
+        if ncols is None:
+            ncols = 5
+        if ncols > len(topic_cols):
+            ncols = len(topic_cols)
+
+        nrows = int(np.ceil(len(topic_cols) / ncols))
+
+        if figsize_scale is None:
+            figsize_scale = 3
+
+        if figsize is None:
+            figsize = (ncols * figsize_scale, nrows * figsize_scale)
+
+        fig, axes = plt.subplots(
+            figsize=figsize,
+            nrows=nrows, ncols=ncols,
+            sharey=True,
+            sharex=True,
+        )
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             if by_affil:
@@ -1401,8 +1421,12 @@ class Visualization:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
+            if merge_topics:
+                merge_string = f'_merged'
+            else:
+                merge_string = ''
 
-            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}{merge_string}.{figformat}'
 
             # save image to disk
             if by_affil:
@@ -1421,6 +1445,7 @@ class Visualization:
         self,
         topic_cols: List[str] = None,
         rename: Dict = None,
+        merge_topics: Dict = None,
         normalized: bool = True,
         thresh: float = 0.1,
         freq: str = '1YS',
@@ -1444,6 +1469,42 @@ class Visualization:
 
         addtl_cols = [self.topic_model.corpus._date_col, self.topic_model.corpus._affiliation_col]
 
+        if normalized:
+            norm_string = 'normalized'
+        else:
+            norm_string = ''
+
+        _df = pd.DataFrame(
+            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
+            columns=topic_cols_all,
+        )
+        _df = _df[topic_cols]
+
+        if rename:
+            _df = _df.rename(columns=rename)
+            topic_cols = list(rename.values())
+
+        if merge_topics:
+            _df_merged = pd.DataFrame(index=_df.index, columns=merge_topics.keys())
+            for k, v in merge_topics.items():
+                _df_merged[k] = _df[v].sum(axis=1)
+            _df = _df_merged
+            topic_cols = list(merge_topics.keys())
+
+        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
+        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
+
+        # so all have the same axes
+        idx = _df.groupby(
+            by=[pd.Grouper(freq=freq),
+                self.topic_model.corpus._affiliation_col,
+                ])[topic_cols].size().unstack().index
+
+        if by_affil:
+            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
+        else:
+            groupby = [pd.Grouper(freq=freq)]
+
         if ncols is None:
             ncols = 5
         if ncols > len(topic_cols):
@@ -1463,35 +1524,6 @@ class Visualization:
             sharey=True,
             sharex=True,
         )
-
-        if normalized:
-            norm_string = 'normalized'
-        else:
-            norm_string = ''
-
-        _df = pd.DataFrame(
-            data=self.topic_model.topic_distribution_for_document(normalized=normalized),
-            columns=topic_cols_all,
-        )
-        _df = _df[topic_cols]
-
-        if rename:
-            _df = _df.rename(columns=rename)
-            topic_cols = list(rename.values())
-
-        _df = pd.merge(_df, self.topic_model.corpus.data_frame[addtl_cols], left_index=True, right_index=True)
-        _df = _df.reset_index().set_index(self.topic_model.corpus._date_col)
-
-        # so all have the same axes
-        idx = _df.groupby(
-            by=[pd.Grouper(freq=freq),
-                self.topic_model.corpus._affiliation_col,
-                ])[topic_cols].size().unstack().index
-
-        if by_affil:
-            groupby = [pd.Grouper(freq=freq), self.topic_model.corpus._affiliation_col]
-        else:
-            groupby = [pd.Grouper(freq=freq)]
 
         for topic_col, ax in zip(topic_cols, axes.ravel()):
             result_thresh = _df[_df[topic_col] >= thresh].groupby(
@@ -1551,8 +1583,12 @@ class Visualization:
                 ma_string = f'_{ma_window}_MA'
             else:
                 ma_string = ''
+            if merge_topics:
+                merge_string = f'_merged'
+            else:
+                merge_string = ''
 
-            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}.{figformat}'
+            filename_out = f'{self.topic_model.corpus.name}_{plot_string}_{affil_string}_{topics_string}_{thresh_string}{norm_string}{ma_string}{merge_string}.{figformat}'
 
             # save image to disk
             if by_affil:
