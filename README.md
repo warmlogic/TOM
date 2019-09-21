@@ -71,7 +71,7 @@ A corpus is a TSV (tab separated values) file describing documents. This is form
 - `orig_text`: the original text of the document
 - `text`: the text on which to train the topic model, which may be preprocessed in various ways
 
-```
+```tsv
 id	access_num	affiliation	dataset	title	author	date	orig_text	text
 1	doi123	journal1	dataset1	Document 1's title	Author 1	2019-01-01	Full content of document 1.	full content document 1
 2	doi456	journal2	dataset1	Document 2's title	Author 2	2019-05-01	Full content of document 2.	full content document 2
@@ -80,7 +80,7 @@ etc.
 
 The following code snippet shows how to load a corpus vectorize them using tf-idf with unigrams.
 
-``` python
+```python
 corpus = Corpus(
     source_filepath='input/raw_corpus.tsv',
     vectorization='tfidf',
@@ -97,21 +97,27 @@ print('Vector representation of document 0:\n', corpus.word_vector_for_document(
 
 It is possible to instantiate a NMF or LDA object then infer topics.
 
+```python
+from tom_lib.structure.corpus import Corpus
+from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
+from tom_lib.visualization.visualization import Visualization
+```
+
 NMF (use `vectorization='tfidf'`):
 
-``` python
+```python
 topic_model = NonNegativeMatrixFactorization(corpus)
 topic_model.infer_topics(num_topics=15)
 ```
 
 LDA (using either the standard variational Bayesian inference or Gibbs sampling; use `vectorization='tf'`):
 
-``` python
+```python
 topic_model = LatentDirichletAllocation(corpus)
 topic_model.infer_topics(num_topics=15, algorithm='variational')
 ```
 
-``` python
+```python
 topic_model = LatentDirichletAllocation(corpus)
 topic_model.infer_topics(num_topics=15, algorithm='gibbs')
 ```
@@ -120,7 +126,7 @@ topic_model.infer_topics(num_topics=15, algorithm='gibbs')
 
 Here we instantiate a NMF object, then generate plots with the three metrics for estimating the optimal number of topics.
 
-``` python
+```python
 topic_model = NonNegativeMatrixFactorization(corpus)
 viz = Visualization(topic_model)
 viz.plot_greene_metric(
@@ -160,7 +166,7 @@ viz.plot_coherence_w2v_metric(
 
 To allow reusing previously learned topics models, TOM can save them on disk, as shown below.
 
-``` python
+```python
 import tom_lib.utils as ut
 ut.save_topic_model(topic_model, 'output/NMF_15topics.pickle')
 topic_model = ut.load_topic_model('output/NMF_15topics.pickle')
@@ -170,7 +176,7 @@ topic_model = ut.load_topic_model('output/NMF_15topics.pickle')
 
 This code excerpt illustrates how one can manipulate a topic model, e.g. get the topic distribution for a document or the word distribution for a topic.
 
-``` python
+```python
 print('\nTopics:')
 topic_model.print_topics(num_words=10)
 print('\nTopic distribution for document 0:',
