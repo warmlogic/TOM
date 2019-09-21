@@ -11,7 +11,7 @@ This is a heavily overhauled version of [this library](http://mediamining.univ-l
 - access to raw data
 - a topic loading similarity browser app
 
-TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, licensed under the MIT license. Its objective is to allow for an efficient analysis of a text corpus from start to finish, via the discovery of latent topics. To this end, TOM features functions for preparing and vectorizing a text corpus, though you may still want to perform additional preprocessing steps on your documents before topic modeling. It also offers a common interface for two topic models (LDA using either variational inference or Gibbs sampling, and NMF using alternating least squares with a projected gradient method), and implements five state-of-the-art methods for estimating the optimal number of topics to model a corpus. What is more, TOM constructs an interactive web browser-based application that makes it easy to explore a topic model and the related corpus.
+TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, licensed under the MIT license. Its objective is to allow for an efficient analysis of a text corpus from start to finish, via the discovery of latent topics. To this end, TOM features functions for preparing and vectorizing a text corpus, though you may want to perform additional preprocessing steps on the corpus before topic modeling. It also offers a common interface for two topic models (LDA using either variational inference or Gibbs sampling, and NMF using alternating least squares with a projected gradient method), and implements five state-of-the-art methods for estimating the optimal number of topics to model a corpus. TOM constructs an interactive web browser-based application that makes it easy to explore a topic model and the related corpus.
 
 ## Features
 
@@ -51,10 +51,11 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
 
 ## Usage
 
-We provide two programs:
+We provide three programs, in order of importance:
 
-- `assess_topics.py`: Produces artifacts used for estimating the optimal number of topics
-- `build_topic_model_browser.py`: Runs a local web server and generates a web browser application for exploring the corpus and topic model
+1. `assess_topics.py`: Produce artifacts used for estimating the optimal number of topics
+2. `build_topic_model_browser.py`: Run a local web server and generate a web browser-based application for exploring the topic model and corpus
+3. `infer_topics.py`: Simply train and save topic models for a range of numbers of topics
 
 Both of these run based on your configuration file. Copy the `config_template.ini` file to `config.ini` and set it up as desired.
 
