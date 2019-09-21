@@ -1,6 +1,4 @@
 # coding: utf-8
-import argparse
-import configparser
 from math import ceil
 import os
 from pathlib import Path
@@ -16,30 +14,13 @@ from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
 import logging
 import urllib
+# import nltk
 
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
 
-
-def get_parser():
-    """
-    Creates a new argument parser
-    """
-    parser = argparse.ArgumentParser(prog='run_browser')
-    parser.add_argument('--config_filepath', '-c', type=str, nargs='?', default='config.ini')
-    return parser
-
-
-def get_config(config_filepath):
-    """
-    Read the specified config file
-    """
-    config = configparser.ConfigParser(allow_no_value=True)
-    try:
-        config.read(config_filepath)
-    except OSError:
-        logger.exception(f'Config file {config_filepath} not found. Did you set it up?')
-    return config
+# # Download stopwords from NLTK
+# nltk.download('stopwords')
 
 
 def main(config_browser):
@@ -883,10 +864,10 @@ def main(config_browser):
 
 
 if __name__ == '__main__':
-    parser = get_parser()
+    parser = ut.get_parser()
     args = parser.parse_args()
     config_filepath = args.config_filepath
-    config = get_config(config_filepath)
+    config = ut.get_config(config_filepath)
 
     config_section = 'webserver'
     port = config[config_section].getint('port', 5000)
