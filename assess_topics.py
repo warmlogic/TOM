@@ -34,8 +34,8 @@ def get_config(config_filepath):
     config = configparser.ConfigParser(allow_no_value=True)
     try:
         config.read(config_filepath)
-    except OSError as e:
-        logger.error(f'Config file {config_filepath} not found. Did you set it up?')
+    except OSError:
+        logger.exception(f'Config file {config_filepath} not found. Did you set it up?')
     return config
 
 
