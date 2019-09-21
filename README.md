@@ -11,16 +11,17 @@ This is a heavily overhauled version of [this library](http://mediamining.univ-l
 - access to raw data
 - a topic loading similarity browser app
 
-TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, licensed under the MIT license. Its objective is to allow for an efficient analysis of a text corpus from start to finish, via the discovery of latent topics. To this end, TOM features functions for preparing and vectorizing a text corpus. It also offers a common interface for two topic models (namely LDA using either variational inference or Gibbs sampling, and NMF using alternating least-square with a projected gradient method), and implements three state-of-the-art methods for estimating the optimal number of topics to model a corpus. What is more, TOM constructs an interactive Web-based browser that makes it easy to explore a topic model and the related corpus.
+TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, licensed under the MIT license. Its objective is to allow for an efficient analysis of a text corpus from start to finish, via the discovery of latent topics. To this end, TOM features functions for preparing and vectorizing a text corpus, though you may still want to perform additional preprocessing steps on your documents before topic modeling. It also offers a common interface for two topic models (LDA using either variational inference or Gibbs sampling, and NMF using alternating least squares with a projected gradient method), and implements five state-of-the-art methods for estimating the optimal number of topics to model a corpus. What is more, TOM constructs an interactive web browser-based application that makes it easy to explore a topic model and the related corpus.
 
 ## Features
 
 ### Vector space modeling
 
 - Feature selection based on word frequency
+  - Via the parameters `max_relative_frequency`, `min_absolute_frequency`, and `max_features`
 - Weighting
-  - tf
-  - tf-idf
+  - [tf-idf](https://en.wikipedia.org/wiki/Tf–idf) (for NMF)
+  - tf (for LDA)
 
 ### Topic modeling
 
@@ -61,20 +62,19 @@ Both of these run based on your configuration file. Copy the `config_template.in
 
 A corpus is a TSV (tab separated values) file describing documents. This is formatted as one document per line, with the following columns:
 
-- `id`: an incrementing integer used for accessing documents by index
-- `access_num`: a unique identifier string
+- `id`: a unique identifier
 - `affiliation`: for grouping documents within a dataset
 - `dataset`: used when combining documents from various sources
 - `title`
 - `author`
 - `date`: preferably formatted as `YYYY-MM-DD`
-- `orig_text`: the original text of the document
 - `text`: the text on which to train the topic model, which may be preprocessed in various ways
+- `orig_text`: the original text of the document (optional; if absent, will use `text` column)
 
-```tsv
-id	access_num	affiliation	dataset	title	author	date	orig_text	text
-1	doi123	journal1	dataset1	Document 1's title	Author 1	2019-01-01	Full content of document 1.	full content document 1
-2	doi456	journal2	dataset1	Document 2's title	Author 2	2019-05-01	Full content of document 2.	full content document 2
+```
+id	affiliation	dataset	title	author	date	text	orig_text
+doc1	journal1	dataset1	Document 1's title	Author 1	2019-01-01	full content document 1	Full content of document 1.
+doc2	journal2	dataset1	Document 2's title	Author 2	2019-05-01	full content document 2	Full content of document 2.
 etc.
 ```
 
