@@ -10,27 +10,27 @@ from sklearn.preprocessing import normalize
 
 
 class Corpus:
-    def __init__(self,
-                 source_filepath,
-                 name: str = 'corpus',
-                 sep: str = '\t',
-                 language: str = 'english',
-                 n_gram: int = 1,
-                 vectorization: str = 'tfidf',
-                 max_relative_frequency: float = 1.0,
-                 min_absolute_frequency: int = 0,
-                 max_features: int = 2000,
-                 sample: float = 1.0,
-                 text_col: str = None,
-                 full_text_col: str = None,
-                 title_col: str = None,
-                 author_col: str = None,
-                 affiliation_col: str = None,
-                 dataset_col: str = None,
-                 date_col: str = None,
-                 id_col: str = None,
-                 ):
-
+    def __init__(
+        self,
+        source_filepath,
+        name: str = 'corpus',
+        sep: str = '\t',
+        language: str = 'english',
+        n_gram: int = 1,
+        vectorization: str = 'tfidf',
+        max_relative_frequency: float = 1.0,
+        min_absolute_frequency: int = 0,
+        max_features: int = 2000,
+        sample: float = 1.0,
+        id_col: str = None,
+        affiliation_col: str = None,
+        dataset_col: str = None,
+        title_col: str = None,
+        author_col: str = None,
+        date_col: str = None,
+        text_col: str = None,
+        full_text_col: str = None,
+    ):
         self.name = name
         self._sep = sep
         self._language = language
@@ -40,14 +40,14 @@ class Corpus:
         self._min_absolute_frequency = min_absolute_frequency
         self._sample = sample
 
-        self._text_col = text_col or 'text'
-        self._full_text_col = full_text_col or self._text_col
-        self._title_col = title_col or 'title'
-        self._author_col = author_col or 'author'
+        self._id_col = id_col or 'id'
         self._affiliation_col = affiliation_col or 'affiliation'
         self._dataset_col = dataset_col or 'dataset'
+        self._title_col = title_col or 'title'
+        self._author_col = author_col or 'author'
         self._date_col = date_col or 'date'
-        self._id_col = id_col
+        self._text_col = text_col or 'text'
+        self._full_text_col = full_text_col or text_col
 
         self.max_features = max_features
 
@@ -68,10 +68,18 @@ class Corpus:
 
         # reset index because row numbers are used to access rows
         self.data_frame = self.data_frame.reset_index()
-        self.data_frame.index.name = 'id'
-        for col in ['index', 'id', 'docnum']:
-            # remove these columns because they are not needed
-            if col in self.data_frame.columns:
+        # remove extra columns
+        for col in self.data_frame.columns:
+            if col not in [
+                self._id_col,
+                self._affiliation_col,
+                self._dataset_col,
+                self._title_col,
+                self._author_col,
+                self._date_col,
+                self._text_col,
+                self._full_text_col,
+            ]:
                 self.data_frame = self.data_frame.drop(col, axis=1)
         # fill in null values
         self.data_frame = self.data_frame.fillna('')
@@ -87,17 +95,21 @@ class Corpus:
         if self._language:
             stop_words = stopwords.words(self._language)
         if self._vectorization == 'tfidf':
-            vectorizer = TfidfVectorizer(ngram_range=(1, self._n_gram),
-                                         max_df=self._max_relative_frequency,
-                                         min_df=self._min_absolute_frequency,
-                                         max_features=self.max_features,
-                                         stop_words=stop_words)
+            vectorizer = TfidfVectorizer(
+                ngram_range=(1, self._n_gram),
+                max_df=self._max_relative_frequency,
+                min_df=self._min_absolute_frequency,
+                max_features=self.max_features,
+                stop_words=stop_words,
+            )
         elif self._vectorization == 'tf':
-            vectorizer = CountVectorizer(ngram_range=(1, self._n_gram),
-                                         max_df=self._max_relative_frequency,
-                                         min_df=self._min_absolute_frequency,
-                                         max_features=self.max_features,
-                                         stop_words=stop_words)
+            vectorizer = CountVectorizer(
+                ngram_range=(1, self._n_gram),
+                max_df=self._max_relative_frequency,
+                min_df=self._min_absolute_frequency,
+                max_features=self.max_features,
+                stop_words=stop_words,
+            )
         else:
             raise ValueError(f'Unknown vectorization type: {self._vectorization}')
         self.vectorizer = vectorizer
