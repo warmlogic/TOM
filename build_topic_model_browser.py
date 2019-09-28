@@ -1,19 +1,19 @@
 # coding: utf-8
-from math import ceil
 import os
+import logging
+import urllib
 from pathlib import Path
-import tom_lib.utils as ut
+from math import ceil
 from flask import Flask, render_template, request, send_from_directory
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
 import dash_table as dt
+import tom_lib.utils as ut
 from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
 from tom_lib.structure.corpus import Corpus
 from tom_lib.visualization.visualization import Visualization
-import logging
-import urllib
 # import nltk
 
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
