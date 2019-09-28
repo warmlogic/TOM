@@ -46,7 +46,7 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
 1. Run the following command to install [Miniconda (Python 3)](https://conda.io/miniconda.html) and install the required libraries in the `base` conda environment:
 
 ```bash
-$ ./python_env_setup.sh
+./python_env_setup.sh
 ```
 
 List of the installed libraries:
@@ -76,6 +76,7 @@ In order of importance, the scripts are:
 1. `infer_topics.py`: Simply train and save topic models for a range of numbers of topics
 
 Run a script in the terminal using the following command structure:
+
 ```bash
 $ python <script name> --config_filepath=<config file name>
 ```
@@ -232,7 +233,7 @@ print('\nTop 10 most relevant words for topic 2:',
    1. If you changed changed the port in `config.ini`, update the `proxy_pass` port to be that value
    1. If you are using a custom port, change the `listen` port to be that value
 
-```
+```text
 server {
  listen 80;
  location / {
@@ -241,3 +242,5 @@ server {
  }
 }
 ```
+
+NB: If you want to run more than one web server at a time, you can simply add additional copies of the above parameters with different ports.
