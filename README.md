@@ -42,6 +42,7 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
 
 ## Installation
 
+1. Clone this repo: `git clone git@github.com:warmlogic/TOM.git`
 1. In a terminal, `cd` to the `TOM` directory
 1. Run the following command to install [Miniconda (Python 3)](https://conda.io/miniconda.html) and install the required libraries in the `base` conda environment:
 
@@ -78,7 +79,7 @@ In order of importance, the scripts are:
 Run a script in the terminal using the following command structure:
 
 ```bash
-$ python <script name> --config_filepath=<config file name>
+python <script name> --config_filepath=<config file name>
 ```
 
 ## Expected corpus format
@@ -94,7 +95,7 @@ A corpus is a TSV (tab separated values) file describing documents. This is form
 - `text`: the text on which to train the topic model, which may be preprocessed in various ways
 - `orig_text`: the original text of the document (optional; if absent, will use `text` column)
 
-```
+```text
 id	affiliation	dataset	title	author	date	text	orig_text
 doc1	journal1	dataset1	Document 1's title	Author 1	2019-01-01	full content document 1	Full content of document 1.
 doc2	journal2	dataset1	Document 2's title	Author 2	2019-05-01	full content document 2	Full content of document 2.
@@ -226,12 +227,15 @@ print('\nTop 10 most relevant words for topic 2:',
 
 ## Run a remote web server
 
+### Setup
+
 1. Set up an instance using a service like AWS EC2 or GCP
 1. If using AWS and you want to use a custom port, edit the Security Group inbound rules and create a custom TCP rule to allow inbound traffic on that port with Source defined as `0.0.0.0/0`
-   1. This is the port on which someone will access the web app
+   1. This is the port that someone will use to access the web app from the outside world. Default is 80.
+1. SSH into the remote instance
 1. Edit the file `/etc/nginx/sites-enabled/default` to contain the following
-   1. If you changed changed the port in `config.ini`, update the `proxy_pass` port to be that value
-   1. If you are using a custom port, change the `listen` port to be that value
+   1. If you are using a custom port for accessing the web app, change the `listen` port to that value
+   1. If you changed changed the port in `config.ini` (default is 5000), update the `proxy_pass` port to be that value. This is the port on which the Flask app will run.
 
 ```text
 server {
@@ -243,4 +247,11 @@ server {
 }
 ```
 
-NB: If you want to run more than one web server at a time, you can simply add additional copies of the above parameters with different ports.
+NB: If you want to run more than one web server at a time, you can simply add additional copies of the above parameters with different ports, and add the corresponding Security Group inbound rules as described above.
+
+### Run it
+
+1. Start a multiplexer session (`tmux new -s webserver`)
+1. `python build_topic_model_browser.py --config_filepath=config.ini`
+1. Visit the web app to verify it works
+1. Exit the multiplexer session (`ctrl-b d`)
