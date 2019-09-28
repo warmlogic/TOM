@@ -42,24 +42,45 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
 
 ## Installation
 
-- We recommend you install [Anaconda](https://www.continuum.io) (Python 3) which will automatically install most of the required dependencies (i.e., pandas, numpy, scipy, scikit-learn, matplotlib, flask).
-- Then install the following libraries
-  - [lda](https://github.com/ariddell/lda/) (`pip install lda`)
-  - [gensim](https://radimrehurek.com/gensim/) (`pip install gensim`)
-  - [smart_open](https://github.com/RaRe-Technologies/smart_open) (`pip install smart_open`)
-  - [Plotly and Dash](https://dash.plot.ly) (`pip install plotly dash dash-daq`)
+1. In a terminal, `cd` to the `TOM` directory
+1. Run the following command to install [Miniconda (Python 3)](https://conda.io/miniconda.html) and install the required libraries in the `base` conda environment:
 
-## Usage
+```bash
+$ ./python_env_setup.sh
+```
 
-We provide three programs, in order of importance:
+List of the installed libraries:
+
+- [Plotly and Dash](https://dash.plot.ly)
+- [gensim](https://radimrehurek.com/gensim/)
+- [lda](https://github.com/ariddell/lda/)
+- [matplotlib](https://matplotlib.org)
+- [networkx](https://networkx.github.io)
+- [nltk](https://www.nltk.org)
+- [numpy](https://numpy.org)
+- [openpyxl](https://openpyxl.readthedocs.io)
+- [pandas](https://pandas.pydata.org)
+- [scikit-learn](https://scikit-learn.org/)
+- [scipy](https://www.scipy.org)
+- [seaborn](https://seaborn.pydata.org)
+- [smart_open](https://github.com/RaRe-Technologies/smart_open)
+
+## Provided scripts
+
+The provided scripts use the parameters defined in the configuration file. Copy the `config_template.ini` file to `config.ini` and set it up as desired.
+
+In order of importance, the scripts are:
 
 1. `assess_topics.py`: Produce artifacts used for estimating the optimal number of topics
-2. `build_topic_model_browser.py`: Run a local web server and generate a web browser-based application for exploring the topic model and corpus
-3. `infer_topics.py`: Simply train and save topic models for a range of numbers of topics
+1. `build_topic_model_browser.py`: Run a local web server and generate a web browser-based application for exploring the topic model and corpus
+1. `infer_topics.py`: Simply train and save topic models for a range of numbers of topics
 
-Both of these run based on your configuration file. Copy the `config_template.ini` file to `config.ini` and set it up as desired.
+Run a script in the terminal using the following command structure:
+```bash
+$ python <script name> --config_filepath=<config file name>
+```
 
-### Load and prepare a textual corpus
+## Expected corpus format
 
 A corpus is a TSV (tab separated values) file describing documents. This is formatted as one document per line, with the following columns:
 
@@ -78,6 +99,18 @@ doc1	journal1	dataset1	Document 1's title	Author 1	2019-01-01	full content docum
 doc2	journal2	dataset1	Document 2's title	Author 2	2019-05-01	full content document 2	Full content of document 2.
 etc.
 ```
+
+## Interactive usage
+
+The following code snippets get run in the provided scripts. They are shown below to demonstrate how to interact with them. You'll need to import the required classes as follows:
+
+```python
+from tom_lib.structure.corpus import Corpus
+from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
+from tom_lib.visualization.visualization import Visualization
+```
+
+### Load and prepare a corpus
 
 The following code snippet shows how to load a corpus vectorize them using tf-idf with unigrams.
 
@@ -98,20 +131,14 @@ print('Vector representation of document 0:\n', corpus.word_vector_for_document(
 
 It is possible to instantiate a NMF or LDA object then infer topics.
 
-```python
-from tom_lib.structure.corpus import Corpus
-from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirichletAllocation
-from tom_lib.visualization.visualization import Visualization
-```
-
-NMF (use `vectorization='tfidf'`):
+NMF (use `vectorization='tfidf'` when creating the corpus):
 
 ```python
 topic_model = NonNegativeMatrixFactorization(corpus)
 topic_model.infer_topics(num_topics=15)
 ```
 
-LDA (using either the standard variational Bayesian inference or Gibbs sampling; use `vectorization='tf'`):
+LDA (using either the standard variational Bayesian inference or Gibbs sampling; use `vectorization='tf'` when creating the corpus):
 
 ```python
 topic_model = LatentDirichletAllocation(corpus)
@@ -125,11 +152,13 @@ topic_model.infer_topics(num_topics=15, algorithm='gibbs')
 
 ### Instantiate a topic model and estimate the optimal number of topics
 
-Here we instantiate a NMF object, then generate plots with the three metrics for estimating the optimal number of topics.
+Here we instantiate a NMF object, then generate plots with four metrics for estimating the optimal number of topics. Estimating the optimal number of topics may take a long time with a large corpus.
 
 ```python
 topic_model = NonNegativeMatrixFactorization(corpus)
+
 viz = Visualization(topic_model)
+
 viz.plot_greene_metric(
     min_num_topics=5,
     max_num_topics=50,
@@ -137,24 +166,28 @@ viz.plot_greene_metric(
     tao=10,
     top_n_words=10,
 )
+
 viz.plot_arun_metric(
     min_num_topics=5,
     max_num_topics=50,
     step=1,
     iterations=10,
 )
+
 viz.plot_brunet_metric(
     min_num_topics=5,
     max_num_topics=50,
     step=1,
     iterations=10,
 )
+
 viz.plot_coherence_w2v_metric(
     min_num_topics=5,
     max_num_topics=50,
     step=1,
     top_n_words=10,
 )
+
 # # LDA only
 # viz.plot_perplexity_metric(
 #     min_num_topics=5,
@@ -190,11 +223,21 @@ print('\nTop 10 most relevant words for topic 2:',
       topic_model.top_words(2, 10))
 ```
 
-## Running the web server
+## Run a remote web server
 
-TODO: Add documentation based on these links
+1. Set up an instance using a service like AWS EC2 or GCP
+1. If using AWS and you want to use a custom port, edit the Security Group inbound rules and create a custom TCP rule to allow inbound traffic on that port with Source defined as `0.0.0.0/0`
+   1. This is the port on which someone will access the web app
+1. Edit the file `/etc/nginx/sites-enabled/default` to contain the following
+   1. If you changed changed the port in `config.ini`, update the `proxy_pass` port to be that value
+   1. If you are using a custom port, change the `listen` port to be that value
 
-- https://medium.com/@akshatuppal/deploying-multiple-python-flask-applications-on-ec2-instance-using-nginx-and-gunicorn-32651fb3d064
-- https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
-- https://stackoverflow.com/questions/7023052/configure-flask-dev-server-to-be-visible-across-the-network
-- https://flask.palletsprojects.com/en/1.1.x/quickstart/
+```
+server {
+ listen 80;
+ location / {
+ include proxy_params;
+ proxy_pass http://127.0.0.1:5000;
+ }
+}
+```
