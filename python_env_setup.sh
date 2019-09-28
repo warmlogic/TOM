@@ -15,14 +15,6 @@ MC_DL_FILE="Miniconda3-latest-Linux-x86_64.sh"
 MC_DL_PATH="$HOME/Downloads/$MC_DL_FILE"
 MC_DIR_PATH="$HOME/$MC_DIR"
 
-# # Exit if Miniconda file already exists
-# {
-# if [ -f "$MC_DL_PATH" ]; then
-#     echo "$MC_DL_PATH already exists! Delete before running this script to ensure installation is up-to-date."
-#     exit 0
-# fi
-# }
-
 # Download Miniconda file only if it does not already exist
 {
 if [ ! -f "$MC_DL_PATH" ]; then
@@ -39,10 +31,6 @@ if [ -f "$MC_DL_PATH" ]; then
     rm $MC_DL_PATH
 fi
 }
-
-# conda update -q conda -y
-
-# conda upgrade --all -y
 
 # enable usage of conda command
 echo 'Enabling conda command'
