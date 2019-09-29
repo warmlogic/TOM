@@ -44,11 +44,13 @@ TOM (TOpic Modeling) is a Python 3 library for topic modeling and browsing, lice
 
 1. Clone this repo: `git clone git@github.com:warmlogic/TOM.git`
 1. In a terminal, `cd` to the `TOM` directory
-1. Run the following command to install [Miniconda (Python 3)](https://conda.io/miniconda.html) and install the required libraries in the `base` conda environment:
+1. Run the following command to install [Miniconda (Python 3)](https://conda.io/miniconda.html) and the required libraries (installed in the `base` conda environment):
 
-```bash
-./python_env_setup.sh
-```
+   ```bash
+   ./python_env_setup.sh
+   ```
+
+1. Log out and back in to ensure the `base` conda environment is active
 
 List of the installed libraries:
 
