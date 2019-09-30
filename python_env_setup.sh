@@ -55,4 +55,4 @@ echo 'Installing dependencies...'
 pip install --trusted-host pypi.python.org --no-cache-dir -r requirements.txt
 
 # Install NLTK stopwords
-RUN python -c "import nltk; nltk.download('stopwords')"
+python -c "import nltk; nltk.download('stopwords')"
