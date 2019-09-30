@@ -227,21 +227,25 @@ print('\nTop 10 most relevant words for topic 2:',
       topic_model.top_words(2, 10))
 ```
 
-## Run a remote web server
+## Run the browser app on a remote web server
 
 ### Setup
 
-1. Set up an instance using a service like AWS EC2 or GCP
+1. Create a compute instance using a service like AWS EC2 or GCP
+   1. [Handy repo for easily provisioning an AWS EC2 instance](https://github.com/warmlogic/aws_setup_teardown)
+   1. The instance size you choose depends on the size of your corpus and topic model parameters. Training a model will take significantly more RAM and CPU than simply hosting the app with a pre-trained model. It's possible to train the model on your own computer and `rsync` the files to the instance for running the app.
+      1. RAM suggestion for training a new model: 8 GB (or more)
+      1. RAM suggestion for running the app with a pre-trained model: 2 GB
 1. If using AWS, edit the Security Group inbound rules and create a custom TCP rule to allow inbound traffic on port 80.
    1. This is the port that someone will use to access the web app from the outside world.
-1. SSH into the remote instance
-1. Install a web server with the following commands:
+1. SSH into the instance
+1. Install a web server:
 
    ```bash
    sudo apt-get install nginx
    ```
 
-1. Edit the file `/etc/nginx/sites-enabled/default` to contain the following
+1. Edit the file `/etc/nginx/sites-enabled/default` to contain only the following text.
    1. If you are using a custom port for accessing the web app, change the `listen` port to that value
    1. If you changed changed the port in `config.ini` (default is 5000), update the `proxy_pass` port to be that value. This is the port on which the Flask app will run.
 
@@ -261,12 +265,14 @@ print('\nTop 10 most relevant words for topic 2:',
    sudo service nginx restart
    ```
 
-
-NB: If you want to run more than one web server at a time, you can simply add additional copies of the above parameters with different ports, and add the corresponding Security Group inbound rules as described above.
+NB: If you want to run more than one web server at a time, you can simply add additional copies of the above parameters with different ports, and add corresponding Security Group inbound rules as described above.
 
 ### Run it
 
 1. Start a multiplexer session (`tmux new -s webserver`)
-1. `python build_topic_model_browser.py --config_filepath=config.ini`
-1. Visit the web app at its public IP address to verify it works
-1. Exit the multiplexer session (`ctrl-b d`)
+1. Run the web app: `python build_topic_model_browser.py --config_filepath=config.ini`
+1. Visit the instance's public IP address to verify it works. Watch for corresponding logs in the terminal.
+1. Exit the multiplexer session: `ctrl-b d`
+1. To reattach to the session: `tmux attach -t webserver`
+1. To shut down the app: `ctrl-c`
+1. Remember that you'll be charged for the instance as long as it is running. You can use the AWS EC2 console to stop the instance to stop being charged, as well as restarting it to pick up where you left off.
