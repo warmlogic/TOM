@@ -1,4 +1,3 @@
-# coding: utf-8
 # from datetime import datetime
 from pathlib import Path
 import os
@@ -7,13 +6,9 @@ from tom_lib.nlp.topic_model import NonNegativeMatrixFactorization, LatentDirich
 from tom_lib.structure.corpus import Corpus
 # from tom_lib.visualization.visualization import Visualization
 import logging
-# import nltk
 
 logging.basicConfig(format='{asctime} : {levelname} : {message}', level=logging.INFO, style='{')
 logger = logging.getLogger(__name__)
-
-# # Download stopwords from NLTK
-# nltk.download('stopwords')
 
 
 def main(config_infer):
