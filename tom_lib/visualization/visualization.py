@@ -1,4 +1,3 @@
-# coding: utf-8
 from typing import List, Tuple, Dict
 import codecs
 import json
