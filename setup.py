@@ -1,4 +1,3 @@
-# coding: utf-8
 from setuptools import setup, find_packages
 import tom_lib
 
@@ -37,6 +36,7 @@ setup(
         'openpyxl',
         'pandas',
         'plotly',
+        'python-dotenv',
         'scikit-learn',
         'scipy',
         'seaborn',
